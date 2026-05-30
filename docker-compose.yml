@@ -222,12 +222,12 @@ services:
     image: node:20-alpine
     container_name: gitorc-web
     working_dir: /workspace/gitorcweb
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5050"
     volumes:
       - ./gitorcweb:/workspace/gitorcweb
       - gitorcweb_node_modules:/workspace/gitorcweb/node_modules
     ports:
-      - "5173:5173"
+      - "5050:5050"
     depends_on:
       gateway:
         condition: service_started

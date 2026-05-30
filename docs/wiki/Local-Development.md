@@ -60,7 +60,7 @@ make down
 
 ### Frontend and platform
 
-- UI: `http://localhost:5173`
+- UI: `http://localhost:5050`
 - Gateway HTTP: `http://localhost:8080`
 - Gateway gRPC: `localhost:9080`
 

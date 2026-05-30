@@ -23,6 +23,7 @@ type Config struct {
 	GRPCPort           string
 	Role               string
 	Summary            string
+	RegisterHTTPRoutes func(mux *http.ServeMux)
 	ComponentType      string
 	ComponentIdentity  string
 	RepositoryIdentity string
@@ -62,6 +63,9 @@ func Run(ctx context.Context, cfg Config) error {
 	logger.Printf("runtime policy %s", policyPayload)
 
 	httpMux := http.NewServeMux()
+	if cfg.RegisterHTTPRoutes != nil {
+		cfg.RegisterHTTPRoutes(httpMux)
+	}
 	httpMux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"status":"ok","service":"` + cfg.Name + `","role":"` + cfg.Role + `","identity":"` + runtimePolicy.ComponentIdentity.Raw + `"}`))
@@ -77,7 +81,7 @@ func Run(ctx context.Context, cfg Config) error {
 
 	httpServer := &http.Server{
 		Addr:              ":" + cfg.HTTPPort,
-		Handler:           httpMux,
+		Handler:           withCORS(httpMux),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -123,4 +127,28 @@ func Run(ctx context.Context, cfg Config) error {
 	defer cancel()
 
 	return httpServer.Shutdown(httpShutdownCtx)
+}
+
+func withCORS(next http.Handler) http.Handler {
+	allowedHeaders := "Content-Type, Authorization"
+	allowedMethods := "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			origin = "*"
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Vary", "Origin")
+		w.Header().Set("Access-Control-Allow-Headers", allowedHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", allowedMethods)
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

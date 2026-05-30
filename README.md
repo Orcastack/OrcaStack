@@ -32,7 +32,7 @@ gitorc/
 ## Local quick start
 
 1. Start infrastructure and services with `docker compose up --build`.
-2. Open the UI at `http://localhost:5173`.
+2. Open the UI at `http://localhost:5050`.
 3. Check service health at `http://localhost:8080/healthz` through `http://localhost:8085/healthz`.
 4. Extend the proto contracts in `gitorcapi/proto/gitorc/platform/v1/platform.proto` and implement handlers service by service.
 
