@@ -45,7 +45,7 @@ jobs:
       - name: Build frontend
         working-directory: gitorcweb
         env:
-          GITORC_WEB_BASE: /gitorc/
+          GITORC_WEB_BASE: /${{ github.event.repository.name }}/
         run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
