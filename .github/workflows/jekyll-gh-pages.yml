@@ -1,10 +1,13 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+# GitHub Pages deployment workflow
+name: Deploy gitorc to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+    paths:
+      - '.github/workflows/jekyll-gh-pages.yml'
+      - 'gitorcweb/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -28,15 +31,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: gitorcweb/package-lock.json
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./_site
+      - name: Install frontend dependencies
+        working-directory: gitorcweb
+        run: npm ci
+      - name: Build frontend
+        working-directory: gitorcweb
+        env:
+          GITORC_WEB_BASE: /gitorc/
+        run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: gitorcweb/dist
 
   # Deployment job
   deploy:
