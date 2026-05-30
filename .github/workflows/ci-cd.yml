@@ -40,7 +40,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd gitorcweb
-        npm install
+        npm ci
 
     - name: Build frontend
       run: |
