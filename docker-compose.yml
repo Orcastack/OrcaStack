@@ -1,3 +1,206 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gitorc-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gitorc}
+      POSTGRES_USER: ${POSTGRES_USER:-gitorc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gitorc}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gitorc} -d ${POSTGRES_DB:-gitorc}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.10
+    container_name: gitorc-redpanda
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092,OUTSIDE://localhost:19092
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=localhost:8082
+    ports:
+      - "19092:19092"
+      - "9644:9644"
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: gitorc-namenode
+    environment:
+      CLUSTER_NAME: gitorc-hadoop
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: gitorc-datanode
+    environment:
+      SERVICE_PRECONDITION: namenode:9870
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+    ports:
+      - "9864:9864"
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    depends_on:
+      - namenode
+
+  hbase:
+    image: harisekhon/hbase:2.4
+    container_name: gitorc-hbase
+    environment:
+      HBASE_MANAGES_ZK: "true"
+    ports:
+      - "16010:16010"
+      - "9090:9090"
+      - "2181:2181"
+    depends_on:
+      - namenode
+
+  gateway:
+    image: golang:1.23
+    container_name: gitorc-gateway
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-gateway"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+    environment:
+      GITORC_GATEWAY_HTTP_PORT: 8080
+      GITORC_GATEWAY_GRPC_PORT: 9080
+    ports:
+      - "8080:8080"
+      - "9080:9080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+
+  git-service:
+    image: golang:1.23
+    container_name: gitorc-git-service
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-git-service"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+      - ./infra/git/repos:/srv/git
+    environment:
+      GITORC_GIT_HTTP_PORT: 8081
+      GITORC_GIT_GRPC_PORT: 9081
+    ports:
+      - "8081:8081"
+      - "9081:9081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  review-service:
+    image: golang:1.23
+    container_name: gitorc-review-service
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-review-service"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+    environment:
+      GITORC_REVIEW_HTTP_PORT: 8082
+      GITORC_REVIEW_GRPC_PORT: 9082
+    ports:
+      - "8086:8082"
+      - "9082:9082"
+    depends_on:
+      git-service:
+        condition: service_started
+
+  ci-service:
+    image: golang:1.23
+    container_name: gitorc-ci-service
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-ci-service"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+      - ./infra/artifacts:/workspace/artifacts
+    environment:
+      GITORC_CI_HTTP_PORT: 8083
+      GITORC_CI_GRPC_PORT: 9083
+    ports:
+      - "8083:8083"
+      - "9083:9083"
+    depends_on:
+      redpanda:
+        condition: service_started
+      hbase:
+        condition: service_started
+
+  cd-service:
+    image: golang:1.23
+    container_name: gitorc-cd-service
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-cd-service"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+      - ./infra/deploy:/workspace/deploy
+    environment:
+      GITORC_CD_HTTP_PORT: 8084
+      GITORC_CD_GRPC_PORT: 9084
+    ports:
+      - "8084:8084"
+      - "9084:9084"
+    depends_on:
+      ci-service:
+        condition: service_started
+
+  analytics-service:
+    image: golang:1.23
+    container_name: gitorc-analytics-service
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-analytics-service"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+    environment:
+      GITORC_ANALYTICS_HTTP_PORT: 8085
+      GITORC_ANALYTICS_GRPC_PORT: 9085
+    ports:
+      - "8085:8085"
+      - "9085:9085"
+    depends_on:
+      hbase:
+        condition: service_started
+
+  web:
+    image: node:20-alpine
+    container_name: gitorc-web
+    working_dir: /workspace/gitorcweb
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    volumes:
+      - ./gitorcweb:/workspace/gitorcweb
+      - gitorcweb_node_modules:/workspace/gitorcweb/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      gateway:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  hadoop_namenode:
+  hadoop_datanode:
+  gitorcweb_node_modules:
 
 services:
   redis:

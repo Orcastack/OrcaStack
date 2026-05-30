@@ -1,0 +1,8 @@
+environment: local
+targets:
+  - name: docker-compose
+    type: docker
+    namespace: gitorc-local
+promotionRules:
+  requireSuccessfulPipeline: true
+  requireReviewApproval: true

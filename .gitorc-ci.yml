@@ -1,0 +1,23 @@
+version: 1
+
+pipeline:
+  name: default
+  triggers:
+    - push
+    - change_merged
+  stages:
+    - name: lint
+      image: golang:1.23
+      commands:
+        - cd gitorcapi
+        - go test ./...
+    - name: web-build
+      image: node:20-alpine
+      commands:
+        - cd gitorcweb
+        - npm ci
+        - npm run build
+    - name: package
+      image: alpine:3.20
+      commands:
+        - echo "Package artifacts into HDFS via CI service"

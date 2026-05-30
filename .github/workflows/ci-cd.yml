@@ -1,151 +1,48 @@
-name: GitHub CI/CD Pipeline
+name: gitorc validation
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+    branches: [ main ]
 
 jobs:
-  backend-tests:
+  api-build:
     runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: test_personal_brand_hub
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
       with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        cd backend
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Run Django tests
-      run: |
-        cd backend
-        python manage.py test --settings=config.settings
-      env:
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_NAME: test_personal_brand_hub
-        DB_USER: postgres
-        DB_PASSWORD: postgres
-    
-    - name: Run Django migrations
-      run: |
-        cd backend
-        python manage.py migrate --settings=config.settings
-      env:
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_NAME: test_personal_brand_hub
-        DB_USER: postgres
-        DB_PASSWORD: postgres
+        go-version: '1.23'
 
-  frontend-tests:
+    - name: Build API services
+      run: |
+        cd gitorcapi
+        go mod tidy
+        go build ./...
+
+  web-build:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18.x]
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
+    - uses: actions/checkout@v4
+
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '20'
         cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-    
+        cache-dependency-path: gitorcweb/package-lock.json
+
     - name: Install dependencies
       run: |
-        cd frontend
-        npm ci
-    
-    - name: Run ESLint
-      run: |
-        cd frontend
-        npm run lint 2>/dev/null || true
-    
+        cd gitorcweb
+        npm install
+
     - name: Build frontend
       run: |
-        cd frontend
+        cd gitorcweb
         npm run build
-      env:
-        REACT_APP_API_URL: http://localhost:8000/api
-
-  build-and-push:
-    needs: [backend-tests, frontend-tests]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Log in to Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Extract metadata (tags, labels)
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=sha,prefix={{branch}}-
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-    
-    - name: Build and push backend image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./backend
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and push frontend image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./frontend
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
