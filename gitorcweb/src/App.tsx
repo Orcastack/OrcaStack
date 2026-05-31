@@ -9,6 +9,7 @@ import {
   isStaticOverviewMode,
   login,
   logout,
+  signup,
   type AuthSession,
   type CloneOperation,
   type Container,
@@ -1369,18 +1370,25 @@ export function App() {
   const handleSignupSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSignupSubmitting(true);
+    setAuthError(null);
 
     try {
-      const principal = signupForm.email.trim() || signupForm.username.trim();
-      if (!principal || !signupForm.password.trim()) {
-        throw new Error('Provide a username or email and password to request access.');
+      const username = signupForm.username.trim();
+      const email = signupForm.email.trim();
+      const password = signupForm.password.trim();
+
+      if (!username || !email || !password) {
+        throw new Error('Provide username, email, and password to request access.');
       }
 
-      setToast('Account requests are reviewed by an administrator before access is granted.');
+      const result = await signup({ username, email, password });
+      setToast(`${result.message} Request ID: ${result.request_id.slice(0, 8)}.`);
       setSignupForm({ username: '', email: '', password: '' });
       navigatePublic('signin');
     } catch (signupError) {
-      setToast(signupError instanceof Error ? signupError.message : 'Account request could not be submitted.');
+      const message = signupError instanceof Error ? signupError.message : 'Account request could not be submitted.';
+      setAuthError(message);
+      setToast(message);
     } finally {
       setSignupSubmitting(false);
     }

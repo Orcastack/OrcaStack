@@ -162,6 +162,18 @@ export type AuthSession = {
   expires_at: string;
 };
 
+export type SignupRequestInput = {
+  username: string;
+  email: string;
+  password: string;
+};
+
+export type SignupRequestResult = {
+  request_id: string;
+  status: string;
+  message: string;
+};
+
 export type RepositoryMutationResult = {
   repository: Repository;
   clone_operation: CloneOperation;
@@ -283,6 +295,18 @@ export async function login(username: string, password: string, signal?: AbortSi
     signal,
     method: 'POST',
     body: { username, password },
+  });
+}
+
+export async function signup(input: SignupRequestInput, signal?: AbortSignal): Promise<SignupRequestResult> {
+  return requestGateway<SignupRequestResult>('/api/auth/signup', {
+    signal,
+    method: 'POST',
+    body: {
+      username: input.username,
+      email: input.email,
+      password: input.password,
+    },
   });
 }
 

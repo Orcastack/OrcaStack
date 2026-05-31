@@ -34,6 +34,18 @@ type loginRequest struct {
 	Password string `json:"password"`
 }
 
+type signupRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type signupResponse struct {
+	RequestID string `json:"request_id"`
+	Status    string `json:"status"`
+	Message   string `json:"message"`
+}
+
 var authSessions = struct {
 	sync.RWMutex
 	store map[string]sessionRecord
@@ -194,6 +206,7 @@ type Metric struct {
 
 func Register(mux *http.ServeMux) {
 	mux.HandleFunc("/api/auth/login", handleLogin)
+	mux.HandleFunc("/api/auth/signup", handleSignup)
 	mux.HandleFunc("/api/auth/session", handleSession)
 	mux.HandleFunc("/api/auth/logout", handleLogout)
 	mux.HandleFunc("/git/", serveGitHTTP)
@@ -284,6 +297,52 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	authSessions.Unlock()
 
 	writeJSON(w, AuthSession{Token: token, User: user, ExpiresAt: expiresAt.Format(time.RFC3339)})
+}
+
+func handleSignup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var request signupRequest
+	if err := decodeJSON(r, &request); err != nil {
+		writeError(w, http.StatusBadRequest, errors.New("invalid signup payload"))
+		return
+	}
+
+	username := strings.TrimSpace(request.Username)
+	email := strings.TrimSpace(request.Email)
+	password := strings.TrimSpace(request.Password)
+
+	if username == "" {
+		writeError(w, http.StatusBadRequest, errors.New("username is required"))
+		return
+	}
+	if email == "" {
+		writeError(w, http.StatusBadRequest, errors.New("email is required"))
+		return
+	}
+	if !strings.Contains(email, "@") {
+		writeError(w, http.StatusBadRequest, errors.New("email must be valid"))
+		return
+	}
+	if len(password) < 8 {
+		writeError(w, http.StatusBadRequest, errors.New("password must be at least 8 characters"))
+		return
+	}
+
+	requestID, err := generateToken()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, errors.New("failed to register account request"))
+		return
+	}
+
+	writeJSONStatus(w, http.StatusAccepted, signupResponse{
+		RequestID: requestID,
+		Status:    "pending_review",
+		Message:   "Account request submitted for administrator review.",
+	})
 }
 
 func handleSession(w http.ResponseWriter, r *http.Request) {
@@ -434,6 +493,12 @@ func generateToken() (string, error) {
 
 func writeJSON(w http.ResponseWriter, payload any) {
 	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(payload)
+}
+
+func writeJSONStatus(w http.ResponseWriter, status int, payload any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(payload)
 }
 
