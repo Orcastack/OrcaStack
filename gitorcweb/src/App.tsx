@@ -459,8 +459,46 @@ const landingPages: LandingPage[] = [
     id: 'discord-channels',
     label: 'Discord & channels',
     title: 'Discord and discussion channels',
-    intro: 'Discord should be a first-class discussion surface for developer questions, platform operations talk, and contributor coordination.',
-    sections: [{ title: 'Channel purpose', bullets: ['Direct implementation questions to live discussion where helpful.', 'Use channels for operations feedback and contributor coordination.', 'Keep discussion aligned with documentation and repository workflows.'] }],
+    intro: 'Community access should give operators and contributors a direct path into GitHub, GitLab, Discord, and Slack for discussion, coordination, and platform feedback.',
+    sections: [
+      {
+        title: 'Join community',
+        links: [
+          {
+            label: 'Join GitHub community',
+            href: 'https://github.com/AtonixCorp/gitorc',
+            external: true,
+            detail: 'Follow the repository, discussions, issues, and release activity.',
+          },
+          {
+            label: 'Join GitLab community',
+            href: 'https://gitlab.com',
+            external: true,
+            detail: 'Use GitLab as an additional collaboration and delivery touchpoint.',
+          },
+          {
+            label: 'Join Discord community',
+            href: 'https://discord.com',
+            external: true,
+            detail: 'Route implementation questions and operator discussion into live channels.',
+          },
+          {
+            label: 'Join Slack community',
+            href: 'https://slack.com',
+            external: true,
+            detail: 'Coordinate platform updates, support threads, and team operations.',
+          },
+        ],
+      },
+      {
+        title: 'Channel purpose',
+        bullets: [
+          'Direct implementation questions to live discussion where helpful.',
+          'Use channels for operations feedback and contributor coordination.',
+          'Keep discussion aligned with documentation and repository workflows.',
+        ],
+      },
+    ],
     searchTerms: ['discord', 'channels'],
   },
   {
@@ -2454,6 +2492,10 @@ export function App() {
               type="button"
             >
               <LandingIcon icon="theme" />
+            </button>
+
+            <button aria-label="Login to dashboard" className="landing-icon-button" onClick={() => navigatePublic('signin')} type="button">
+              <LandingIcon icon="login" />
             </button>
           </div>
         </header>
