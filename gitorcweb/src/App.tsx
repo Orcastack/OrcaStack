@@ -2407,7 +2407,7 @@ export function App() {
             <span className="landing-brand-mark"><LandingSystemMark /></span>
             <span className="landing-brand-copy">
               <strong>GITORC</strong>
-              <span>CI/CD Engine</span>
+              <span>Hardware & Software Automation</span>
             </span>
           </button>
 
@@ -2476,9 +2476,9 @@ export function App() {
             </div>
           </div>
           <article className="landing-hero-panel">
-            <p className="eyebrow">Identity-driven Git + CI/CD automation</p>
+            <p className="eyebrow">Hardware & Software Automation</p>
             <h1>GITORC</h1>
-            <p className="landing-hero-tagline">CI/CD Automation That Deploys and Manages Our Cloud.</p>
+            <p className="landing-hero-tagline">CI/CD Automation for Hardware & Software.</p>
             <p className="lede">A clean operator platform for repositories, pipelines, RBAC-governed access, and cloud deployment workflows across Proxmox, OpenStack, Kubernetes, Rancher, networking, and observability.</p>
             <div className="landing-hero-actions">
               <a className="button button-ghost" href="https://github.com/AtonixCorp/gitorc" rel="noreferrer" target="_blank">Open repository</a>
