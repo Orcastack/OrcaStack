@@ -3,6 +3,7 @@ stages:
   - automate
   - package
   - govern
+  - release
 
 variables:
   GIT_STRATEGY: clone
@@ -113,3 +114,15 @@ policy-gate:
   only:
     - merge_requests
     - main
+
+release-packages:
+  stage: release
+  image: golang:1.24
+  before_script:
+    - apt-get update
+    - apt-get install -y rpm dpkg-dev apt-utils gnupg
+  script:
+    - bash ./scripts/release/build-release.sh "${CI_COMMIT_TAG#v}"
+    - bash ./scripts/release/update-apt-repo.sh "${CI_COMMIT_TAG#v}"
+  only:
+    - tags

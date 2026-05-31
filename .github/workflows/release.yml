@@ -1,0 +1,62 @@
+name: gitorc release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GPG_KEY_ID: ${{ vars.GITORC_GPG_KEY_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install release tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm dpkg-dev apt-utils gnupg
+
+      - name: Import signing key
+        if: secrets.GITORC_GPG_PRIVATE_KEY != ''
+        env:
+          GITORC_GPG_PRIVATE_KEY: ${{ secrets.GITORC_GPG_PRIVATE_KEY }}
+        run: |
+          printf '%s' "$GITORC_GPG_PRIVATE_KEY" | gpg --batch --import
+
+      - name: Build release artifacts
+        run: bash ./scripts/release/build-release.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Build apt repository
+        run: bash ./scripts/release/update-apt-repo.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/release/packages/gitorc.deb
+            dist/release/packages/gitorc.deb.sha256
+            dist/release/packages/gitorc.deb.asc
+            dist/release/packages/gitorc.rpm
+            dist/release/packages/gitorc.rpm.sha256
+            dist/release/packages/gitorc.rpm.asc
+            dist/release/packages/gitorc.tar.gz
+            dist/release/packages/gitorc.tar.gz.sha256
+            dist/release/packages/gitorc.tar.gz.asc
+
+      - name: Publish apt repository
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist/release/apt
+          destination_dir: apt

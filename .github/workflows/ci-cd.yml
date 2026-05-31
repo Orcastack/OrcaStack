@@ -3,6 +3,7 @@ name: gitorc validation
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
@@ -157,3 +158,26 @@ jobs:
         path: |
           gitorcweb/dist
           gitorcapi/dist/web-signing/public.pem
+
+  release-assets-smoke:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Install package tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y rpm dpkg-dev apt-utils
+
+    - name: Build release assets
+      run: bash ./scripts/release/build-release.sh "${GITHUB_REF_NAME#v}"
+
+    - name: Build apt metadata
+      run: bash ./scripts/release/update-apt-repo.sh "${GITHUB_REF_NAME#v}"
