@@ -26,6 +26,7 @@ import {
 
 type LandingPageId =
   | 'landing-overview'
+  | 'download-center'
   | 'getting-started-overview'
   | 'clone-run-locally'
   | 'first-pipeline-10-minutes'
@@ -68,6 +69,7 @@ type LandingIconName =
   | 'channel'
   | 'repository'
   | 'control-panel'
+  | 'download'
   | 'login'
   | 'github'
   | 'gitlab'
@@ -178,6 +180,52 @@ const landingPages: LandingPage[] = [
       },
     ],
     searchTerms: ['overview', 'landing', 'developer platform'],
+  },
+  {
+    id: 'download-center',
+    label: 'Download center',
+    title: 'Multi-format downloads for Linux operators and platform teams',
+    intro: 'Install GITORC through Debian, RPM, tarball, or Go-based distribution paths. Tagged releases publish signed artifacts, checksums, and APT repository metadata so the platform can be installed like a standard Linux service.',
+    sections: [
+      {
+        title: 'Download options',
+        links: [
+          { label: 'Download .deb', href: 'https://github.com/AtonixCorp/gitorc/releases/latest/download/gitorc.deb', external: true, detail: 'Ubuntu and Debian package with systemd unit and packaged gateway runtime.' },
+          { label: 'Download .rpm', href: 'https://github.com/AtonixCorp/gitorc/releases/latest/download/gitorc.rpm', external: true, detail: 'RHEL, CentOS, and Fedora package with service install path.' },
+          { label: 'Download tar.gz', href: 'https://github.com/AtonixCorp/gitorc/releases/latest/download/gitorc.tar.gz', external: true, detail: 'Manual archive including launcher, gateway binary, README, LICENSE, and systemd service file.' },
+        ],
+      },
+      {
+        title: 'Install commands',
+        bullets: [
+          'sudo apt install gitorc',
+          'sudo apt install ./gitorc.deb',
+          'sudo rpm -i gitorc.rpm',
+          'tar -xvf gitorc.tar.gz',
+          'go install github.com/atonixcorp/gitorc@latest',
+        ],
+      },
+      {
+        title: 'APT repository',
+        bullets: [
+          'curl -fsSL https://atonixcorp.github.io/gitorc/apt/gitorc-archive-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/gitorc-archive-keyring.gpg',
+          'echo "deb [signed-by=/usr/share/keyrings/gitorc-archive-keyring.gpg] https://atonixcorp.github.io/gitorc/apt stable main" | sudo tee /etc/apt/sources.list.d/gitorc.list',
+          'sudo apt update',
+          'sudo apt install gitorc',
+        ],
+      },
+      {
+        title: 'Verification and service control',
+        bullets: [
+          'sha256sum -c gitorc.deb.sha256',
+          'sha256sum -c gitorc.rpm.sha256',
+          'sha256sum -c gitorc.tar.gz.sha256',
+          'sudo systemctl enable gitorc',
+          'sudo systemctl start gitorc',
+        ],
+      },
+    ],
+    searchTerms: ['download', 'deb', 'rpm', 'tar.gz', 'apt', 'go install'],
   },
   {
     id: 'getting-started-overview',
@@ -438,6 +486,7 @@ const landingSidebarGroups: LandingSidebarGroup[] = [
     label: 'Platform navigation',
     items: [
       { id: 'landing-overview', label: 'Overview', icon: 'overview' },
+      { id: 'download-center', label: 'Download', icon: 'download' },
       { id: 'platform-overview', label: 'Platform structure', icon: 'control-panel' },
       { id: 'ci-cd-engine', label: 'CI/CD engine', icon: 'automation' },
       { id: 'platform-pipelines-workflows', label: 'Pipelines & workflows', icon: 'pipelines' },
@@ -465,6 +514,7 @@ const landingSidebarGroups: LandingSidebarGroup[] = [
 
 const landingHeaderLinks: LandingHeaderLink[] = [
   { label: 'Platform', icon: 'control-panel', publicPage: 'platform', targetId: 'platform-overview' },
+  { label: 'Download', icon: 'download', targetId: 'download-center', publicPage: 'platform' },
   { label: 'Repository', icon: 'repository', targetId: 'repository-role', publicPage: 'platform' },
   { label: 'Docs', icon: 'docs', targetId: 'docs-inventory', publicPage: 'platform' },
   { label: 'Community', icon: 'community', targetId: 'developer-community', publicPage: 'platform' },
@@ -532,6 +582,14 @@ function LandingIcon({ icon }: { icon: LandingIconName }) {
       return (
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M7.5 18h9.5a3 3 0 0 0 .2-6 4.7 4.7 0 0 0-8.9-1.5A3.7 3.7 0 0 0 7.5 18Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+        </svg>
+      );
+    case 'download':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 4v10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="m8 10 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M5 19h14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       );
     case 'security':

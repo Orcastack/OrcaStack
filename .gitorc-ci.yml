@@ -96,3 +96,13 @@ pipeline:
       image: alpine:3.20
       commands:
         - echo "Rollback to last signed release revision when governance authorizes recovery"
+    - name: release-packages
+      image: golang:1.24
+      commands:
+        - apt-get update
+        - apt-get install -y rpm dpkg-dev apt-utils gnupg
+        - bash ./scripts/release/build-release.sh "$GITORC_RELEASE_VERSION"
+        - bash ./scripts/release/update-apt-repo.sh "$GITORC_RELEASE_VERSION"
+      when:
+        tag:
+          - v*

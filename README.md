@@ -32,8 +32,9 @@ GITORC includes:
 - CI/CD runners and governed promotion lanes.
 - OpenStack and Kubernetes private-cloud infrastructure.
 - Keystone-linked identity, RBAC, signing, and runtime policy enforcement.
+- Linux installation packages, archive downloads, and release automation.
 
-GITORC does not include operating-system installers, firmware, drivers, or device runtimes.
+GITORC does not include firmware, drivers, or device runtimes.
 
 ## Quick start
 
@@ -63,4 +64,5 @@ make deploy-private-cloud
 - [Private-cloud deployment](docs/Private-Cloud-Deployment.md)
 - [CI/CD engine](docs/CI-CD-Engine.md)
 - [Cloud automation workflows](docs/Cloud-Automation-Workflows.md)
+- [Installation](docs/Installation.md)
 - [Infrastructure overview](infra/README.md)

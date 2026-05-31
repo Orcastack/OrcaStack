@@ -2,7 +2,7 @@ API_DIR := gitorcapi
 WEB_DIR := gitorcweb
 TF_ENV_DIR := infra/terraform/environments/private-cloud
 
-.PHONY: api-build api-run gateway git review ci cd analytics web-install web-build up down infra-fmt infra-validate bootstrap-local deploy-private-cloud cloud-bootstrap proxmox-bootstrap openstack-bootstrap network-fabric kubernetes-bootstrap rancher-register gpu-bootstrap observability-bootstrap
+.PHONY: api-build api-run gateway git review ci cd analytics web-install web-build up down infra-fmt infra-validate bootstrap-local deploy-private-cloud cloud-bootstrap proxmox-bootstrap openstack-bootstrap network-fabric kubernetes-bootstrap rancher-register gpu-bootstrap observability-bootstrap release-build apt-repo-update
 
 api-build:
 	cd $(API_DIR) && go build ./...
@@ -81,3 +81,9 @@ gpu-bootstrap:
 
 observability-bootstrap:
 	kubectl apply -f infra/kubernetes/platform/observability-stack.yaml
+
+release-build:
+	bash ./scripts/release/build-release.sh "$(VERSION)"
+
+apt-repo-update:
+	bash ./scripts/release/update-apt-repo.sh "$(VERSION)"
