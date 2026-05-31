@@ -41,6 +41,30 @@ body {
   gap: 1rem;
 }
 
+.signin-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.signin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 1rem;
+}
+
+.signin-panel {
+  padding: 1.8rem;
+}
+
+.signin-title {
+  max-width: 13ch;
+}
+
+.signin-steps {
+  grid-template-columns: 1fr;
+}
+
 .hero-panel {
   display: grid;
   grid-template-columns: 1.7fr 1fr;
@@ -296,6 +320,16 @@ h1 {
 
 .landing-grid {
   grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+}
+
+.landing-grid-equal {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.landing-feature-card,
+.landing-service-card,
+.landing-audience-card {
+  min-height: 100%;
 }
 
 .landing-steps {
@@ -766,6 +800,7 @@ h1 {
   .hero-panel,
   .landing-grid,
   .landing-steps,
+  .signin-grid,
   .layout-grid,
   .lower-grid,
   .metrics-grid,
@@ -795,6 +830,7 @@ h1 {
   .hero-panel,
   .landing-grid,
   .landing-steps,
+  .signin-grid,
   .layout-grid,
   .lower-grid,
   .metrics-grid,

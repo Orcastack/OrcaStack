@@ -15,13 +15,67 @@ import {
   type SecurityState,
 } from './api';
 
-const serviceMap = [
-  { name: 'Gateway', role: 'UI and control-plane entrypoint', endpoint: 'http://localhost:8080 or http://localhost:18080' },
-  { name: 'Git Service', role: 'Provider sync, clone intents, refs, and commit inspection', endpoint: 'http://localhost:8081' },
-  { name: 'Review Service', role: 'Approvals, review queues, and merge policy', endpoint: 'http://localhost:8086' },
-  { name: 'CI Engine', role: 'Transform, build, and artifact execution lanes', endpoint: 'http://localhost:8083' },
-  { name: 'CD Engine', role: 'Release promotion and automation dispatch', endpoint: 'http://localhost:8084' },
-  { name: 'Analytics', role: 'Metrics, traceability, and identity chain views', endpoint: 'http://localhost:8085' },
+const capabilityCards = [
+  {
+    name: 'Repository Governance',
+    role: 'Unify owned Git, provider federation, branch policy, and change control under a single operating model.',
+  },
+  {
+    name: 'Review Enforcement',
+    role: 'Tie approvals, policy checks, and merge decisions directly to platform-defined release gates.',
+  },
+  {
+    name: 'Pipeline Orchestration',
+    role: 'Coordinate CI execution, artifact traceability, and promotion readiness across delivery lanes.',
+  },
+  {
+    name: 'Release Control',
+    role: 'Drive staged deployments, rollback discipline, and environment accountability from one control surface.',
+  },
+  {
+    name: 'Runtime Trust',
+    role: 'Expose signed identities, attestation status, and operational evidence for platform actions.',
+  },
+  {
+    name: 'Operational Visibility',
+    role: 'Surface platform state, event flow, and security posture for engineering and release teams.',
+  },
+];
+
+const proofPoints = [
+  'Owned control plane for repository, review, CI/CD, and runtime policy.',
+  'Designed for private infrastructure, regulated teams, and high-assurance delivery environments.',
+  'Separates public product communication from authenticated operator workflows.',
+];
+
+const platformPillars = [
+  {
+    title: 'Repository ownership',
+    description: 'Manage source of truth, provider connectivity, and branch governance without fragmenting control across multiple tools.',
+  },
+  {
+    title: 'Delivery policy',
+    description: 'Promote builds through review-aware pipelines and controlled deployment lanes with clear operational accountability.',
+  },
+  {
+    title: 'Trust and evidence',
+    description: 'Connect runtime identity, signatures, and operational events so teams can explain not just what changed, but why it was authorized.',
+  },
+];
+
+const audienceCards = [
+  {
+    title: 'Platform engineering',
+    description: 'Standardize repository workflows, internal controls, and release mechanics across teams and environments.',
+  },
+  {
+    title: 'Security and compliance',
+    description: 'Add operational evidence, identity-aware approval flows, and auditable release behavior to the DevOps lifecycle.',
+  },
+  {
+    title: 'Delivery leadership',
+    description: 'Create one place to understand software change, deployment readiness, and runtime accountability.',
+  },
 ];
 
 const routeTabs = [
@@ -45,6 +99,17 @@ type FocusState =
   | { kind: 'pipeline'; id: string }
   | { kind: 'deployment'; id: string }
   | { kind: 'process'; id: string };
+
+type PublicPage = 'home' | 'signin';
+
+function readPublicPage(): PublicPage {
+  if (typeof window === 'undefined') {
+    return 'home';
+  }
+
+  const hash = window.location.hash.replace(/^#/, '');
+  return hash.startsWith('/signin') ? 'signin' : 'home';
+}
 
 function readRoute(): RouteState {
   const hash = window.location.hash.replace(/^#/, '') || '/overview';
@@ -95,6 +160,7 @@ function securityLabel(security: SecurityState) {
 export function App() {
   const publicLandingMode = isStaticOverviewMode();
   const [route, setRoute] = useState<RouteState>(() => readRoute());
+  const [publicPage, setPublicPage] = useState<PublicPage>(() => readPublicPage());
   const [overview, setOverview] = useState<Overview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +171,11 @@ export function App() {
   const [activeGatewayBase, setActiveGatewayBase] = useState(getGatewayBase());
 
   useEffect(() => {
-    const onHashChange = () => setRoute(readRoute());
+    const onHashChange = () => {
+      setRoute(readRoute());
+      setPublicPage(readPublicPage());
+    };
+
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
@@ -113,6 +183,14 @@ export function App() {
   useEffect(() => {
     let active = true;
     let interval: number | undefined;
+
+    if (publicLandingMode) {
+      setIsLoading(false);
+      setError(null);
+      return () => {
+        active = false;
+      };
+    }
 
     const loadOverview = async () => {
       try {
@@ -136,11 +214,9 @@ export function App() {
     };
 
     void loadOverview();
-    if (!publicLandingMode) {
-      interval = window.setInterval(() => {
-        void loadOverview();
-      }, 8000);
-    }
+    interval = window.setInterval(() => {
+      void loadOverview();
+    }, 8000);
 
     return () => {
       active = false;
@@ -277,6 +353,11 @@ export function App() {
   const navigateTo = (name: RouteName, repositoryId?: string) => {
     window.location.hash = toHash(name, repositoryId);
     setRoute({ name, repositoryId });
+  };
+
+  const navigatePublic = (page: PublicPage) => {
+    window.location.hash = page === 'signin' ? '#/signin' : '#/';
+    setPublicPage(page);
   };
 
   const copyText = async (value: string, label: string) => {
@@ -1003,65 +1084,61 @@ export function App() {
   };
 
   const renderLandingPage = () => {
-    if (!overview) {
-      return null;
-    }
-
     return (
       <div className="landing-shell">
         <section className="hero-panel">
           <article className="panel hero-copy">
             <p className="eyebrow">gitorc platform</p>
-            <h1>Own the Git workflow, not just the repository.</h1>
+            <h1>DevOps control for teams that need governance, delivery discipline, and runtime trust.</h1>
             <p className="lede">
-              gitorc is a self-hosted control plane for repository ownership, review policy, CI/CD execution, and signed runtime operations.
-              This public site is the landing page. The operator workspace opens after login or on localhost:5050 during local development.
+              gitorc is a Git-centric DevOps platform for organizations that want stronger ownership of source control, review policy,
+              CI/CD orchestration, and operational evidence across the software delivery lifecycle.
             </p>
             <div className="hero-actions">
-              <a className="button button-primary" href="http://localhost:5050" rel="noreferrer" target="_blank">Open local control plane</a>
-              <a className="button button-ghost" href="#platform">See platform surfaces</a>
+              <button className="button button-primary" onClick={() => navigatePublic('signin')} type="button">Open control plane</button>
+              <a className="button button-ghost" href="#platform">Explore platform capabilities</a>
             </div>
             <div className="badge-stack landing-badges">
-              <span className="status-badge status-primary">Public Pages experience</span>
-              <span className="status-badge status-success">Dashboard stays local or authenticated</span>
-              <span className="status-badge status-warn">Static preview data</span>
+              {proofPoints.map((point) => (
+                <span key={point} className="status-badge status-primary">{point}</span>
+              ))}
             </div>
           </article>
 
           <aside className="hero-side">
             <article className="identity-card">
               <div>
-                <dt>Pages mode</dt>
-                <dd>Landing page only. No gateway dependency, no operator mutations.</dd>
+                <dt>Deployment model</dt>
+                <dd>Built for private infrastructure where the operator surface remains inside authenticated platform boundaries.</dd>
               </div>
               <div>
-                <dt>Operator mode</dt>
-                <dd>Repository inventory, review queues, pipelines, deployments, and runtime telemetry.</dd>
+                <dt>Control surface</dt>
+                <dd>Repository governance, policy-driven delivery, deployment orchestration, and runtime oversight in one system.</dd>
               </div>
               <div>
-                <dt>Primary local entry</dt>
-                <dd>http://localhost:5050</dd>
+                <dt>Public experience</dt>
+                <dd>This page describes the platform. Operational workflows are intentionally reserved for the authenticated workspace.</dd>
               </div>
             </article>
 
             <article className="panel landing-panel-accent">
-              <p className="section-kicker">What changes after login</p>
-              <h3>One control plane for code, delivery, and runtime trust</h3>
+              <p className="section-kicker">Platform narrative</p>
+              <h3>One operating model across code, delivery, and runtime assurance</h3>
               <ul>
-                <li>Trace repository actions through signed process identity.</li>
-                <li>Gate CI and deployment lanes through review state.</li>
-                <li>Inspect runtime health, rollback posture, and security status.</li>
+                <li>Consolidate repository governance and delivery policy into a single control plane.</li>
+                <li>Move beyond disconnected tooling with review-aware pipeline and release workflows.</li>
+                <li>Connect operational decisions to verifiable identity, authorization, and evidence.</li>
               </ul>
             </article>
           </aside>
         </section>
 
-        <section className="metrics-grid">
-          {overview.metrics.map((metric) => (
-            <article key={metric.label} className="metric-card">
-              <p>{metric.label}</p>
-              <strong>{metric.value}</strong>
-              <span>{metric.hint}</span>
+        <section className="landing-grid landing-grid-equal">
+          {platformPillars.map((pillar) => (
+            <article key={pillar.title} className="metric-card landing-feature-card">
+              <p className="section-kicker">Core pillar</p>
+              <strong>{pillar.title}</strong>
+              <span>{pillar.description}</span>
             </article>
           ))}
         </section>
@@ -1069,17 +1146,16 @@ export function App() {
         <section id="platform" className="panel stack-panel dashboard-block">
           <div className="section-heading">
             <div>
-              <p className="section-kicker">Platform surfaces</p>
-              <h2>Gateway-first services behind the local control plane</h2>
+              <p className="section-kicker">Platform capabilities</p>
+              <h2>Purpose-built for serious DevOps operations</h2>
             </div>
-            <span className="status-badge status-primary">Local-first topology</span>
+            <span className="status-badge status-primary">Private infrastructure ready</span>
           </div>
           <div className="service-grid">
-            {serviceMap.map((service) => (
-              <article key={service.name} className="service-card">
+            {capabilityCards.map((service) => (
+              <article key={service.name} className="service-card landing-service-card">
                 <h3>{service.name}</h3>
                 <p>{service.role}</p>
-                <span>{service.endpoint}</span>
               </article>
             ))}
           </div>
@@ -1089,8 +1165,8 @@ export function App() {
           <article className="panel stack-panel">
             <div className="section-heading compact-heading">
               <div>
-                <p className="section-kicker">Operator workspace</p>
-                <h2>What users should see after login or on localhost:5050</h2>
+                <p className="section-kicker">Authenticated workspace</p>
+                <h2>What operators access inside the platform boundary</h2>
               </div>
             </div>
             <div className="trace-grid">
@@ -1124,35 +1200,19 @@ export function App() {
           <article className="panel stack-panel">
             <div className="section-heading compact-heading">
               <div>
-                <p className="section-kicker">Project preview</p>
-                <h2>Representative repositories in this build</h2>
+                <p className="section-kicker">Who it is for</p>
+                <h2>Teams that need tighter operational control</h2>
               </div>
-              <span className="status-badge status-success">Read-only snapshot</span>
             </div>
             <div className="repo-list">
-              {overview.repositories.map((repository) => {
-                const pipeline = overview.pipelines.find((item) => item.repository_id === repository.id);
-                const review = overview.reviews.find((item) => item.repository_id === repository.id);
-
-                return (
-                  <article key={repository.id} className="repo-card">
-                    <div className="provider-row">
-                      <strong>{repository.name}</strong>
-                      <span className={`mini-badge ${statusClass(pipeline?.status || 'pending')}`}>{formatStatus(pipeline?.status || 'pending')}</span>
-                    </div>
-                    <p>{repository.summary}</p>
-                    <div className="repo-meta">
-                      <span>{repository.provider_id}</span>
-                      <span>{repository.default_branch}</span>
-                      <span>{repository.commit}</span>
-                    </div>
-                    <div className="action-row">
-                      <span className={`stage-pill ${statusClass(review?.status || 'pending')}`}>Review: {formatStatus(review?.status || 'pending')}</span>
-                      <span className="identity-chip">{repository.identity}</span>
-                    </div>
-                  </article>
-                );
-              })}
+              {audienceCards.map((audience) => (
+                <article key={audience.title} className="repo-card landing-audience-card">
+                  <div className="provider-row">
+                    <strong>{audience.title}</strong>
+                  </div>
+                  <p>{audience.description}</p>
+                </article>
+              ))}
             </div>
           </article>
         </section>
@@ -1160,38 +1220,99 @@ export function App() {
         <section className="panel stack-panel dashboard-block">
           <div className="section-heading">
             <div>
-              <p className="section-kicker">Local bootstrap</p>
-              <h2>Use the public site as the front door, not the control room</h2>
+              <p className="section-kicker">Access model</p>
+              <h2>The public site introduces the platform. Operational control belongs behind authenticated access.</h2>
             </div>
           </div>
           <div className="landing-steps">
             <article className="trace-card">
               <span className="step-index">1</span>
-              <h3>Start the stack</h3>
-              <p>Bring up the gateway and services locally.</p>
-              <div className="command-list">
-                <code>docker compose up --build</code>
-              </div>
+              <h3>Present the platform</h3>
+              <p>Use the public experience to explain the operating model, trust posture, and delivery governance story.</p>
             </article>
             <article className="trace-card">
               <span className="step-index">2</span>
-              <h3>Open the operator workspace</h3>
-              <p>Use the local web entrypoint where the dashboard belongs.</p>
-              <div className="command-list">
-                <code>http://localhost:5050</code>
-              </div>
+              <h3>Authenticate into operations</h3>
+              <p>Move authorized users into the private control plane where repository, pipeline, and deployment actions are allowed.</p>
             </article>
             <article className="trace-card">
               <span className="step-index">3</span>
-              <h3>Verify the gateway</h3>
-              <p>Confirm the API surface before switching to live control-plane behavior.</p>
-              <div className="command-list">
-                <code>curl http://localhost:8080/healthz</code>
-              </div>
+              <h3>Operate with evidence</h3>
+              <p>Use the authenticated surface for delivery decisions, runtime oversight, and auditable operational traceability.</p>
             </article>
           </div>
         </section>
       </div>
+    );
+  };
+
+  const renderSignInPage = () => {
+    return (
+      <section className="signin-shell">
+        <article className="panel signin-panel">
+          <p className="eyebrow">control plane access</p>
+          <h1 className="signin-title">Access the operator workspace through your authenticated deployment boundary.</h1>
+          <p className="lede">
+            The public site is intentionally informational. Repository actions, review policy, CI orchestration, release operations,
+            and runtime oversight belong in the authenticated gitorc control plane provisioned inside your environment.
+          </p>
+          <div className="hero-actions">
+            <button className="button button-primary" type="button">Private access required</button>
+            <button className="button button-ghost" onClick={() => navigatePublic('home')} type="button">Back to landing page</button>
+          </div>
+        </article>
+
+        <section className="signin-grid">
+          <article className="panel stack-panel">
+            <div className="section-heading compact-heading">
+              <div>
+                <p className="section-kicker">Expected operator flow</p>
+                <h2>What opens after sign-in</h2>
+              </div>
+            </div>
+            <div className="trace-grid">
+              <article className="trace-card">
+                <h3>Projects and repositories</h3>
+                <p>Create projects, inspect connected providers, and start clone or review actions.</p>
+              </article>
+              <article className="trace-card">
+                <h3>Pipelines and deployments</h3>
+                <p>Run CI, inspect stage health, promote artifacts, and manage rollbacks.</p>
+              </article>
+              <article className="trace-card">
+                <h3>Runtime and trust</h3>
+                <p>Trace live processes, security posture, attestations, and signed operational events.</p>
+              </article>
+            </div>
+          </article>
+
+          <article className="panel stack-panel">
+            <div className="section-heading compact-heading">
+              <div>
+                <p className="section-kicker">Local bootstrap</p>
+                <h2>Before opening the workspace</h2>
+              </div>
+            </div>
+            <div className="landing-steps signin-steps">
+              <article className="trace-card">
+                <span className="step-index">1</span>
+                <h3>Provision access</h3>
+                <p>Expose the operator surface only inside the approved deployment boundary for your team.</p>
+              </article>
+              <article className="trace-card">
+                <span className="step-index">2</span>
+                <h3>Enforce policy</h3>
+                <p>Connect repository, review, CI/CD, and operational controls to the organization’s security model.</p>
+              </article>
+              <article className="trace-card">
+                <span className="step-index">3</span>
+                <h3>Operate with confidence</h3>
+                <p>Use the authenticated workspace for governed delivery workflows and runtime decision making.</p>
+              </article>
+            </div>
+          </article>
+        </section>
+      </section>
     );
   };
 
@@ -1234,7 +1355,8 @@ export function App() {
         </section>
       ) : null}
 
-      {!isLoading && !error && publicLandingMode ? renderLandingPage() : null}
+      {!isLoading && !error && publicLandingMode && publicPage === 'home' ? renderLandingPage() : null}
+      {!isLoading && !error && publicLandingMode && publicPage === 'signin' ? renderSignInPage() : null}
       {!isLoading && !error && !publicLandingMode ? renderScreen() : null}
     </main>
   );
