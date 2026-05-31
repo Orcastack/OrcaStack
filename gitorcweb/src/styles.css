@@ -89,9 +89,6 @@ body {
 }
 
 .landing-header {
-  position: sticky;
-  top: 1rem;
-  z-index: 25;
   display: flex;
   align-items: center;
   justify-content: space-between;
