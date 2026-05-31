@@ -1,6 +1,6 @@
 # gitorc
 
-gitorc is a self-hosted Git-centric DevOps platform blueprint for local machines and private infrastructure. It combines owned Git RPC, Gerrit-style review workflows, a CI/CD control plane, and a big-data backend based on HBase and Hadoop.
+gitorc is a self-hosted Git-centric DevOps platform blueprint for local machines and private infrastructure.
 
 ## Monorepo structure
 
