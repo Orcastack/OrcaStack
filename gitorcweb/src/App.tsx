@@ -925,7 +925,6 @@ export function App() {
   const [isSubmittingProject, setIsSubmittingProject] = useState(false);
   const [landingTheme, setLandingTheme] = useState<'graphite' | 'paper'>('graphite');
   const [landingQuery, setLandingQuery] = useState('');
-  const [landingHeroPointer, setLandingHeroPointer] = useState({ x: 50, y: 50 });
   const [activeLandingPage, setActiveLandingPage] = useState<LandingPageId>('landing-overview');
   const workspaceHasData = hasWorkspaceData(overview);
 
@@ -2376,29 +2375,12 @@ export function App() {
     );
   };
 
-  const renderLandingPage = () => {
-    const heroBackgroundStyle = {
-      '--landing-hero-pointer-x': `${landingHeroPointer.x}%`,
-      '--landing-hero-pointer-y': `${landingHeroPointer.y}%`,
-      '--landing-hero-drift-x': `${(landingHeroPointer.x - 50) * 0.18}px`,
-      '--landing-hero-drift-y': `${(landingHeroPointer.y - 50) * 0.16}px`,
-      '--landing-hero-tilt-x': `${(50 - landingHeroPointer.y) * 0.05}deg`,
-      '--landing-hero-tilt-y': `${(landingHeroPointer.x - 50) * 0.05}deg`,
-    } as React.CSSProperties;
-
-    const handleLandingHeroPointerMove = (event: React.PointerEvent<HTMLElement>) => {
-      const bounds = event.currentTarget.getBoundingClientRect();
-      const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-      const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-      setLandingHeroPointer({
-        x: Math.min(100, Math.max(0, x)),
-        y: Math.min(100, Math.max(0, y)),
-      });
-    };
-
-    const resetLandingHeroPointer = () => {
-      setLandingHeroPointer({ x: 50, y: 50 });
-    };
+  const renderDocumentationPage = (mode: 'home' | 'platform') => {
+    const brandSubtitle = mode === 'home' ? 'Hardware & Software Automation' : 'Standard platform';
+    const navLabel = mode === 'home' ? 'Landing page navigation' : 'Platform navigation';
+    const searchLabel = mode === 'home' ? 'Search landing sections' : 'Search platform pages';
+    const searchPlaceholder = mode === 'home' ? 'Search documentation, workflows, support' : 'Search docs, workflows, support';
+    const pageEyebrow = activeLandingGroup?.label || 'Documentation overview';
 
     return (
       <div className={`landing-shell landing-theme-${landingTheme}`}>
@@ -2407,101 +2389,11 @@ export function App() {
             <span className="landing-brand-mark"><LandingSystemMark /></span>
             <span className="landing-brand-copy">
               <strong>GITORC</strong>
-              <span>Hardware & Software Automation</span>
+              <span>{brandSubtitle}</span>
             </span>
           </button>
 
-          <nav className="landing-header-nav" aria-label="Landing page navigation">
-            {landingHeaderLinks.map((link) => {
-              return (
-                <button
-                  key={link.label}
-                  className="landing-nav-link"
-                  onClick={() => navigatePublic(link.publicPage || 'platform', link.targetId)}
-                  type="button"
-                >
-                  <span className="landing-nav-icon"><LandingIcon icon={link.icon} /></span>
-                  {link.label}
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="landing-header-controls">
-            <form className="landing-search" onSubmit={handleLandingSearch}>
-              <span className="landing-search-icon"><LandingIcon icon="search" /></span>
-              <input
-                aria-label="Search landing sections"
-                onChange={(event) => setLandingQuery(event.target.value)}
-                placeholder="Search platform sections"
-                type="search"
-                value={landingQuery}
-              />
-              <button className="landing-control-button" type="submit">Search</button>
-            </form>
-
-            <button
-              aria-label="Toggle landing theme"
-              className="landing-icon-button"
-              onClick={() => setLandingTheme((current) => (current === 'graphite' ? 'paper' : 'graphite'))}
-              type="button"
-            >
-              <LandingIcon icon="theme" />
-            </button>
-
-            <button aria-label="Login to dashboard" className="landing-icon-button" onClick={() => navigatePublic('signin')} type="button">
-              <LandingIcon icon="login" />
-            </button>
-          </div>
-        </header>
-
-        <section className="landing-hero-shell" onPointerLeave={resetLandingHeroPointer} onPointerMove={handleLandingHeroPointerMove}>
-          <div aria-hidden="true" className="landing-hero-background" style={heroBackgroundStyle}>
-            <div className="landing-hero-orb landing-hero-orb-primary" />
-            <div className="landing-hero-orb landing-hero-orb-secondary" />
-            <div className="landing-hero-grid-plane" />
-            <div className="landing-hero-grid-plane landing-hero-grid-plane-secondary" />
-            <div className="landing-hero-beam landing-hero-beam-left" />
-            <div className="landing-hero-beam landing-hero-beam-right" />
-            <div className="landing-hero-cube-cluster">
-              <span className="landing-hero-cube landing-hero-cube-large" />
-              <span className="landing-hero-cube landing-hero-cube-mid" />
-              <span className="landing-hero-cube landing-hero-cube-small" />
-            </div>
-            <div className="landing-hero-node-ring">
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-          </div>
-          <article className="landing-hero-panel">
-            <p className="eyebrow">Hardware & Software Automation</p>
-            <h1>GITORC</h1>
-            <p className="landing-hero-tagline">CI/CD Automation for Hardware & Software.</p>
-            <p className="lede">A clean operator platform for repositories, pipelines, RBAC-governed access, and cloud deployment workflows across Proxmox, OpenStack, Kubernetes, Rancher, networking, and observability.</p>
-            <div className="landing-hero-actions">
-              <a className="button button-ghost" href="https://github.com/AtonixCorp/gitorc" rel="noreferrer" target="_blank">Open repository</a>
-            </div>
-          </article>
-        </section>
-      </div>
-    );
-  };
-
-  const renderPlatformPage = () => {
-    return (
-      <div className={`landing-shell landing-theme-${landingTheme}`}>
-        <header className="landing-header">
-          <button className="landing-brand" onClick={() => navigatePublic('home')} type="button">
-            <span className="landing-brand-mark"><LandingSystemMark /></span>
-            <span className="landing-brand-copy">
-              <strong>GITORC</strong>
-              <span>Standard platform</span>
-            </span>
-          </button>
-
-          <nav className="landing-header-nav" aria-label="Platform navigation">
+          <nav className="landing-header-nav" aria-label={navLabel}>
             {landingHeaderLinks.map((link) => (
               <button
                 key={link.label}
@@ -2519,9 +2411,9 @@ export function App() {
             <form className="landing-search" onSubmit={handleLandingSearch}>
               <span className="landing-search-icon"><LandingIcon icon="search" /></span>
               <input
-                aria-label="Search platform pages"
+                aria-label={searchLabel}
                 onChange={(event) => setLandingQuery(event.target.value)}
-                placeholder="Search docs, workflows, support"
+                placeholder={searchPlaceholder}
                 type="search"
                 value={landingQuery}
               />
@@ -2544,7 +2436,7 @@ export function App() {
         </header>
 
         <div className="landing-workbench">
-          <aside className="landing-sidebar" aria-label="Platform structure">
+          <aside className="landing-sidebar" aria-label="Documentation sidebar">
             {landingSidebarGroups.map((group) => (
               <div key={group.label} className="landing-sidebar-group">
                 <p className="landing-sidebar-kicker">{group.label}</p>
@@ -2570,7 +2462,7 @@ export function App() {
             <section className="landing-page">
               <div className="landing-page-hero">
                 <div>
-                  <p className="eyebrow">{activeLandingGroup?.label || 'Developer platform overview'}</p>
+                  <p className="eyebrow">{pageEyebrow}</p>
                   <h1>{activeLandingPageDefinition.title}</h1>
                   <p className="lede">{activeLandingPageDefinition.intro}</p>
                 </div>
@@ -2612,6 +2504,10 @@ export function App() {
       </div>
     );
   };
+
+  const renderLandingPage = () => renderDocumentationPage('home');
+
+  const renderPlatformPage = () => renderDocumentationPage('platform');
 
   const renderAuthProviderButton = (provider: Exclude<AuthProvider, 'gitorc'>, mode: 'login' | 'signup') => {
     const providerLabel = provider === 'github' ? 'GitHub' : provider === 'gitlab' ? 'GitLab' : 'Google';
