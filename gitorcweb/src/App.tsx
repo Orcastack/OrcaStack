@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   fetchOverview,
   getGatewayBase,
+  isStaticOverviewMode,
   type CloneOperation,
   type Container,
   type Deployment,
@@ -92,6 +93,7 @@ function securityLabel(security: SecurityState) {
 }
 
 export function App() {
+  const publicLandingMode = isStaticOverviewMode();
   const [route, setRoute] = useState<RouteState>(() => readRoute());
   const [overview, setOverview] = useState<Overview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,6 +112,7 @@ export function App() {
 
   useEffect(() => {
     let active = true;
+    let interval: number | undefined;
 
     const loadOverview = async () => {
       try {
@@ -133,15 +136,19 @@ export function App() {
     };
 
     void loadOverview();
-    const interval = window.setInterval(() => {
-      void loadOverview();
-    }, 8000);
+    if (!publicLandingMode) {
+      interval = window.setInterval(() => {
+        void loadOverview();
+      }, 8000);
+    }
 
     return () => {
       active = false;
-      window.clearInterval(interval);
+      if (interval) {
+        window.clearInterval(interval);
+      }
     };
-  }, []);
+  }, [publicLandingMode]);
 
   useEffect(() => {
     if (!toast) {
@@ -995,6 +1002,199 @@ export function App() {
     );
   };
 
+  const renderLandingPage = () => {
+    if (!overview) {
+      return null;
+    }
+
+    return (
+      <div className="landing-shell">
+        <section className="hero-panel">
+          <article className="panel hero-copy">
+            <p className="eyebrow">gitorc platform</p>
+            <h1>Own the Git workflow, not just the repository.</h1>
+            <p className="lede">
+              gitorc is a self-hosted control plane for repository ownership, review policy, CI/CD execution, and signed runtime operations.
+              This public site is the landing page. The operator workspace opens after login or on localhost:5050 during local development.
+            </p>
+            <div className="hero-actions">
+              <a className="button button-primary" href="http://localhost:5050" rel="noreferrer" target="_blank">Open local control plane</a>
+              <a className="button button-ghost" href="#platform">See platform surfaces</a>
+            </div>
+            <div className="badge-stack landing-badges">
+              <span className="status-badge status-primary">Public Pages experience</span>
+              <span className="status-badge status-success">Dashboard stays local or authenticated</span>
+              <span className="status-badge status-warn">Static preview data</span>
+            </div>
+          </article>
+
+          <aside className="hero-side">
+            <article className="identity-card">
+              <div>
+                <dt>Pages mode</dt>
+                <dd>Landing page only. No gateway dependency, no operator mutations.</dd>
+              </div>
+              <div>
+                <dt>Operator mode</dt>
+                <dd>Repository inventory, review queues, pipelines, deployments, and runtime telemetry.</dd>
+              </div>
+              <div>
+                <dt>Primary local entry</dt>
+                <dd>http://localhost:5050</dd>
+              </div>
+            </article>
+
+            <article className="panel landing-panel-accent">
+              <p className="section-kicker">What changes after login</p>
+              <h3>One control plane for code, delivery, and runtime trust</h3>
+              <ul>
+                <li>Trace repository actions through signed process identity.</li>
+                <li>Gate CI and deployment lanes through review state.</li>
+                <li>Inspect runtime health, rollback posture, and security status.</li>
+              </ul>
+            </article>
+          </aside>
+        </section>
+
+        <section className="metrics-grid">
+          {overview.metrics.map((metric) => (
+            <article key={metric.label} className="metric-card">
+              <p>{metric.label}</p>
+              <strong>{metric.value}</strong>
+              <span>{metric.hint}</span>
+            </article>
+          ))}
+        </section>
+
+        <section id="platform" className="panel stack-panel dashboard-block">
+          <div className="section-heading">
+            <div>
+              <p className="section-kicker">Platform surfaces</p>
+              <h2>Gateway-first services behind the local control plane</h2>
+            </div>
+            <span className="status-badge status-primary">Local-first topology</span>
+          </div>
+          <div className="service-grid">
+            {serviceMap.map((service) => (
+              <article key={service.name} className="service-card">
+                <h3>{service.name}</h3>
+                <p>{service.role}</p>
+                <span>{service.endpoint}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="landing-grid">
+          <article className="panel stack-panel">
+            <div className="section-heading compact-heading">
+              <div>
+                <p className="section-kicker">Operator workspace</p>
+                <h2>What users should see after login or on localhost:5050</h2>
+              </div>
+            </div>
+            <div className="trace-grid">
+              <article className="trace-card">
+                <h3>Repository control</h3>
+                <ul>
+                  <li>Connected providers and repository inventory.</li>
+                  <li>Clone intents, RYCLI commands, and review entrypoints.</li>
+                  <li>Commit and branch context tied to identity records.</li>
+                </ul>
+              </article>
+              <article className="trace-card">
+                <h3>Delivery orchestration</h3>
+                <ul>
+                  <li>Pipeline lanes with run history and gating state.</li>
+                  <li>Deployment lanes with rollback targets and artifact traceability.</li>
+                  <li>Environment and cluster rollout visibility.</li>
+                </ul>
+              </article>
+              <article className="trace-card">
+                <h3>Runtime trust</h3>
+                <ul>
+                  <li>Process identity, LDAP registration, RBAC verification.</li>
+                  <li>Attestation status for repositories, pipelines, and services.</li>
+                  <li>Live event stream and container state monitoring.</li>
+                </ul>
+              </article>
+            </div>
+          </article>
+
+          <article className="panel stack-panel">
+            <div className="section-heading compact-heading">
+              <div>
+                <p className="section-kicker">Project preview</p>
+                <h2>Representative repositories in this build</h2>
+              </div>
+              <span className="status-badge status-success">Read-only snapshot</span>
+            </div>
+            <div className="repo-list">
+              {overview.repositories.map((repository) => {
+                const pipeline = overview.pipelines.find((item) => item.repository_id === repository.id);
+                const review = overview.reviews.find((item) => item.repository_id === repository.id);
+
+                return (
+                  <article key={repository.id} className="repo-card">
+                    <div className="provider-row">
+                      <strong>{repository.name}</strong>
+                      <span className={`mini-badge ${statusClass(pipeline?.status || 'pending')}`}>{formatStatus(pipeline?.status || 'pending')}</span>
+                    </div>
+                    <p>{repository.summary}</p>
+                    <div className="repo-meta">
+                      <span>{repository.provider_id}</span>
+                      <span>{repository.default_branch}</span>
+                      <span>{repository.commit}</span>
+                    </div>
+                    <div className="action-row">
+                      <span className={`stage-pill ${statusClass(review?.status || 'pending')}`}>Review: {formatStatus(review?.status || 'pending')}</span>
+                      <span className="identity-chip">{repository.identity}</span>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </article>
+        </section>
+
+        <section className="panel stack-panel dashboard-block">
+          <div className="section-heading">
+            <div>
+              <p className="section-kicker">Local bootstrap</p>
+              <h2>Use the public site as the front door, not the control room</h2>
+            </div>
+          </div>
+          <div className="landing-steps">
+            <article className="trace-card">
+              <span className="step-index">1</span>
+              <h3>Start the stack</h3>
+              <p>Bring up the gateway and services locally.</p>
+              <div className="command-list">
+                <code>docker compose up --build</code>
+              </div>
+            </article>
+            <article className="trace-card">
+              <span className="step-index">2</span>
+              <h3>Open the operator workspace</h3>
+              <p>Use the local web entrypoint where the dashboard belongs.</p>
+              <div className="command-list">
+                <code>http://localhost:5050</code>
+              </div>
+            </article>
+            <article className="trace-card">
+              <span className="step-index">3</span>
+              <h3>Verify the gateway</h3>
+              <p>Confirm the API surface before switching to live control-plane behavior.</p>
+              <div className="command-list">
+                <code>curl http://localhost:8080/healthz</code>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    );
+  };
+
   const renderScreen = () => {
     if (!overview || !selectedRepository) {
       return null;
@@ -1034,7 +1234,8 @@ export function App() {
         </section>
       ) : null}
 
-      {!isLoading && !error ? renderScreen() : null}
+      {!isLoading && !error && publicLandingMode ? renderLandingPage() : null}
+      {!isLoading && !error && !publicLandingMode ? renderScreen() : null}
     </main>
   );
 }

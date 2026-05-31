@@ -287,4 +287,8 @@ export function getGatewayBase() {
   return lastResolvedGatewayBase;
 }
 
+export function isStaticOverviewMode() {
+  return shouldUseStaticOverview();
+}
+
 export { configuredGatewayBase as gatewayBase, gatewayCandidates };
