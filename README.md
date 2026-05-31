@@ -1,6 +1,6 @@
 # gitorc
 
-GITORC is a sovereign Git-centric automation platform for private-cloud environments. This repository is the implementation base, bootstrap entry point, audit trail, and architecture reference for the platform.
+GITORC is a Git-centric automation platform for private-cloud environments. This repository is the implementation base, bootstrap entry point, audit trail, and architecture reference for the platform.
 
 ## Platform overview
 
