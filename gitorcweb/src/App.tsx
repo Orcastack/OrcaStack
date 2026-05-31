@@ -15,18 +15,34 @@ import {
   type SecurityState,
 } from './api';
 
-type LandingSectionId =
-  | 'overview'
-  | 'how-it-works'
-  | 'ci-cd-automation'
-  | 'pipelines-workflows'
+type LandingPageId =
+  | 'landing-overview'
+  | 'getting-started-overview'
+  | 'clone-run-locally'
+  | 'first-pipeline-10-minutes'
+  | 'platform-overview'
+  | 'ci-cd-engine'
+  | 'platform-pipelines-workflows'
   | 'device-node-integration'
   | 'location-intelligence'
   | 'private-cloud-hpc'
   | 'security-model'
-  | 'developer-documentation'
-  | 'community-discord'
-  | 'github-repository';
+  | 'workflow-system'
+  | 'workflow-states-delivery'
+  | 'runtime-strategies'
+  | 'signed-artifacts-policy'
+  | 'repository-role'
+  | 'monorepo-layout'
+  | 'bootstrap-locally'
+  | 'changelog-releases'
+  | 'docs-inventory'
+  | 'api-reference'
+  | 'architecture-docs'
+  | 'local-development-guide'
+  | 'developer-community'
+  | 'discord-channels'
+  | 'contribution-guide'
+  | 'issue-templates-rfcs';
 
 type LandingIconName =
   | 'overview'
@@ -44,270 +60,47 @@ type LandingIconName =
   | 'theme'
   | 'profile';
 
-type LandingSection = {
-  id: LandingSectionId;
+type LandingPageLink = {
   label: string;
-  icon: LandingIconName;
-  title: string;
-  summary: string;
-  bullets: string[];
-  evidenceTitle: string;
-  evidence: string[];
-  searchTerms: string[];
-};
-
-type LandingHeaderLink = {
-  label: string;
-  targetId?: string;
+  detail?: string;
+  targetId?: LandingPageId;
   href?: string;
   external?: boolean;
 };
 
-const landingSidebarSections: LandingSection[] = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    icon: 'overview',
-    title: 'A Git-centric CI/CD engine for private infrastructure and governed delivery.',
-    summary: 'gitorc presents itself as a platform interface from the first screen: repository control, review discipline, pipeline automation, deployment routing, and operational evidence in one system surface.',
-    bullets: [
-      'Treat the public landing page as an operator-facing briefing, not a marketing homepage.',
-      'Explain what the stack does before users authenticate into the control plane.',
-      'Expose a concrete bootstrap path so teams can clone and run the platform before deeper implementation work.',
-    ],
-    evidenceTitle: 'Platform signal',
-    evidence: [
-      'Self-hosted stack with a React control plane and Go service mesh.',
-      'Operator workflows stay behind authenticated access boundaries.',
-      'Default local endpoints: UI 5050, gateway 8080, service health via /healthz.',
-    ],
-    searchTerms: ['intro', 'platform', 'download', 'bootstrap', 'landing'],
-  },
-  {
-    id: 'how-it-works',
-    label: 'How It Works',
-    icon: 'workflow',
-    title: 'Source change enters one controlled flow from repository to runtime evidence.',
-    summary: 'The platform aligns repository events, review policy, CI execution, deployment lanes, and signed operational traces so release decisions are made inside one operational model.',
-    bullets: [
-      'Capture repository and review intent at the same boundary where policy is enforced.',
-      'Promote builds through explicit lanes instead of disconnected tool handoffs.',
-      'Preserve runtime context and identity evidence after delivery completes.',
-    ],
-    evidenceTitle: 'Execution path',
-    evidence: [
-      'Commit and branch context enter governed review.',
-      'CI and CD stages emit state, artifact, and environment signals.',
-      'Runtime services remain linked to operator identity and audit posture.',
-    ],
-    searchTerms: ['flow', 'process', 'path', 'architecture'],
-  },
-  {
-    id: 'ci-cd-automation',
-    label: 'CI/CD Automation',
-    icon: 'automation',
-    title: 'Continuous integration and delivery are first-class operating functions.',
-    summary: 'This interface describes a self-automated CI/CD engine, not a standalone SCM or marketing shell. Pipelines, promotions, and delivery gates are core platform behavior.',
-    bullets: [
-      'Coordinate CI execution, deployment control, and rollback posture from one interface.',
-      'Keep automation state visible to developers, platform engineers, and release leadership.',
-      'Treat governance and delivery policy as runtime controls instead of external process documents.',
-    ],
-    evidenceTitle: 'Automation posture',
-    evidence: [
-      'CI service, CD service, analytics service, and gateway ship with the local stack.',
-      'Docker Compose exposes a runnable environment for end-to-end automation validation.',
-      'The UI is already structured to separate public briefing from authenticated operations.',
-    ],
-    searchTerms: ['ci', 'cd', 'delivery', 'automation', 'runner'],
-  },
-  {
-    id: 'pipelines-workflows',
-    label: 'Pipelines & Workflows',
-    icon: 'pipelines',
-    title: 'Pipelines and workflows exist as governed lanes with operational accountability.',
-    summary: 'The platform describes delivery as a sequence of controlled lanes, stage state, promotion readiness, and rollback discipline rather than a simple build badge.',
-    bullets: [
-      'Surface run history, gate conditions, and promotion decisions in a way operators can defend.',
-      'Model workflows as release infrastructure, not generic automation cards.',
-      'Keep artifact traceability and environment state close to the workflow view.',
-    ],
-    evidenceTitle: 'Workflow outcomes',
-    evidence: [
-      'Build, test, promote, and deploy operate as explicit stages.',
-      'Release status remains understandable without leaving the platform context.',
-      'Rollback readiness is part of the workflow definition, not an afterthought.',
-    ],
-    searchTerms: ['pipeline', 'workflow', 'release', 'stages'],
-  },
-  {
-    id: 'device-node-integration',
-    label: 'Device & Node Integration',
-    icon: 'devices',
-    title: 'Execution nodes and runtime devices are modeled as managed delivery surfaces.',
-    summary: 'The landing page should communicate that orchestration can extend beyond source and builds to the nodes, services, and connected environments that execute workloads.',
-    bullets: [
-      'Tie process identity and runtime state back to deployment decisions.',
-      'Present nodes as operator-managed infrastructure rather than decorative infrastructure icons.',
-      'Support platform narratives where edge devices, services, or compute nodes participate in orchestration.',
-    ],
-    evidenceTitle: 'Node visibility',
-    evidence: [
-      'Container and process state already exist in the control-plane model.',
-      'Deployment lanes can be described in terms of where workloads actually execute.',
-      'Operational views remain useful to teams managing device-aware automation.',
-    ],
-    searchTerms: ['nodes', 'devices', 'agents', 'runtime'],
-  },
-  {
-    id: 'location-intelligence',
-    label: 'Location Intelligence',
-    icon: 'location',
-    title: 'Operational context can stay aware of where compute and delivery surfaces live.',
-    summary: 'Location awareness belongs here as an intelligence layer for deployments, field infrastructure, private sites, and regional execution boundaries.',
-    bullets: [
-      'Describe the platform as capable of routing work across environments with geographic context.',
-      'Keep this framed as operational intelligence, not consumer mapping.',
-      'Use the landing page to explain why delivery state and location context matter together.',
-    ],
-    evidenceTitle: 'Location-aware operations',
-    evidence: [
-      'Environment targeting can be explained as site-aware orchestration.',
-      'Private deployments often span multiple facilities or regions.',
-      'Runtime evidence stays meaningful when tied to where execution occurred.',
-    ],
-    searchTerms: ['location', 'sites', 'regions', 'intelligence'],
-  },
-  {
-    id: 'private-cloud-hpc',
-    label: 'Private Cloud & HPC',
-    icon: 'cloud',
-    title: 'Built for private cloud footprints, internal clusters, and high-compute environments.',
-    summary: 'The platform briefing should read naturally to teams running inside private infrastructure, controlled networks, and compute-heavy environments where operational maturity matters.',
-    bullets: [
-      'Explain that the stack is self-hosted and can be staged inside private deployment boundaries.',
-      'Frame HPC and cluster readiness as an orchestration capability, not a theme choice.',
-      'Keep the interface tone consistent with enterprise infrastructure operations.',
-    ],
-    evidenceTitle: 'Infrastructure fit',
-    evidence: [
-      'Local topology includes gateway, Git, review, CI, CD, analytics, data, and storage services.',
-      'Docker Compose provides a full-stack bootstrap for isolated environments.',
-      'The control plane is positioned as infrastructure software, not a SaaS brochure.',
-    ],
-    searchTerms: ['private cloud', 'hpc', 'cluster', 'infrastructure'],
-  },
-  {
-    id: 'security-model',
-    label: 'Security Model',
-    icon: 'security',
-    title: 'Security is expressed as signed identity, RBAC context, and runtime evidence.',
-    summary: 'The landing page needs to describe a serious security model: service identity, signed actions, directory integration, attestation posture, and auditable operator boundaries.',
-    bullets: [
-      'Expose security as a platform operating model rather than a compliance slogan.',
-      'Link repository, review, pipeline, and service actions to verifiable identity.',
-      'Make it clear that sensitive control stays inside authenticated infrastructure boundaries.',
-    ],
-    evidenceTitle: 'Trust controls',
-    evidence: [
-      'LDAP, signing, RBAC, and component identity are already part of the local runtime environment.',
-      'Go services expose health and metadata endpoints for operational verification.',
-      'The control plane narrative includes attestation and evidence as core concepts.',
-    ],
-    searchTerms: ['security', 'identity', 'rbac', 'attestation'],
-  },
-  {
-    id: 'developer-documentation',
-    label: 'Developer Documentation',
-    icon: 'docs',
-    title: 'Documentation and API surfaces are part of the platform entry point.',
-    summary: 'Developer docs, API reference, architecture notes, and local bootstrap guidance must appear as first-class navigation targets because they define how teams adopt and extend the stack.',
-    bullets: [
-      'Make documentation reachable from the header and represented directly inside the landing workflow.',
-      'Explain how to run the stack before implementation work begins.',
-      'Keep API and architecture access adjacent to the rest of the engineering surface.',
-    ],
-    evidenceTitle: 'Docs inventory',
-    evidence: [
-      'README, architecture docs, API documentation, and local development docs already exist in the repo.',
-      'The frontend build and Go build are both validated from the monorepo.',
-      'Bootstrap commands can be surfaced directly inside this landing page.',
-    ],
-    searchTerms: ['docs', 'api', 'reference', 'download', 'install'],
-  },
-  {
-    id: 'community-discord',
-    label: 'Community & Discord',
-    icon: 'community',
-    title: 'Community channels belong alongside docs because operators need both reference and discussion.',
-    summary: 'Developer community, Discord access, and contribution paths should be visible as platform resources, not hidden in a footer or secondary marketing band.',
-    bullets: [
-      'Position community surfaces as extensions of the engineering workflow.',
-      'Keep discoverability high for implementation questions, operations feedback, and contributor onboarding.',
-      'Tie discussion channels back to documentation and repository access.',
-    ],
-    evidenceTitle: 'Community posture',
-    evidence: [
-      'Documentation, API guidance, GitHub access, and changelog context are treated as top-nav items.',
-      'Discord and community space are included in the same structural frame as the platform sections.',
-      'The landing page establishes documentation readiness before sign-in.',
-    ],
-    searchTerms: ['community', 'discord', 'support', 'contributors'],
-  },
-  {
-    id: 'github-repository',
-    label: 'GitHub Repository',
-    icon: 'github',
-    title: 'The repository is the download path, implementation base, and audit trail for the platform.',
-    summary: 'The landing page should tell teams where to clone the code, how to boot the stack locally, and where to inspect delivery and architecture artifacts before extending the system.',
-    bullets: [
-      'Make the repository visible in the header and the sidebar narrative.',
-      'Expose a download and local bootstrap path before teams start implementation work.',
-      'Treat changelog and source access as engineering assets, not promotional afterthoughts.',
-    ],
-    evidenceTitle: 'Repository role',
-    evidence: [
-      'GitHub repository: github.com/AtonixCorp/gitorc.',
-      'Local stack entrypoint: docker-compose.yml plus make up and make down.',
-      'Monorepo contains Go services, React UI, infra assets, SDKs, and docs.',
-    ],
-    searchTerms: ['github', 'repository', 'clone', 'source'],
-  },
-];
+type LandingPageSection = {
+  title: string;
+  description?: string;
+  bullets?: string[];
+  links?: LandingPageLink[];
+};
 
-const landingHeaderLinks: LandingHeaderLink[] = [
-  { label: 'Docs', targetId: 'developer-documentation' },
-  { label: 'API Reference', targetId: 'api-reference' },
-  { label: 'Toolbox', targetId: 'developer-community' },
-  { label: 'Changelog', targetId: 'changelog' },
-];
+type LandingPage = {
+  id: LandingPageId;
+  label: string;
+  title: string;
+  intro: string;
+  sections: LandingPageSection[];
+  searchTerms: string[];
+};
 
-const landingRuntimeSignals = [
-  { label: 'Control plane', value: 'Git, review, CI, CD, analytics' },
-  { label: 'Local bootstrap', value: 'make up' },
-  { label: 'Operator access', value: 'Authenticated boundary' },
-];
+type LandingSidebarItem = {
+  id: LandingPageId;
+  label: string;
+  icon: LandingIconName;
+};
 
-const landingWorkflowStages = [
-  'Source control and review entry are governed from the same operating boundary.',
-  'CI and CD lanes carry artifacts through explicit gates, not disconnected tools.',
-  'Runtime services emit identity-aware operational evidence after release execution.',
-];
+type LandingSidebarGroup = {
+  label: string;
+  items: LandingSidebarItem[];
+};
 
-const landingDocumentationCards = [
-  {
-    label: 'Architecture',
-    value: 'Platform structure, service shape, and deployment model.',
-  },
-  {
-    label: 'API reference',
-    value: 'Gateway contracts and API documentation for integration work.',
-  },
-  {
-    label: 'Local development',
-    value: 'Bootstrap, build, and endpoint guidance for local operation.',
-  },
-];
+type LandingHeaderLink = {
+  label: string;
+  targetId?: LandingPageId;
+  href?: string;
+  external?: boolean;
+};
 
 const landingBootstrapCommands = [
   'git clone https://github.com/AtonixCorp/gitorc',
@@ -316,23 +109,377 @@ const landingBootstrapCommands = [
   'curl http://localhost:8080/healthz',
 ];
 
-const landingCommunityCards = [
+const landingPages: LandingPage[] = [
   {
+    id: 'landing-overview',
+    label: 'Developer platform overview',
+    title: 'Developer platform overview',
+    intro: 'Use the landing page to route into the platform, not to explain everything at once. Start the stack, understand the system shape, then move into the deeper repo, docs, workflow, and community pages.',
+    sections: [
+      {
+        title: 'Start here',
+        description: 'Get the stack running locally.',
+        links: [
+          { label: 'Clone the repository', targetId: 'clone-run-locally', detail: 'Repository checkout and first local bootstrap path.' },
+          { label: 'Bootstrap locally', targetId: 'bootstrap-locally', detail: 'Bring up the local stack and verify the main endpoints.' },
+          { label: 'Run your first workflow', targetId: 'first-pipeline-10-minutes', detail: 'Move from clone to a first governed pipeline path.' },
+        ],
+      },
+      {
+        title: 'Understand the platform',
+        links: [
+          { label: 'Platform structure', targetId: 'platform-overview', detail: 'How CI/CD, workflows, devices, and security fit together.' },
+          { label: 'CI/CD & workflows', targetId: 'workflow-system', detail: 'Pipelines, delivery states, and runtime strategies.' },
+        ],
+      },
+      {
+        title: 'Build from the repo',
+        links: [
+          { label: 'Open GitHub repository', href: 'https://github.com/AtonixCorp/gitorc', external: true, detail: 'The repository is the download path, implementation base, and audit trail.' },
+          { label: 'View monorepo layout', targetId: 'monorepo-layout', detail: 'Inspect services, UI, infra, docs, and SDK structure.' },
+          { label: 'View changelog', targetId: 'changelog-releases', detail: 'Track releases and rollout deltas.' },
+        ],
+      },
+      {
+        title: 'Developer documentation',
+        links: [
+          { label: 'Docs inventory', targetId: 'docs-inventory' },
+          { label: 'API reference', targetId: 'api-reference' },
+          { label: 'Architecture docs', targetId: 'architecture-docs' },
+          { label: 'Local development guide', targetId: 'local-development-guide' },
+        ],
+      },
+      {
+        title: 'Community & support',
+        links: [
+          { label: 'Join Discord', targetId: 'discord-channels' },
+          { label: 'Developer community', targetId: 'developer-community' },
+          { label: 'Contribution guide', targetId: 'contribution-guide' },
+        ],
+      },
+    ],
+    searchTerms: ['overview', 'landing', 'developer platform'],
+  },
+  {
+    id: 'getting-started-overview',
+    label: 'Getting started overview',
+    title: 'Getting started: from clone to first governed workflow',
+    intro: 'This is the fast path. Clone the repository, bootstrap the local stack, then run one workflow that proves repository state, pipeline state, and delivery state belong to one system.',
+    sections: [
+      { title: 'Fast path', bullets: ['Clone the repository.', 'Start the local stack.', 'Verify the gateway and UI.', 'Run the first workflow.'] },
+      { title: 'Next', links: [{ label: 'Clone & run locally', targetId: 'clone-run-locally' }, { label: 'First pipeline in 10 minutes', targetId: 'first-pipeline-10-minutes' }] },
+    ],
+    searchTerms: ['getting started', 'fast path'],
+  },
+  {
+    id: 'clone-run-locally',
+    label: 'Clone & run locally',
+    title: 'Clone the repository and run the platform locally',
+    intro: 'The repository is the fastest way into the platform. Clone it, inspect the monorepo, and bring up the local runtime before making implementation changes.',
+    sections: [
+      { title: 'Bootstrap commands', bullets: landingBootstrapCommands },
+      { title: 'Links', links: [{ label: 'Open GitHub repository', href: 'https://github.com/AtonixCorp/gitorc', external: true }, { label: 'Monorepo layout', targetId: 'monorepo-layout' }] },
+    ],
+    searchTerms: ['clone', 'run locally', 'bootstrap'],
+  },
+  {
+    id: 'first-pipeline-10-minutes',
+    label: 'First pipeline in 10 minutes',
+    title: 'Run a first pipeline in 10 minutes',
+    intro: 'The first workflow should show a governed path from repository input to pipeline execution and delivery evidence.',
+    sections: [
+      { title: 'Suggested flow', bullets: ['Verify the gateway and UI.', 'Open the control plane.', 'Run one pipeline path.', 'Inspect the resulting state and runtime evidence.'] },
+      { title: 'Next', links: [{ label: 'CI/CD engine', targetId: 'ci-cd-engine' }, { label: 'Workflow states & delivery', targetId: 'workflow-states-delivery' }] },
+    ],
+    searchTerms: ['first pipeline', 'first workflow'],
+  },
+  {
+    id: 'platform-overview',
+    label: 'Platform overview',
+    title: 'Platform structure across CI/CD, workflows, devices, and security',
+    intro: 'The platform structure should be understandable at a glance: repositories feed workflows, workflows drive CI/CD, delivery extends into devices and nodes, and security enforces the path.',
+    sections: [
+      { title: 'High-level map', bullets: ['CI/CD engine is the core operating runtime.', 'Pipelines and workflows translate repository state into delivery state.', 'Devices, nodes, and location-aware runtimes extend the orchestration surface.', 'Security binds identity, artifacts, and policy enforcement.'] },
+      { title: 'Next', links: [{ label: 'CI/CD engine', targetId: 'ci-cd-engine' }, { label: 'Pipelines & workflows', targetId: 'platform-pipelines-workflows' }, { label: 'Security model', targetId: 'security-model' }] },
+    ],
+    searchTerms: ['platform structure', 'overview'],
+  },
+  {
+    id: 'ci-cd-engine',
+    label: 'CI/CD engine',
+    title: 'CI/CD engine for private infrastructure and governed delivery',
+    intro: 'The CI/CD engine is the core runtime connecting repositories, workflows, and delivery into governed, auditable operations across private and high-compute environments.',
+    sections: [
+      { title: 'Role in the platform', bullets: ['CI/CD is an operating function, not a sidecar tool.', 'It is tied to repository state, signed artifacts, and runtime enforcement.'] },
+      { title: 'Workflows as pipelines', bullets: ['Workflows operate as pipelines with scope control.', 'Delivery is controlled from repository to build to deploy to runtime.'] },
+      { title: 'Private infrastructure & HPC', bullets: ['Supports private cloud footprints and high-compute environments.', 'Integrates with devices, nodes, and location-aware runtimes.'] },
+      { title: 'Security model', bullets: ['Security operates as signed artifacts, RBAC context, and runtime policy.', 'The engine enforces who can change what and where it runs.'] },
+      { title: 'Where to go next', links: [{ label: 'Pipelines & workflows', targetId: 'platform-pipelines-workflows' }, { label: 'Device & node integration', targetId: 'device-node-integration' }, { label: 'Security model', targetId: 'security-model' }] },
+    ],
+    searchTerms: ['ci/cd engine', 'governed delivery'],
+  },
+  {
+    id: 'platform-pipelines-workflows',
+    label: 'Pipelines & workflows',
+    title: 'Pipelines and workflows as governed delivery lanes',
+    intro: 'Pipelines and workflows turn repository events into build, promotion, deployment, and runtime outcomes with explicit stage clarity and accountability.',
+    sections: [
+      { title: 'Why they matter', bullets: ['Pipelines encode stage state and promotion readiness.', 'Workflow boundaries make rollout and rollback explicit.', 'Artifact traceability stays close to delivery state.'] },
+      { title: 'Related pages', links: [{ label: 'How workflows enable one cohesive system', targetId: 'workflow-system' }, { label: 'Workflow states & delivery', targetId: 'workflow-states-delivery' }, { label: 'Runtime strategies', targetId: 'runtime-strategies' }] },
+    ],
+    searchTerms: ['pipelines', 'workflows'],
+  },
+  {
+    id: 'device-node-integration',
+    label: 'Device & node integration',
+    title: 'Device and node integration as part of the delivery surface',
+    intro: 'The orchestration model extends beyond source control and build runners. Devices, services, and compute nodes are managed execution surfaces tied back to delivery and runtime identity.',
+    sections: [
+      { title: 'Execution surface', bullets: ['Tie runtime node state back to deployment decisions.', 'Expose process identity and host placement as operational data.', 'Support device-aware and node-aware delivery paths.'] },
+      { title: 'Where to go next', links: [{ label: 'Location intelligence', targetId: 'location-intelligence' }, { label: 'Private cloud & HPC', targetId: 'private-cloud-hpc' }, { label: 'Runtime strategies', targetId: 'runtime-strategies' }] },
+    ],
+    searchTerms: ['devices', 'nodes'],
+  },
+  {
+    id: 'location-intelligence',
+    label: 'Location intelligence',
+    title: 'Location intelligence for site-aware orchestration',
+    intro: 'Location awareness belongs in the platform as operational intelligence for where workloads execute and how environments are segmented.',
+    sections: [{ title: 'Operational role', bullets: ['Use site and region context as part of delivery targeting.', 'Keep location awareness tied to infrastructure and runtime evidence.', 'Support deployments spanning multiple facilities or regions.'] }],
+    searchTerms: ['location intelligence', 'regions', 'sites'],
+  },
+  {
+    id: 'private-cloud-hpc',
+    label: 'Private cloud & HPC',
+    title: 'Private cloud and HPC readiness for high-control environments',
+    intro: 'The platform fits private cloud, internal cluster, and high-compute environments where governance and runtime visibility matter from the first deployment.',
+    sections: [{ title: 'Infrastructure fit', bullets: ['Supports isolated deployment boundaries and self-hosted control surfaces.', 'Maps naturally to high-compute and cluster-backed delivery environments.', 'Treats the UI and services as infrastructure software rather than brochureware.'] }],
+    searchTerms: ['private cloud', 'hpc'],
+  },
+  {
+    id: 'security-model',
+    label: 'Security model',
+    title: 'Security model across signed artifacts, identity, and runtime policy',
+    intro: 'Security is operated as a platform concern. Repository, workflow, deployment, and runtime subjects remain tied to signed identity, RBAC context, and enforcement boundaries.',
+    sections: [
+      { title: 'Trust model', bullets: ['Signed artifacts and attestation bind delivery outputs to identity.', 'RBAC and directory context define who can act and where.', 'Runtime policy keeps enforcement attached to execution.'] },
+      { title: 'Related pages', links: [{ label: 'Signed artifacts & policy', targetId: 'signed-artifacts-policy' }, { label: 'CI/CD engine', targetId: 'ci-cd-engine' }] },
+    ],
+    searchTerms: ['security model', 'rbac', 'policy'],
+  },
+  {
+    id: 'workflow-system',
+    label: 'How workflows enable one cohesive system',
+    title: 'How workflows enable one cohesive system',
+    intro: 'Workflows are what make the platform feel unified instead of fragmented. They provide the shared operating model across repository states, pipeline stages, deployment actions, and runtime verification.',
+    sections: [{ title: 'Cohesion through workflow', bullets: ['Repository changes move through one explicit control path.', 'Pipeline state, deployment state, and runtime state remain connected.', 'Operators can explain why a delivery action was allowed and what followed from it.'] }],
+    searchTerms: ['workflow system', 'cohesive system'],
+  },
+  {
+    id: 'workflow-states-delivery',
+    label: 'Workflow states & delivery',
+    title: 'Workflow states and delivery progression',
+    intro: 'Delivery state should be legible. Workflows make build, test, promotion, deploy, rollback, and runtime observation visible as explicit transitions.',
+    sections: [{ title: 'State model', bullets: ['Build, test, promote, and deploy are explicit transitions.', 'Rollback and retry belong to the same workflow context.', 'Operators should see gate decisions and outcomes in one place.'] }],
+    searchTerms: ['workflow states', 'delivery states'],
+  },
+  {
+    id: 'runtime-strategies',
+    label: 'Runtime strategies',
+    title: 'Runtime strategies for governed execution',
+    intro: 'Runtime strategy explains how built artifacts become running systems across nodes, environments, and controlled infrastructure boundaries.',
+    sections: [{ title: 'Runtime posture', bullets: ['Support staged and environment-aware execution strategies.', 'Track host, node, and process context as part of rollout understanding.', 'Keep runtime observability close to the pipeline and deployment path.'] }],
+    searchTerms: ['runtime strategies'],
+  },
+  {
+    id: 'signed-artifacts-policy',
+    label: 'Signed artifacts & policy',
+    title: 'Signed artifacts and policy enforcement',
+    intro: 'Artifacts should carry trust context with them. Signed outputs, attestation, and policy checks create a delivery path that is explainable and enforceable.',
+    sections: [{ title: 'Policy path', bullets: ['Treat artifact signing as a first-class delivery requirement.', 'Attach policy checks to promotion and deployment stages.', 'Use identity and evidence to support runtime enforcement decisions.'] }],
+    searchTerms: ['signed artifacts', 'policy', 'attestation'],
+  },
+  {
+    id: 'repository-role',
+    label: 'Repository role',
+    title: 'The repository as download path, implementation base, and audit trail',
+    intro: 'The repository is the delivery base, cloning path, implementation surface, and audit trail for how the platform evolves.',
+    sections: [
+      { title: 'Repository function', bullets: ['Source control and implementation start here.', 'Bootstrap, docs, APIs, and service boundaries are discoverable from the monorepo.', 'Changelog and release movement remain tied to repository history.'] },
+      { title: 'Links', links: [{ label: 'Open GitHub repository', href: 'https://github.com/AtonixCorp/gitorc', external: true }, { label: 'Monorepo layout', targetId: 'monorepo-layout' }, { label: 'Changelog & releases', targetId: 'changelog-releases' }] },
+    ],
+    searchTerms: ['repository role', 'github repository'],
+  },
+  {
+    id: 'monorepo-layout',
+    label: 'Monorepo layout',
+    title: 'Monorepo layout across services, UI, infra, docs, and SDKs',
+    intro: 'The monorepo layout gives developers the structural map of the platform.',
+    sections: [{ title: 'Repository map', bullets: ['gitorcapi contains Go services and shared runtime code.', 'gitorcweb contains the React control plane UI.', 'infra holds local runtime assets and deployment seed material.', 'docs and README surfaces provide architecture, API, and local development guidance.'] }],
+    searchTerms: ['monorepo layout', 'repo structure'],
+  },
+  {
+    id: 'bootstrap-locally',
+    label: 'Bootstrap locally',
+    title: 'Bootstrap the platform locally',
+    intro: 'Local bootstrap should be direct and repeatable. Start the local stack, then verify the gateway and UI before moving into feature work.',
+    sections: [
+      { title: 'Bootstrap path', bullets: landingBootstrapCommands },
+      { title: 'Expected endpoints', bullets: ['UI: http://localhost:5050', 'Gateway HTTP: http://localhost:8080', 'Gateway health: http://localhost:8080/healthz'] },
+    ],
+    searchTerms: ['bootstrap locally', 'make up', 'local stack'],
+  },
+  {
+    id: 'changelog-releases',
+    label: 'Changelog & releases',
+    title: 'Changelog and releases as operator-facing change history',
+    intro: 'Release movement should be visible as an engineering artifact before rollout, support, or debugging decisions.',
+    sections: [{ title: 'Why it matters', bullets: ['Track release deltas before rollout decisions.', 'Keep documentation, code, and runtime movement in one historical thread.', 'Treat releases as part of operational readiness.'] }],
+    searchTerms: ['changelog', 'releases'],
+  },
+  {
+    id: 'docs-inventory',
+    label: 'Docs inventory',
+    title: 'Developer documentation inventory',
+    intro: 'Documentation should give developers a fast structural map of the platform.',
+    sections: [
+      { title: 'Documentation surfaces', links: [{ label: 'API reference', targetId: 'api-reference' }, { label: 'Architecture docs', targetId: 'architecture-docs' }, { label: 'Local development guide', targetId: 'local-development-guide' }] },
+      { title: 'Inventory', bullets: ['README and architecture docs describe the platform structure and operating model.', 'API documentation and contracts explain integration surfaces.', 'Local development docs define bootstrap, build, and endpoint behavior.'] },
+    ],
+    searchTerms: ['docs inventory', 'documentation'],
+  },
+  {
+    id: 'api-reference',
+    label: 'API reference',
+    title: 'API reference and contract surfaces',
+    intro: 'The API surface defines how the platform is integrated, automated, and extended.',
+    sections: [{ title: 'API focus', bullets: ['Gateway contracts define the main control plane surface.', 'Service APIs expose health, metadata, and runtime integration points.', 'Contracts should be read together with architecture and local development docs.'] }],
+    searchTerms: ['api reference', 'contracts'],
+  },
+  {
+    id: 'architecture-docs',
+    label: 'Architecture docs',
+    title: 'Architecture docs for platform structure and service relationships',
+    intro: 'Architecture documentation explains how services, UI, data surfaces, and runtime boundaries fit together.',
+    sections: [{ title: 'Architecture focus', bullets: ['Explain the service topology and control plane boundaries.', 'Describe how repository, workflow, deployment, and runtime state interact.', 'Connect platform structure to the operating model.'] }],
+    searchTerms: ['architecture docs', 'platform architecture'],
+  },
+  {
+    id: 'local-development-guide',
+    label: 'Local development guide',
+    title: 'Local development guide for build, run, and verification',
+    intro: 'Local development docs should give a reliable path through prerequisites, builds, startup, and health verification.',
+    sections: [
+      { title: 'Guide contents', bullets: ['Prerequisites for Go, Node, Docker, and Make.', 'Backend and frontend build commands.', 'Docker Compose startup and health verification steps.'] },
+      { title: 'Related pages', links: [{ label: 'Bootstrap locally', targetId: 'bootstrap-locally' }, { label: 'Monorepo layout', targetId: 'monorepo-layout' }] },
+    ],
+    searchTerms: ['local development', 'local dev guide'],
+  },
+  {
+    id: 'developer-community',
     label: 'Developer community',
-    value: 'Operational questions, implementation feedback, and contributor onboarding.',
+    title: 'Developer community for discussion, implementation questions, and support',
+    intro: 'Community surfaces should be treated as part of the engineering system around the platform.',
+    sections: [
+      { title: 'Community role', bullets: ['Create a place for engineering discussion around workflows and runtime operations.', 'Support contributors and adopters with a visible path to ask questions.', 'Keep community connected to docs, repository history, and contribution flow.'] },
+      { title: 'Related pages', links: [{ label: 'Discord & channels', targetId: 'discord-channels' }, { label: 'Contribution guide', targetId: 'contribution-guide' }, { label: 'Issue templates & RFCs', targetId: 'issue-templates-rfcs' }] },
+    ],
+    searchTerms: ['developer community', 'community support'],
   },
   {
-    label: 'Discord',
-    value: 'Live engineering discussion channel for platform adoption and runtime issues.',
+    id: 'discord-channels',
+    label: 'Discord & channels',
+    title: 'Discord and discussion channels',
+    intro: 'Discord should be a first-class discussion surface for developer questions, platform operations talk, and contributor coordination.',
+    sections: [{ title: 'Channel purpose', bullets: ['Direct implementation questions to live discussion where helpful.', 'Use channels for operations feedback and contributor coordination.', 'Keep discussion aligned with documentation and repository workflows.'] }],
+    searchTerms: ['discord', 'channels'],
   },
   {
-    label: 'Changelog',
-    value: 'Release notes, platform deltas, and rollout awareness for operators.',
+    id: 'contribution-guide',
+    label: 'Contribution guide',
+    title: 'Contribution guide for structured platform changes',
+    intro: 'Contribution guidance should help developers change the platform without losing structure, documentation discipline, or release rigor.',
+    sections: [{ title: 'Contribution path', bullets: ['Start with the repository and documentation surfaces.', 'Use clear issue, RFC, and review patterns for meaningful platform changes.', 'Treat contribution flow as part of long-term lifecycle support.'] }],
+    searchTerms: ['contribution guide', 'contributing'],
+  },
+  {
+    id: 'issue-templates-rfcs',
+    label: 'Issue templates & RFCs',
+    title: 'Issue templates and RFCs for structured platform evolution',
+    intro: 'Issue templates and RFCs provide a structured path for bug reports, feature discussion, and design change proposals.',
+    sections: [{ title: 'Structured change flow', bullets: ['Use issues for concrete bugs and gaps.', 'Use RFCs for architectural or workflow-level changes.', 'Keep discussions linked back to repository history and documentation.'] }],
+    searchTerms: ['issue templates', 'rfcs', 'rfc'],
   },
 ];
 
-function isLandingSectionId(value: string): value is LandingSectionId {
-  return landingSidebarSections.some((section) => section.id === value);
+const landingSidebarGroups: LandingSidebarGroup[] = [
+  {
+    label: 'Getting started',
+    items: [
+      { id: 'getting-started-overview', label: 'Overview', icon: 'overview' },
+      { id: 'clone-run-locally', label: 'Clone & run locally', icon: 'github' },
+      { id: 'first-pipeline-10-minutes', label: 'First pipeline in 10 minutes', icon: 'automation' },
+    ],
+  },
+  {
+    label: 'Platform structure',
+    items: [
+      { id: 'platform-overview', label: 'Overview', icon: 'overview' },
+      { id: 'ci-cd-engine', label: 'CI/CD engine', icon: 'automation' },
+      { id: 'platform-pipelines-workflows', label: 'Pipelines & workflows', icon: 'pipelines' },
+      { id: 'device-node-integration', label: 'Device & node integration', icon: 'devices' },
+      { id: 'location-intelligence', label: 'Location intelligence', icon: 'location' },
+      { id: 'private-cloud-hpc', label: 'Private cloud & HPC', icon: 'cloud' },
+      { id: 'security-model', label: 'Security model', icon: 'security' },
+    ],
+  },
+  {
+    label: 'CI/CD & workflows',
+    items: [
+      { id: 'workflow-system', label: 'How workflows enable one cohesive system', icon: 'workflow' },
+      { id: 'workflow-states-delivery', label: 'Workflow states & delivery', icon: 'pipelines' },
+      { id: 'runtime-strategies', label: 'Runtime strategies', icon: 'devices' },
+      { id: 'signed-artifacts-policy', label: 'Signed artifacts & policy', icon: 'security' },
+    ],
+  },
+  {
+    label: 'Repository & bootstrap',
+    items: [
+      { id: 'repository-role', label: 'Repository role', icon: 'github' },
+      { id: 'monorepo-layout', label: 'Monorepo layout', icon: 'overview' },
+      { id: 'bootstrap-locally', label: 'Bootstrap locally', icon: 'automation' },
+      { id: 'changelog-releases', label: 'Changelog & releases', icon: 'overview' },
+    ],
+  },
+  {
+    label: 'Developer docs & APIs',
+    items: [
+      { id: 'docs-inventory', label: 'Docs inventory', icon: 'docs' },
+      { id: 'api-reference', label: 'API reference', icon: 'docs' },
+      { id: 'architecture-docs', label: 'Architecture docs', icon: 'docs' },
+      { id: 'local-development-guide', label: 'Local development guide', icon: 'docs' },
+    ],
+  },
+  {
+    label: 'Community & support',
+    items: [
+      { id: 'developer-community', label: 'Developer community', icon: 'community' },
+      { id: 'discord-channels', label: 'Discord & channels', icon: 'community' },
+      { id: 'contribution-guide', label: 'Contribution guide', icon: 'community' },
+      { id: 'issue-templates-rfcs', label: 'Issue templates & RFCs', icon: 'community' },
+    ],
+  },
+];
+
+const landingHeaderLinks: LandingHeaderLink[] = [
+  { label: 'Docs', targetId: 'docs-inventory' },
+  { label: 'API Reference', targetId: 'api-reference' },
+  { label: 'Toolbox', targetId: 'developer-community' },
+  { label: 'Changelog', targetId: 'changelog-releases' },
+];
+
+function isLandingPageId(value: string): value is LandingPageId {
+  return landingPages.some((page) => page.id === value);
 }
 
 function LandingSystemMark() {
@@ -547,7 +694,7 @@ export function App() {
   const [activeGatewayBase, setActiveGatewayBase] = useState(getGatewayBase());
   const [landingTheme, setLandingTheme] = useState<'graphite' | 'paper'>('graphite');
   const [landingQuery, setLandingQuery] = useState('');
-  const [activeLandingSection, setActiveLandingSection] = useState<LandingSectionId>('overview');
+  const [activeLandingPage, setActiveLandingPage] = useState<LandingPageId>('landing-overview');
 
   useEffect(() => {
     const onHashChange = () => {
@@ -613,39 +760,6 @@ export function App() {
     const timeout = window.setTimeout(() => setToast(null), 3200);
     return () => window.clearTimeout(timeout);
   }, [toast]);
-
-  useEffect(() => {
-    if (!publicLandingMode || publicPage !== 'home') {
-      return;
-    }
-
-    const sections = landingSidebarSections
-      .map((section) => document.getElementById(section.id))
-      .filter((section): section is HTMLElement => Boolean(section));
-
-    if (!sections.length) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
-
-        if (visibleEntry?.target.id && isLandingSectionId(visibleEntry.target.id)) {
-          setActiveLandingSection(visibleEntry.target.id);
-        }
-      },
-      {
-        rootMargin: '-18% 0px -58% 0px',
-        threshold: [0.15, 0.35, 0.6],
-      },
-    );
-
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, [publicLandingMode, publicPage]);
 
   const selectedRepository = useMemo(() => {
     if (!overview) {
@@ -772,17 +886,8 @@ export function App() {
     setPublicPage(page);
   };
 
-  const scrollToLandingTarget = (targetId: string) => {
-    const target = document.getElementById(targetId);
-    if (!target) {
-      return;
-    }
-
-    if (isLandingSectionId(targetId)) {
-      setActiveLandingSection(targetId);
-    }
-
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const selectLandingPage = (pageId: LandingPageId) => {
+    setActiveLandingPage(pageId);
   };
 
   const handleLandingSearch = (event: React.FormEvent<HTMLFormElement>) => {
@@ -790,12 +895,14 @@ export function App() {
 
     const query = landingQuery.trim().toLowerCase();
     if (!query) {
-      scrollToLandingTarget('overview');
+      selectLandingPage('landing-overview');
       return;
     }
 
-    const match = landingSidebarSections.find((section) => {
-      const haystack = [section.label, section.title, ...section.searchTerms].join(' ').toLowerCase();
+    const match = landingPages.find((page) => {
+      const sectionTitles = page.sections.map((section) => section.title).join(' ');
+      const sectionLinks = page.sections.flatMap((section) => (section.links || []).map((link) => link.label)).join(' ');
+      const haystack = [page.label, page.title, page.intro, sectionTitles, sectionLinks, ...page.searchTerms].join(' ').toLowerCase();
       return haystack.includes(query);
     });
 
@@ -804,8 +911,40 @@ export function App() {
       return;
     }
 
-    scrollToLandingTarget(match.id);
-    setToast(`Jumped to ${match.label}.`);
+    selectLandingPage(match.id);
+    setToast(`Opened ${match.label}.`);
+  };
+
+  const activeLandingPageDefinition = useMemo(
+    () => landingPages.find((page) => page.id === activeLandingPage) ?? landingPages[0],
+    [activeLandingPage],
+  );
+
+  const activeLandingGroup = useMemo(
+    () => landingSidebarGroups.find((group) => group.items.some((item) => item.id === activeLandingPageDefinition.id)) ?? null,
+    [activeLandingPageDefinition.id],
+  );
+
+  const renderLandingLink = (link: LandingPageLink, className: string, buttonClassName = className) => {
+    if (link.external && link.href) {
+      return (
+        <a key={link.label} className={className} href={link.href} rel="noreferrer" target="_blank">
+          <strong>{link.label}</strong>
+          {link.detail ? <span>{link.detail}</span> : null}
+        </a>
+      );
+    }
+
+    if (link.targetId) {
+      return (
+        <button key={link.label} className={buttonClassName} onClick={() => selectLandingPage(link.targetId!)} type="button">
+          <strong>{link.label}</strong>
+          {link.detail ? <span>{link.detail}</span> : null}
+        </button>
+      );
+    }
+
+    return null;
   };
 
   const copyText = async (value: string, label: string) => {
@@ -1532,12 +1671,10 @@ export function App() {
   };
 
   const renderLandingPage = () => {
-    const overviewSection = landingSidebarSections[0];
-
     return (
       <div className={`landing-shell landing-theme-${landingTheme}`}>
         <header className="landing-header">
-          <button className="landing-brand" onClick={() => scrollToLandingTarget('overview')} type="button">
+          <button className="landing-brand" onClick={() => selectLandingPage('landing-overview')} type="button">
             <span className="landing-brand-mark"><LandingSystemMark /></span>
             <span className="landing-brand-copy">
               <strong>GITORC</strong>
@@ -1559,7 +1696,7 @@ export function App() {
                 <button
                   key={link.label}
                   className="landing-nav-link"
-                  onClick={() => link.targetId && scrollToLandingTarget(link.targetId)}
+                  onClick={() => link.targetId && selectLandingPage(link.targetId)}
                   type="button"
                 >
                   {link.label}
@@ -1598,189 +1735,74 @@ export function App() {
 
         <div className="landing-workbench">
           <aside className="landing-sidebar" aria-label="Platform structure">
-            <div className="landing-sidebar-group">
-              <p className="landing-sidebar-kicker">Platform structure</p>
-              {landingSidebarSections.map((section) => (
-                <button
-                  key={section.id}
-                  aria-pressed={activeLandingSection === section.id}
-                  className={`landing-sidebar-link ${activeLandingSection === section.id ? 'landing-sidebar-link-active' : ''}`}
-                  onClick={() => scrollToLandingTarget(section.id)}
-                  type="button"
-                >
-                  <span className="landing-sidebar-icon"><LandingIcon icon={section.icon} /></span>
-                  <span className="landing-sidebar-copy">
-                    <strong>{section.label}</strong>
-                    <span>{section.title}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <article className="landing-sidebar-callout">
-              <p className="landing-sidebar-kicker">Bootstrap locally</p>
-              <strong>Clone and run before implementation</strong>
-              <code>make up</code>
-              <span>UI 5050 · Gateway 8080 · Health checks on /healthz</span>
-            </article>
+            {landingSidebarGroups.map((group) => (
+              <div key={group.label} className="landing-sidebar-group">
+                <p className="landing-sidebar-kicker">{group.label}</p>
+                {group.items.map((item) => (
+                  <button
+                    key={item.id}
+                    aria-pressed={activeLandingPageDefinition.id === item.id}
+                    className={`landing-sidebar-link ${activeLandingPageDefinition.id === item.id ? 'landing-sidebar-link-active' : ''}`}
+                    onClick={() => selectLandingPage(item.id)}
+                    type="button"
+                  >
+                    <span className="landing-sidebar-icon"><LandingIcon icon={item.icon} /></span>
+                    <span className="landing-sidebar-copy">
+                      <strong>{item.label}</strong>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ))}
           </aside>
 
           <div className="landing-main">
-            <section id="overview" className="landing-section landing-section-overview">
-              <div className="landing-section-intro">
+            <section className="landing-page">
+              <div className="landing-page-hero">
                 <div>
-                  <p className="eyebrow">engineering platform interface</p>
-                  <h1>{overviewSection.title}</h1>
-                  <p className="lede">{overviewSection.summary}</p>
+                  <p className="eyebrow">{activeLandingGroup?.label || 'Developer platform overview'}</p>
+                  <h1>{activeLandingPageDefinition.title}</h1>
+                  <p className="lede">{activeLandingPageDefinition.intro}</p>
                 </div>
-                <span className="landing-section-chip">Private infrastructure ready</span>
+                <div className="landing-page-actions">
+                  <button className="button button-primary" onClick={() => navigatePublic('signin')} type="button">Open control plane</button>
+                  <a className="button button-ghost" href="https://github.com/AtonixCorp/gitorc" rel="noreferrer" target="_blank">Open repository</a>
+                  <button className="button button-ghost" onClick={() => selectLandingPage('bootstrap-locally')} type="button">Bootstrap locally</button>
+                </div>
               </div>
 
-              <div className="landing-overview-grid">
-                <article className="landing-panel">
-                  <p className="section-kicker">Platform identity</p>
-                  <h2>The front door of a serious delivery system</h2>
-                  <p>
-                    gitorc should read as a self-automated CI/CD platform from the first second: developer-first structure,
-                    operational maturity, enterprise trust, and a clear path from repository events to governed delivery.
-                  </p>
-                  <div className="hero-actions">
-                    <button className="button button-primary" onClick={() => navigatePublic('signin')} type="button">Open control plane</button>
-                    <a className="button button-ghost" href="https://github.com/AtonixCorp/gitorc" rel="noreferrer" target="_blank">Download stack</a>
-                    <button className="button button-ghost" onClick={() => scrollToLandingTarget('developer-documentation')} type="button">Read docs</button>
-                  </div>
-                  <ul className="landing-bullet-list">
-                    {overviewSection.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
-                    ))}
-                  </ul>
-                </article>
-
-                <article className="landing-panel landing-panel-strong">
-                  <p className="section-kicker">Operational frame</p>
-                  <div className="landing-signal-list">
-                    {landingRuntimeSignals.map((signal) => (
-                      <div key={signal.label} className="landing-signal-row">
-                        <span>{signal.label}</span>
-                        <strong>{signal.value}</strong>
+              <div className="landing-page-sections">
+                {activeLandingPageDefinition.sections.map((section) => (
+                  <article key={section.title} className="landing-page-section">
+                    <div className="landing-section-head">
+                      <div className="landing-section-title-row">
+                        <span className="landing-section-icon"><LandingIcon icon="overview" /></span>
+                        <div>
+                          <p className="section-kicker">{activeLandingPageDefinition.label}</p>
+                          <h2>{section.title}</h2>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                  <div className="landing-evidence-card">
-                    <p className="section-kicker">Platform signal</p>
-                    <ul className="landing-bullet-list landing-bullet-list-compact">
-                      {overviewSection.evidence.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              </div>
-            </section>
+                    </div>
 
-            <section id="how-it-works" className="landing-section">
-              <div className="landing-section-head">
-                <div>
-                  <p className="section-kicker">How it works</p>
-                  <h2>One operational path from source to runtime evidence</h2>
-                </div>
-              </div>
-              <div className="landing-flow-grid">
-                {landingWorkflowStages.map((stage, index) => (
-                  <article key={stage} className="landing-flow-card">
-                    <span className="step-index">{index + 1}</span>
-                    <p>{stage}</p>
+                    {section.description ? <p className="landing-page-copy">{section.description}</p> : null}
+
+                    {section.bullets?.length ? (
+                      <ul className="landing-bullet-list">
+                        {section.bullets.map((bullet) => (
+                          <li key={bullet}>{bullet}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+
+                    {section.links?.length ? (
+                      <div className="landing-link-grid">
+                        {section.links.map((link) => renderLandingLink(link, 'landing-link-card'))}
+                      </div>
+                    ) : null}
                   </article>
                 ))}
               </div>
             </section>
-
-            {landingSidebarSections.slice(2).map((section) => (
-              <section key={section.id} id={section.id} className="landing-section">
-                <div className="landing-section-head">
-                  <div className="landing-section-title-row">
-                    <span className="landing-section-icon"><LandingIcon icon={section.icon} /></span>
-                    <div>
-                      <p className="section-kicker">{section.label}</p>
-                      <h2>{section.title}</h2>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="landing-section-layout">
-                  <article className="landing-panel">
-                    <p>{section.summary}</p>
-                    <ul className="landing-bullet-list">
-                      {section.bullets.map((bullet) => (
-                        <li key={bullet}>{bullet}</li>
-                      ))}
-                    </ul>
-                  </article>
-
-                  <article className="landing-evidence-card">
-                    <p className="section-kicker">{section.evidenceTitle}</p>
-                    <ul className="landing-bullet-list landing-bullet-list-compact">
-                      {section.evidence.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </article>
-                </div>
-
-                {section.id === 'developer-documentation' ? (
-                  <div className="landing-subgrid">
-                    <div id="api-reference" className="landing-card-grid">
-                      {landingDocumentationCards.map((card) => (
-                        <article key={card.label} className="landing-mini-card">
-                          <p className="section-kicker">Documentation</p>
-                          <strong>{card.label}</strong>
-                          <span>{card.value}</span>
-                        </article>
-                      ))}
-                    </div>
-                    <article className="landing-command-panel">
-                      <p className="section-kicker">Bootstrap before implementation</p>
-                      <h3>Download the stack and stand it up locally</h3>
-                      <div className="command-list">
-                        {landingBootstrapCommands.map((command) => (
-                          <code key={command}>{command}</code>
-                        ))}
-                      </div>
-                    </article>
-                  </div>
-                ) : null}
-
-                {section.id === 'community-discord' ? (
-                  <div id="developer-community" className="landing-card-grid">
-                    {landingCommunityCards.map((card) => (
-                      <article key={card.label} className="landing-mini-card" id={card.label === 'Discord' ? 'discord-community' : undefined}>
-                        <p className="section-kicker">Community</p>
-                        <strong>{card.label}</strong>
-                        <span>{card.value}</span>
-                      </article>
-                    ))}
-                  </div>
-                ) : null}
-
-                {section.id === 'github-repository' ? (
-                  <div className="landing-subgrid">
-                    <article className="landing-command-panel">
-                      <p className="section-kicker">Repository access</p>
-                      <h3>Clone the platform and inspect the monorepo locally</h3>
-                      <div className="landing-link-row">
-                        <a className="button button-primary" href="https://github.com/AtonixCorp/gitorc" rel="noreferrer" target="_blank">Open GitHub repository</a>
-                        <button className="button button-ghost" onClick={() => scrollToLandingTarget('changelog')} type="button">View changelog</button>
-                      </div>
-                    </article>
-                    <article id="changelog" className="landing-mini-card landing-mini-card-strong">
-                      <p className="section-kicker">Changelog</p>
-                      <strong>Track platform movement as an operator artifact</strong>
-                      <span>Use changelog visibility to follow release deltas, runtime topology changes, and documentation updates before rollout decisions.</span>
-                    </article>
-                  </div>
-                ) : null}
-              </section>
-            ))}
           </div>
         </div>
       </div>
