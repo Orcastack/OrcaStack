@@ -2,7 +2,7 @@ API_DIR := gitorcapi
 WEB_DIR := gitorcweb
 TF_ENV_DIR := infra/terraform/environments/private-cloud
 
-.PHONY: api-build api-run gateway git review ci cd analytics web-install web-build up down infra-fmt infra-validate bootstrap-local deploy-private-cloud
+.PHONY: api-build api-run gateway git review ci cd analytics web-install web-build up down infra-fmt infra-validate bootstrap-local deploy-private-cloud cloud-bootstrap proxmox-bootstrap openstack-bootstrap network-fabric kubernetes-bootstrap rancher-register gpu-bootstrap observability-bootstrap
 
 api-build:
 	cd $(API_DIR) && go build ./...
@@ -51,3 +51,33 @@ bootstrap-local:
 deploy-private-cloud:
 	kubectl apply -f infra/kubernetes/base/namespace.yaml
 	kubectl apply -k infra/kubernetes/platform
+
+cloud-bootstrap: infra-validate
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
+	kubectl apply -f infra/kubernetes/platform/observability-stack.yaml
+
+proxmox-bootstrap:
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+
+openstack-bootstrap:
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+
+network-fabric:
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+
+kubernetes-bootstrap:
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+
+rancher-register:
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+
+gpu-bootstrap:
+	ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
+
+observability-bootstrap:
+	kubectl apply -f infra/kubernetes/platform/observability-stack.yaml

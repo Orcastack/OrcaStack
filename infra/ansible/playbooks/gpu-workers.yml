@@ -1,0 +1,15 @@
+- name: Enable GPU worker support
+  hosts: kubernetes_gpu_workers
+  become: true
+  tasks:
+    - name: Install GPU runtime dependencies
+      ansible.builtin.package:
+        name:
+          - nvidia-driver
+          - nvidia-container-toolkit
+        state: present
+
+    - name: Ensure GPU runtime is configured
+      ansible.builtin.service:
+        name: containerd
+        state: restarted

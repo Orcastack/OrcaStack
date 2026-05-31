@@ -1,0 +1,18 @@
+- name: Prepare OpenStack control plane dependencies
+  hosts: openstack_controllers:openstack_computes
+  become: true
+  tasks:
+    - name: Install OpenStack and virtualization dependencies
+      ansible.builtin.package:
+        name:
+          - nova-compute
+          - neutron-openvswitch-agent
+          - cinder-volume
+          - ceph-common
+        state: present
+
+    - name: Ensure libvirt is enabled
+      ansible.builtin.service:
+        name: libvirtd
+        enabled: true
+        state: started

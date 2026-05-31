@@ -1,0 +1,12 @@
+- name: Prepare observability dependencies
+  hosts: kubernetes_control_plane
+  become: true
+  tasks:
+    - name: Ensure Helm is available for observability stack deployment
+      ansible.builtin.package:
+        name: helm
+        state: present
+
+    - name: Confirm kubectl is available for Prometheus and Grafana rollout
+      ansible.builtin.command: kubectl version --client
+      changed_when: false

@@ -1,5 +1,6 @@
 stages:
   - validate
+  - automate
   - package
   - govern
 
@@ -51,6 +52,44 @@ infra-validate:
     - terraform fmt -check -recursive infra/terraform
   only:
     - merge_requests
+    - main
+
+cloud-automation-blueprint:
+  stage: automate
+  image: cytopia/ansible:latest-tools
+  script:
+    - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+    - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+    - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+    - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+    - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+    - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
+  only:
+    - merge_requests
+    - main
+
+cloud-manifests:
+  stage: automate
+  image: bitnami/kubectl:1.31
+  script:
+    - kubectl kustomize infra/kubernetes/platform >/tmp/gitorc-platform.yaml
+    - test -s /tmp/gitorc-platform.yaml
+  only:
+    - merge_requests
+    - main
+
+deploy-cloud-foundation:
+  stage: govern
+  image: cytopia/ansible:latest-tools
+  script:
+    - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+    - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+    - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+    - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+    - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+    - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
+  when: manual
+  only:
     - main
 
 artifact-sign:

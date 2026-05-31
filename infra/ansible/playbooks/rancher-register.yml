@@ -1,0 +1,20 @@
+- name: Register Kubernetes clusters in Rancher
+  hosts: rancher_management
+  become: false
+  vars:
+    rancher_cluster_name: gitorc-private-cloud
+  tasks:
+    - name: Call Rancher registration API
+      ansible.builtin.uri:
+        url: "{{ gitorc_rancher_server_url }}/v3/clusters"
+        method: POST
+        body_format: json
+        headers:
+          Authorization: "Bearer {{ lookup('env', 'RANCHER_BEARER_TOKEN') }}"
+        body:
+          type: cluster
+          name: "{{ rancher_cluster_name }}"
+          rancherKubernetesEngineConfig: {}
+        status_code:
+          - 200
+          - 201

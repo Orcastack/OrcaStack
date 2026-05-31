@@ -1,0 +1,24 @@
+- name: Bootstrap Proxmox VE foundation
+  hosts: proxmox_hosts
+  become: true
+  tasks:
+    - name: Ensure Proxmox packages are installed
+      ansible.builtin.package:
+        name:
+          - qemu-server
+          - pve-manager
+          - pve-cluster
+        state: present
+
+    - name: Ensure bridge and SDN prerequisites are present
+      ansible.builtin.package:
+        name:
+          - openvswitch-switch
+          - frr
+        state: present
+
+    - name: Enable Proxmox services
+      ansible.builtin.service:
+        name: pve-cluster
+        enabled: true
+        state: started

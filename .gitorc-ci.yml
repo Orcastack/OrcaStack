@@ -6,6 +6,15 @@ pipeline:
     - push
     - change_merged
   stages:
+    - name: cloud-bootstrap
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
     - name: identity-bind
       image: golang:1.23
       commands:
@@ -29,6 +38,27 @@ pipeline:
         - terraform -chdir=infra/terraform/environments/private-cloud init -backend=false
         - terraform -chdir=infra/terraform/environments/private-cloud validate
         - terraform fmt -check -recursive infra/terraform
+    - name: proxmox-bootstrap
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+    - name: openstack-control-plane
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+    - name: network-fabric
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+    - name: kubernetes-rancher
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+    - name: gpu-enablement
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
     - name: sign-artifacts
       image: golang:1.23
       commands:
@@ -46,6 +76,7 @@ pipeline:
       commands:
         - kubectl apply -f infra/kubernetes/base/namespace.yaml
         - kubectl apply -k infra/kubernetes/platform
+        - kubectl apply -f infra/kubernetes/platform/observability-stack.yaml
       when:
         branch:
           - main

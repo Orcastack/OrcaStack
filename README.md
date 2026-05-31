@@ -62,4 +62,5 @@ make deploy-private-cloud
 - [Platform architecture](docs/platform-architecture.md)
 - [Private-cloud deployment](docs/Private-Cloud-Deployment.md)
 - [CI/CD engine](docs/CI-CD-Engine.md)
+- [Cloud automation workflows](docs/Cloud-Automation-Workflows.md)
 - [Infrastructure overview](infra/README.md)

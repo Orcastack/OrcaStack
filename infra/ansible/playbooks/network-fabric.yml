@@ -1,0 +1,23 @@
+- name: Configure OVN, OVS, and FRR fabric
+  hosts: network_fabric:openstack_controllers:openstack_computes
+  become: true
+  tasks:
+    - name: Install SDN and routing packages
+      ansible.builtin.package:
+        name:
+          - openvswitch-switch
+          - ovn-host
+          - frr
+        state: present
+
+    - name: Enable OVS
+      ansible.builtin.service:
+        name: openvswitch-switch
+        enabled: true
+        state: started
+
+    - name: Enable FRR
+      ansible.builtin.service:
+        name: frr
+        enabled: true
+        state: started

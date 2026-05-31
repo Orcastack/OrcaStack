@@ -1,0 +1,23 @@
+version: 1
+workflow:
+  name: application-release
+  description: Release a governed application through build, sign, deploy, and rollback-ready cloud automation.
+  lanes:
+    - name: build-and-test
+      type: pipeline-stage
+      stage: api-test
+    - name: sign
+      type: pipeline-stage
+      stage: sign-artifacts
+    - name: policy-gate
+      type: pipeline-stage
+      stage: policy-gate
+    - name: deploy-dev
+      type: kubernetes
+      manifest: infra/kubernetes/platform/gitorc-services.yaml
+    - name: monitor
+      type: kubernetes
+      manifest: infra/kubernetes/platform/monitoring.yaml
+    - name: rollback
+      type: pipeline-stage
+      stage: rollback

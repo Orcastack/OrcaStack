@@ -1,0 +1,31 @@
+version: 1
+workflow:
+  name: cloud-bootstrap
+  description: Build the private cloud under GITORC control from bare-metal and virtualization layers up to Rancher and Kubernetes registration.
+  lanes:
+    - name: proxmox-foundation
+      type: ansible
+      playbook: infra/ansible/playbooks/proxmox-bootstrap.yml
+      inventory: infra/ansible/inventories/private-cloud/hosts.yml
+    - name: openstack-foundation
+      type: terraform
+      entrypoint: infra/terraform/environments/private-cloud
+    - name: network-fabric
+      type: ansible
+      playbook: infra/ansible/playbooks/network-fabric.yml
+      inventory: infra/ansible/inventories/private-cloud/hosts.yml
+    - name: kubernetes-cluster
+      type: ansible
+      playbook: infra/ansible/playbooks/kubernetes-cluster.yml
+      inventory: infra/ansible/inventories/private-cloud/hosts.yml
+    - name: rancher-registration
+      type: ansible
+      playbook: infra/ansible/playbooks/rancher-register.yml
+      inventory: infra/ansible/inventories/private-cloud/hosts.yml
+    - name: observability-stack
+      type: kubernetes
+      manifest: infra/kubernetes/platform/observability-stack.yaml
+    - name: gpu-enablement
+      type: ansible
+      playbook: infra/ansible/playbooks/gpu-workers.yml
+      inventory: infra/ansible/inventories/private-cloud/hosts.yml

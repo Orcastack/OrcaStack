@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rancher-registration
+type: Opaque
+stringData:
+  server-url: https://rancher.internal.example
+  cluster-name: gitorc-private-cloud
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gitorc-rancher-register
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: rancher-register
+          image: curlimages/curl:8.8.0
+          command:
+            - /bin/sh
+            - -c
+            - echo "Cluster registration is executed by GITORC workflow using Rancher API credentials"

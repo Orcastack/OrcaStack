@@ -14,6 +14,9 @@ infra/
 ├── kubernetes/
 │   ├── base/                        # Shared namespaces and platform primitives
 │   └── platform/                    # Ingress, runners, monitoring, logging, storage, secrets
+├── ansible/                         # Imperative cloud automation from GITORC workflows
+├── automation/
+│   └── workflows/                   # Cloud bootstrap and release workflow definitions
 ├── policy/
 │   ├── kyverno/                     # Admission and attestation enforcement
 │   └── opa/                         # Runtime governance policies
@@ -28,10 +31,14 @@ infra/
 ## What This Stack Covers
 
 - OpenStack networking: networks, subnets, routers, floating IPs, and load balancer attachment.
+- Proxmox VE bootstrap for bare-metal and VM-hosted capacity.
 - OpenStack identity: Keystone projects, service users, roles, and application credentials.
 - OpenStack storage: Cinder classes, Barbican secrets, and Kubernetes storage integration points.
+- OVN, OVS, and FRR network automation for routed cluster fabrics.
 - Kubernetes platform modules: namespaces, storage classes, PVC-backed services, ingress, and service accounts.
+- Rancher registration and cluster lifecycle automation.
 - CI/CD runner infrastructure: dedicated runner pools, runner service accounts, and workload isolation.
+- GPU worker enablement for accelerated workloads.
 - Monitoring and logging: Prometheus/Loki-oriented manifests and scrape configuration.
 - Secrets management: Barbican-backed secret references and CSI sync definitions.
 - Runtime policy enforcement: Kyverno admission policy and OPA governance package.
@@ -39,9 +46,10 @@ infra/
 ## Deployment Model
 
 1. Provision the private-cloud foundation with Terraform from `terraform/environments/private-cloud`.
-2. Apply the Kubernetes manifests from `kubernetes/base` and `kubernetes/platform` into the target cluster.
-3. Configure environment promotion in `deploy/environments/`.
-4. Enforce artifact and runtime governance from `policy/`.
+2. Run the cloud bootstrap automation from `automation/workflows/cloud-bootstrap.yaml` using the Ansible playbooks in `ansible/`.
+3. Apply the Kubernetes manifests from `kubernetes/base` and `kubernetes/platform` into the target cluster.
+4. Configure environment promotion in `deploy/environments/`.
+5. Enforce artifact and runtime governance from `policy/`.
 
 ## Constraints
 

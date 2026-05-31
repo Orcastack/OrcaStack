@@ -79,6 +79,28 @@ jobs:
         test -f infra/deploy/environments/private-cloud-dev.yaml
         test -f infra/deploy/environments/private-cloud-stage.yaml
         test -f infra/deploy/environments/private-cloud-prod.yaml
+        test -f infra/automation/workflows/cloud-bootstrap.yaml
+        test -f infra/ansible/playbooks/proxmox-bootstrap.yml
+        test -f infra/ansible/playbooks/network-fabric.yml
+        test -f infra/ansible/playbooks/rancher-register.yml
+        test -f infra/kubernetes/platform/gpu-support.yaml
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Ansible
+      run: pip install ansible-core==2.17.3
+
+    - name: Ansible syntax check
+      run: |
+        ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+        ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+        ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+        ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+        ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+        ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
 
     - name: Evaluate runtime policy
       uses: open-policy-agent/setup-opa@v2
@@ -87,6 +109,9 @@ jobs:
 
     - name: Run OPA policy gate
       run: opa eval --fail-defined --data infra/policy/opa/runtime-governance.rego --input infra/policy/examples/stage-approval-input.json 'data.gitorc.runtime.deny'
+
+    - name: Render platform manifests
+      run: kubectl kustomize infra/kubernetes/platform >/tmp/gitorc-platform.yaml
 
   web-build:
     runs-on: ubuntu-latest

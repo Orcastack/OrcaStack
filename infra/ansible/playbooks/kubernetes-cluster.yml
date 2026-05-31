@@ -1,0 +1,24 @@
+- name: Prepare Kubernetes nodes for GITORC automation
+  hosts: kubernetes_control_plane:kubernetes_workers:kubernetes_gpu_workers
+  become: true
+  tasks:
+    - name: Install Kubernetes node dependencies
+      ansible.builtin.package:
+        name:
+          - containerd
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+    - name: Enable container runtime
+      ansible.builtin.service:
+        name: containerd
+        enabled: true
+        state: started
+
+    - name: Enable kubelet
+      ansible.builtin.service:
+        name: kubelet
+        enabled: true
+        state: started
