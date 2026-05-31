@@ -276,11 +276,9 @@ const landingSidebarSections: LandingSection[] = [
 ];
 
 const landingHeaderLinks: LandingHeaderLink[] = [
-  { label: 'Documentation', targetId: 'developer-documentation' },
+  { label: 'Docs', targetId: 'developer-documentation' },
   { label: 'API Reference', targetId: 'api-reference' },
-  { label: 'Developer Community', targetId: 'developer-community' },
-  { label: 'Discord', targetId: 'discord-community' },
-  { label: 'GitHub', href: 'https://github.com/AtonixCorp/gitorc', external: true },
+  { label: 'Toolbox', targetId: 'developer-community' },
   { label: 'Changelog', targetId: 'changelog' },
 ];
 
@@ -1539,38 +1537,36 @@ export function App() {
     return (
       <div className={`landing-shell landing-theme-${landingTheme}`}>
         <header className="landing-header">
-          <div className="landing-header-left">
-            <button className="landing-brand" onClick={() => scrollToLandingTarget('overview')} type="button">
-              <span className="landing-brand-mark"><LandingSystemMark /></span>
-              <span className="landing-brand-copy">
-                <strong>GITORC</strong>
-                <span>CI/CD Engine</span>
-              </span>
-            </button>
+          <button className="landing-brand" onClick={() => scrollToLandingTarget('overview')} type="button">
+            <span className="landing-brand-mark"><LandingSystemMark /></span>
+            <span className="landing-brand-copy">
+              <strong>GITORC</strong>
+              <span>CI/CD Engine</span>
+            </span>
+          </button>
 
-            <nav className="landing-header-nav" aria-label="Landing page navigation">
-              {landingHeaderLinks.map((link) => {
-                if (link.external && link.href) {
-                  return (
-                    <a key={link.label} className="landing-nav-link" href={link.href} rel="noreferrer" target="_blank">
-                      {link.label}
-                    </a>
-                  );
-                }
-
+          <nav className="landing-header-nav" aria-label="Landing page navigation">
+            {landingHeaderLinks.map((link) => {
+              if (link.external && link.href) {
                 return (
-                  <button
-                    key={link.label}
-                    className="landing-nav-link"
-                    onClick={() => link.targetId && scrollToLandingTarget(link.targetId)}
-                    type="button"
-                  >
+                  <a key={link.label} className="landing-nav-link" href={link.href} rel="noreferrer" target="_blank">
                     {link.label}
-                  </button>
+                  </a>
                 );
-              })}
-            </nav>
-          </div>
+              }
+
+              return (
+                <button
+                  key={link.label}
+                  className="landing-nav-link"
+                  onClick={() => link.targetId && scrollToLandingTarget(link.targetId)}
+                  type="button"
+                >
+                  {link.label}
+                </button>
+              );
+            })}
+          </nav>
 
           <div className="landing-header-controls">
             <form className="landing-search" onSubmit={handleLandingSearch}>

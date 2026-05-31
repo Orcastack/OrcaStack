@@ -103,7 +103,6 @@ body {
   background: var(--landing-bg);
 }
 
-.landing-header-left,
 .landing-brand,
 .landing-header-nav,
 .landing-header-controls,
@@ -116,7 +115,6 @@ body {
   align-items: center;
 }
 
-.landing-header-left,
 .landing-header-controls,
 .landing-header-nav,
 .landing-link-row {
@@ -192,7 +190,13 @@ body {
 }
 
 .landing-header-nav {
+  flex: 1 1 auto;
   flex-wrap: wrap;
+  justify-content: center;
+}
+
+.landing-header-controls {
+  flex: 0 0 auto;
 }
 
 .landing-nav-link,
@@ -1292,7 +1296,6 @@ h1 {
   }
 
   .landing-header,
-  .landing-header-left,
   .landing-header-controls,
   .landing-search,
   .landing-section-intro,
@@ -1354,7 +1357,6 @@ h1 {
 
 @media (max-width: 960px) {
   .landing-header,
-  .landing-header-left,
   .landing-header-controls,
   .landing-search {
     flex-direction: column;
