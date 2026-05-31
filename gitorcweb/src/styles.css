@@ -680,7 +680,6 @@ body {
 }
 
 .auth-card-header,
-.auth-provider-list,
 .auth-form {
   flex-direction: column;
 }
@@ -730,7 +729,10 @@ body {
 
 .auth-provider-list {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   justify-content: center;
+  align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.15rem;
 }

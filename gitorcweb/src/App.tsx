@@ -2501,7 +2501,7 @@ export function App() {
           <div className="auth-card-header">
             <span className="auth-card-mark"><LandingIcon icon={isSignup ? 'gitorc' : 'login'} /></span>
             <div>
-              <p className="auth-card-kicker">secure operator access</p>
+              <p className="auth-card-kicker">Secure operator access</p>
               <h1>{isSignup ? 'Create your GITORC account' : 'Login to GITORC'}</h1>
               <p className="auth-card-subtitle">
                 {isSignup ? 'Create secure access to automation, pipelines, and control-plane operations.' : 'Secure access to automation, pipelines, and control-plane operations.'}
