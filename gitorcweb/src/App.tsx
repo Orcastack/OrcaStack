@@ -820,9 +820,9 @@ function isLandingPageId(value: string): value is LandingPageId {
 function LandingSystemMark() {
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true">
-      <rect x="4" y="6" width="16" height="12" rx="2" />
-      <rect x="28" y="6" width="16" height="12" rx="2" />
-      <rect x="16" y="30" width="16" height="12" rx="2" />
+      <rect x="4" y="6" width="16" height="12" rx="2" fill="currentColor" />
+      <rect x="28" y="6" width="16" height="12" rx="2" fill="currentColor" />
+      <rect x="16" y="30" width="16" height="12" rx="2" fill="currentColor" />
       <path d="M12 18v7h24v5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -3011,7 +3011,7 @@ export function App() {
         <article className="panel auth-card">
           <div className="auth-card-header">
             <span className="auth-card-mark"><LandingIcon icon={isSignup ? 'gitorc' : 'login'} /></span>
-            <div>
+            <div className="auth-card-copy">
               <p className="auth-card-kicker">Secure operator access</p>
               <h1>{isSignup ? 'Create your GITORC account' : 'Login to GITORC'}</h1>
               <p className="auth-card-subtitle">

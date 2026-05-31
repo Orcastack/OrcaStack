@@ -1112,13 +1112,15 @@ body {
 .auth-divider,
 .auth-footer-row,
 .auth-card-mark,
-.auth-provider-icon {
+.auth-provider-icon,
+.auth-card-copy {
   display: flex;
   align-items: center;
 }
 
 .auth-card-header,
-.auth-form {
+.auth-form,
+.auth-card-copy {
   flex-direction: column;
 }
 
@@ -1127,6 +1129,13 @@ body {
   text-align: center;
   gap: 0.9rem;
   margin-bottom: 1.1rem;
+}
+
+.auth-card-copy {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  gap: 0.1rem;
 }
 
 .auth-card-kicker {
