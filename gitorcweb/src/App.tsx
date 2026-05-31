@@ -137,53 +137,61 @@ const landingBootstrapCommands = [
 const landingPages: LandingPage[] = [
   {
     id: 'landing-overview',
-    label: 'Developer platform overview',
-    title: 'A CI/CD automation platform that deploys and manages cloud infrastructure',
-    intro: 'GITORC is not the cloud itself. It is the Git, CI/CD, and workflow platform that deploys and manages Proxmox, OpenStack, Kubernetes, Rancher, networking, observability, and application delivery from one governed automation surface.',
+    label: 'Platform overview',
+    title: 'GITORC: Hardware-Software CI/CD Automation Platform',
+    intro: 'GITORC is a hardware-software automation engine that unifies Git operations, code review, CI/CD pipelines, virtualization, identity governance, and secure orchestration into one integrated system for bare metal, virtual machines, containers, private cloud, OpenStack, and Kubernetes environments.',
     sections: [
       {
+        title: 'What this page explains',
+        bullets: [
+          'What GITORC is.',
+          'How hardware, software, and automation layers interact.',
+          'How identity, CI/CD, and virtualization unify into one workflow.',
+          'Why every clone, build, review, deploy, and provision action is identity-bound and cryptographically verifiable.',
+        ],
+      },
+      {
+        title: 'Core responsibilities',
+        bullets: [
+          'Hardware integration through device-aware builds, hardware-bound identities, and virtualization support.',
+          'Software automation across Git, code review, CI, CD, pipelines, runners, and orchestration.',
+          'Identity enforcement through LDAP, RBAC, cryptographic signing, and audit trails.',
+          'Virtualization for VM provisioning, container orchestration, and isolated build environments.',
+          'Secure execution where every process has a unique identity and lifecycle.',
+        ],
+      },
+      {
+        title: 'Platform areas',
+        links: [
+          { label: 'Platform overview', targetId: 'platform-overview', detail: 'See how hardware, software, identity, and automation fit together.' },
+          { label: 'Repositories', targetId: 'repository-role', detail: 'Git operations, review, branch rules, identity, and traceability.' },
+          { label: 'Pipelines (CI/CD)', targetId: 'platform-pipelines-workflows', detail: 'Isolated execution, artifact generation, and governed promotion.' },
+          { label: 'Automation engine', targetId: 'ci-cd-engine', detail: 'Event-driven execution, runners, agents, retries, and policy enforcement.' },
+          { label: 'Identity & security', targetId: 'security-model', detail: 'LDAP, RBAC, signing, audit logs, and token controls.' },
+          { label: 'Virtualization', targetId: 'private-cloud-hpc', detail: 'Bare metal, VMs, containers, OpenStack, Kubernetes, and hypervisors.' },
+          { label: 'Deployment', targetId: 'runtime-strategies', detail: 'Identity-verified rollout, rollback, and target environment control.' },
+          { label: 'System operations', targetId: 'device-node-integration', detail: 'Telemetry, services, agents, storage, compute, and network visibility.' },
+        ],
+      },
+      {
         title: 'Start here',
-        description: 'Get the stack running locally.',
         links: [
           { label: 'Clone the repository', targetId: 'clone-run-locally', detail: 'Repository checkout and first local bootstrap path.' },
           { label: 'Bootstrap locally', targetId: 'bootstrap-locally', detail: 'Bring up the local stack and verify the main endpoints.' },
-          { label: 'Run your first workflow', targetId: 'first-pipeline-10-minutes', detail: 'Move from clone to a first governed pipeline path.' },
+          { label: 'Open GitHub repository', href: 'https://github.com/AtonixCorp/gitorc', external: true, detail: 'The implementation base, release trail, and audit surface.' },
         ],
       },
       {
-        title: 'Understand the platform',
-        links: [
-          { label: 'Platform structure', targetId: 'platform-overview', detail: 'How CI/CD, cloud deployment, clusters, and security fit together.' },
-          { label: 'CI/CD & workflows', targetId: 'workflow-system', detail: 'Pipelines, delivery states, and infrastructure automation strategies.' },
-        ],
-      },
-      {
-        title: 'Build from the repo',
-        links: [
-          { label: 'Open GitHub repository', href: 'https://github.com/AtonixCorp/gitorc', external: true, detail: 'The repository is the download path, implementation base, and audit trail.' },
-          { label: 'View monorepo layout', targetId: 'monorepo-layout', detail: 'Inspect services, UI, infra, docs, and SDK structure.' },
-          { label: 'View changelog', targetId: 'changelog-releases', detail: 'Track releases and rollout deltas.' },
-        ],
-      },
-      {
-        title: 'Developer documentation',
+        title: 'Documentation and community',
         links: [
           { label: 'Docs inventory', targetId: 'docs-inventory' },
           { label: 'API reference', targetId: 'api-reference' },
-          { label: 'Architecture docs', targetId: 'architecture-docs' },
-          { label: 'Local development guide', targetId: 'local-development-guide' },
-        ],
-      },
-      {
-        title: 'Community & support',
-        links: [
           { label: 'Join Discord', targetId: 'discord-channels' },
-          { label: 'Developer community', targetId: 'developer-community' },
-          { label: 'Contribution guide', targetId: 'contribution-guide' },
+          { label: 'Join Slack', targetId: 'discord-channels' },
         ],
       },
     ],
-    searchTerms: ['overview', 'landing', 'developer platform'],
+    searchTerms: ['gitorc', 'platform overview', 'hardware software automation', 'ci/cd automation'],
   },
   {
     id: 'download-center',
@@ -267,51 +275,132 @@ const landingPages: LandingPage[] = [
   {
     id: 'platform-overview',
     label: 'Platform overview',
-    title: 'Platform structure across CI/CD, cloud deployment, infrastructure, and trust',
-    intro: 'Repositories feed workflows, workflows drive CI/CD, and pipelines deploy infrastructure layers such as Proxmox, OpenStack, Kubernetes, Rancher, networking, and observability while identity-backed policy keeps the path governable.',
+    title: 'Platform overview across hardware, software, identity, and automation',
+    intro: 'GITORC unifies hardware integration, software automation, identity enforcement, virtualization, and secure execution into one workflow so repository activity, build execution, provisioning, and deployment all stay traceable and policy-controlled.',
     sections: [
-      { title: 'High-level map', bullets: ['CI/CD engine is the core operating runtime.', 'Pipelines and workflows translate repository state into infrastructure and application delivery state.', 'Cloud deployment automation targets Proxmox, OpenStack, OVN/OVS, FRR, Kubernetes, Rancher, Terraform, Ansible, Prometheus, and Grafana.', 'Security binds identity, artifacts, and policy enforcement.'] },
-      { title: 'Next', links: [{ label: 'CI/CD engine', targetId: 'ci-cd-engine' }, { label: 'Pipelines & workflows', targetId: 'platform-pipelines-workflows' }, { label: 'Security model', targetId: 'security-model' }] },
+      {
+        title: 'How the platform layers interact',
+        bullets: [
+          'Hardware integration keeps builds, runners, and execution environments aware of real devices, virtualization boundaries, and host capabilities.',
+          'Software automation connects Git, code review, CI, CD, orchestration, and artifact flow into one delivery model.',
+          'Identity enforcement keeps LDAP, RBAC, signing, and audit context attached to every action.',
+          'Virtualization provides isolated environments across bare metal, VMs, containers, OpenStack, Kubernetes, and private cloud targets.',
+          'Secure execution ensures each process has a unique identity and lifecycle from trigger to teardown.',
+        ],
+      },
+      {
+        title: 'Navigate the platform',
+        links: [
+          { label: 'Repositories', targetId: 'repository-role' },
+          { label: 'Pipelines (CI/CD)', targetId: 'platform-pipelines-workflows' },
+          { label: 'Automation engine', targetId: 'ci-cd-engine' },
+          { label: 'Identity & security', targetId: 'security-model' },
+          { label: 'Virtualization', targetId: 'private-cloud-hpc' },
+          { label: 'Deployment', targetId: 'runtime-strategies' },
+          { label: 'System operations', targetId: 'device-node-integration' },
+        ],
+      },
     ],
-    searchTerms: ['platform structure', 'overview'],
+    searchTerms: ['platform structure', 'hardware software', 'identity', 'virtualization'],
   },
   {
     id: 'ci-cd-engine',
-    label: 'CI/CD engine',
-    title: 'CI/CD engine for governed cloud deployment and delivery',
-    intro: 'The CI/CD engine connects repositories, workflows, and delivery into governed operations that can deploy infrastructure stacks, manage clusters, run GPU workloads, and ship applications across private environments.',
+    label: 'Automation engine',
+    title: 'Automation engine for builds, tests, deployments, and provisioning',
+    intro: 'The automation engine connects Git events to CI/CD workflows, integrates with hardware and virtualization layers, and enforces identity and security policies across each action it executes.',
     sections: [
-      { title: 'Role in the platform', bullets: ['CI/CD is an operating function, not a sidecar tool.', 'It is tied to repository state, signed artifacts, and runtime enforcement.'] },
-      { title: 'Workflows as pipelines', bullets: ['Workflows operate as pipelines with scope control.', 'Delivery is controlled from repository to build to infrastructure deploy to runtime.'] },
-      { title: 'Cloud deployment lanes', bullets: ['Pipelines must deploy OpenStack, Kubernetes clusters, Rancher registration, OVN/OVS, FRR routing, monitoring stacks, and application releases.', 'Terraform and Ansible execution belong inside the automation surface rather than outside it.'] },
-      { title: 'Private infrastructure & HPC', bullets: ['Supports bare-metal, Proxmox VMs, OpenStack VMs, Kubernetes pods, and GPU-capable execution surfaces.', 'Integrates with nodes and cluster-backed runtimes without becoming a cloud dashboard itself.'] },
-      { title: 'Security model', bullets: ['Security operates as signed artifacts, RBAC context, and runtime policy.', 'The engine enforces who can change what and where it runs.'] },
-      { title: 'Where to go next', links: [{ label: 'Pipelines & workflows', targetId: 'platform-pipelines-workflows' }, { label: 'Device & node integration', targetId: 'device-node-integration' }, { label: 'Security model', targetId: 'security-model' }] },
+      {
+        title: 'What it does',
+        bullets: [
+          'Automates builds, tests, deployments, and provisioning.',
+          'Connects Git events to CI/CD workflows.',
+          'Integrates with hardware and virtualization layers.',
+          'Enforces identity and security policies throughout execution.',
+        ],
+      },
+      {
+        title: 'How it runs',
+        bullets: [
+          'Uses an event-driven architecture.',
+          'Executes tasks through runners and agents.',
+          'Logs every action with identity and timestamp.',
+          'Supports self-healing and retries.',
+        ],
+      },
+      {
+        title: 'Related areas',
+        links: [
+          { label: 'Pipelines (CI/CD)', targetId: 'platform-pipelines-workflows' },
+          { label: 'Identity & security', targetId: 'security-model' },
+          { label: 'System operations', targetId: 'device-node-integration' },
+        ],
+      },
     ],
-    searchTerms: ['ci/cd engine', 'governed delivery'],
+    searchTerms: ['automation engine', 'event driven', 'runners', 'agents'],
   },
   {
     id: 'platform-pipelines-workflows',
-    label: 'Pipelines & workflows',
-    title: 'Pipelines and workflows as governed cloud deployment lanes',
-    intro: 'Pipelines and workflows turn repository events into build, promotion, infrastructure deployment, cluster registration, monitoring rollout, and runtime outcomes with explicit stage clarity and accountability.',
+    label: 'Pipelines (CI/CD)',
+    title: 'Pipelines (CI/CD) for isolated build, test, and delivery execution',
+    intro: 'Pipelines execute CI/CD workloads in isolated environments, produce traceable artifacts, and connect build, test, packaging, and deployment into one governed path.',
     sections: [
-      { title: 'Why they matter', bullets: ['Pipelines encode stage state and promotion readiness.', 'Workflow boundaries make rollout, upgrade, and rollback explicit.', 'Artifact traceability stays close to infrastructure and application delivery state.'] },
-      { title: 'Cloud automation scope', bullets: ['Deploy OpenStack.', 'Deploy Kubernetes clusters.', 'Register clusters in Rancher.', 'Configure OVN/OVS and FRR.', 'Deploy monitoring stacks and application releases.', 'Manage upgrades through repeatable automation.'] },
-      { title: 'Related pages', links: [{ label: 'How workflows enable one cohesive system', targetId: 'workflow-system' }, { label: 'Workflow states & delivery', targetId: 'workflow-states-delivery' }, { label: 'Runtime strategies', targetId: 'runtime-strategies' }] },
+      {
+        title: 'What it does',
+        bullets: [
+          'Executes CI pipelines.',
+          'Builds software in isolated environments.',
+          'Runs tests, scans, linting, and packaging.',
+          'Produces artifacts such as .deb, .tar.gz, containers, and binaries.',
+          'Triggers downstream deployments.',
+        ],
+      },
+      {
+        title: 'How it runs',
+        bullets: [
+          'Each step runs in a virtualized or containerized runner.',
+          'Every step has a process identity.',
+          'Logs stream in real time.',
+          'Artifacts are stored with fingerprints.',
+          'Failures generate alerts and audit entries.',
+        ],
+      },
+      {
+        title: 'Related areas',
+        links: [
+          { label: 'Repositories', targetId: 'repository-role' },
+          { label: 'Automation engine', targetId: 'ci-cd-engine' },
+          { label: 'Deployment', targetId: 'runtime-strategies' },
+        ],
+      },
     ],
-    searchTerms: ['pipelines', 'workflows'],
+    searchTerms: ['pipelines', 'ci/cd', 'runners', 'artifacts'],
   },
   {
     id: 'device-node-integration',
-    label: 'Device & node integration',
-    title: 'Device and node integration as part of the delivery surface',
-    intro: 'The orchestration model extends beyond source control and build runners. Devices, services, and compute nodes are managed execution surfaces tied back to delivery and runtime identity.',
+    label: 'System operations',
+    title: 'System operations across health, telemetry, services, and infrastructure state',
+    intro: 'System operations surfaces the health of runners, agents, services, logs, metrics, storage, compute, and network resources so operators can manage the platform as a live system.',
     sections: [
-      { title: 'Execution surface', bullets: ['Tie runtime node state back to deployment decisions.', 'Expose process identity and host placement as operational data.', 'Support device-aware and node-aware delivery paths.'] },
-      { title: 'Where to go next', links: [{ label: 'Location intelligence', targetId: 'location-intelligence' }, { label: 'Private cloud & HPC', targetId: 'private-cloud-hpc' }, { label: 'Runtime strategies', targetId: 'runtime-strategies' }] },
+      {
+        title: 'What it does',
+        bullets: [
+          'Monitors system health.',
+          'Tracks runners, agents, and services.',
+          'Shows logs, metrics, and events.',
+          'Manages storage, compute, and network resources.',
+        ],
+      },
+      {
+        title: 'How it runs',
+        bullets: [
+          'Uses an internal telemetry engine.',
+          'Streams live data to the dashboard.',
+          'Enforces identity on all operations.',
+          'Supports multi-node setups.',
+        ],
+      },
     ],
-    searchTerms: ['devices', 'nodes'],
+    searchTerms: ['system operations', 'telemetry', 'services', 'health'],
   },
   {
     id: 'location-intelligence',
@@ -323,22 +412,57 @@ const landingPages: LandingPage[] = [
   },
   {
     id: 'private-cloud-hpc',
-    label: 'Private cloud & HPC',
-    title: 'Bare-metal, VM, pod, and GPU readiness for high-control environments',
-    intro: 'The platform must run on bare-metal servers, Proxmox VMs, OpenStack VMs, Kubernetes pods, and GPU-capable environments while keeping governance and runtime visibility intact.',
-    sections: [{ title: 'Infrastructure fit', bullets: ['Supports isolated deployment boundaries and self-hosted control surfaces.', 'Maps naturally to bare-metal, VM, pod, and GPU-backed delivery environments.', 'Treats the UI and services as infrastructure software rather than a cloud dashboard replacement.'] }],
-    searchTerms: ['private cloud', 'hpc'],
+    label: 'Virtualization',
+    title: 'Virtualization across VMs, containers, bare metal, and private cloud',
+    intro: 'GITORC creates isolated build and execution environments across virtual machines, containers, bare metal, OpenStack, Kubernetes, and hypervisor-backed targets while preserving identity and lifecycle traceability.',
+    sections: [
+      {
+        title: 'What it does',
+        bullets: [
+          'Creates isolated build environments.',
+          'Supports VMs, containers, and bare metal.',
+          'Integrates with OpenStack, Kubernetes, and hypervisors.',
+        ],
+      },
+      {
+        title: 'How it runs',
+        bullets: [
+          'Pipelines choose the correct execution environment.',
+          'Runners are provisioned dynamically.',
+          'Environments are destroyed after use.',
+          'Identity and logs follow the full lifecycle.',
+        ],
+      },
+    ],
+    searchTerms: ['virtualization', 'openstack', 'kubernetes', 'vm'],
   },
   {
     id: 'security-model',
-    label: 'Security model',
-    title: 'Security model across signed artifacts, identity, and runtime policy',
-    intro: 'Security is operated as a platform concern. Repository, workflow, deployment, and runtime subjects remain tied to signed identity, RBAC context, and enforcement boundaries.',
+    label: 'Identity & security',
+    title: 'Identity and security across LDAP, RBAC, signing, and audit trails',
+    intro: 'Identity and security are first-class runtime concerns in GITORC. Repositories, pipelines, deployments, and processes all carry unique identities and are validated through RBAC, cryptographic signing, audit logs, and policy enforcement.',
     sections: [
-      { title: 'Trust model', bullets: ['Signed artifacts and attestation bind delivery outputs to identity.', 'RBAC and directory context define who can act and where.', 'Runtime policy keeps enforcement attached to execution.'] },
-      { title: 'Related pages', links: [{ label: 'Signed artifacts & policy', targetId: 'signed-artifacts-policy' }, { label: 'CI/CD engine', targetId: 'ci-cd-engine' }] },
+      {
+        title: 'What it does',
+        bullets: [
+          'Provides LDAP identity.',
+          'Enforces RBAC for all operations.',
+          'Applies cryptographic signing.',
+          'Records audit logs.',
+          'Issues secure API tokens.',
+        ],
+      },
+      {
+        title: 'How it runs',
+        bullets: [
+          'Every repository, pipeline, deployment, and process has a unique identity.',
+          'All actions are validated against RBAC.',
+          'Logs are immutable.',
+          'Security policies apply automatically.',
+        ],
+      },
     ],
-    searchTerms: ['security model', 'rbac', 'policy'],
+    searchTerms: ['identity', 'security', 'ldap', 'rbac'],
   },
   {
     id: 'workflow-system',
@@ -374,14 +498,32 @@ const landingPages: LandingPage[] = [
   },
   {
     id: 'repository-role',
-    label: 'Repository role',
-    title: 'The repository as product surface, implementation base, and audit trail',
-    intro: 'The repository is where developers first evaluate the platform, clone the implementation, inspect release movement, and understand how GITORC evolves over time.',
+    label: 'Repositories',
+    title: 'Repositories for Git operations, review, policies, and pipeline triggers',
+    intro: 'Repositories are the core source-control surface in GITORC. They host Git data, branch and tag rules, code review workflows, CI triggers, and identity-bound repository state.',
     sections: [
-      { title: 'Repository function', bullets: ['Source control and implementation start here.', 'Bootstrap, docs, APIs, and service boundaries are discoverable from the monorepo.', 'Changelog and release movement remain tied to repository history.'] },
-      { title: 'Links', links: [{ label: 'Open GitHub repository', href: 'https://github.com/AtonixCorp/gitorc', external: true }, { label: 'Monorepo layout', targetId: 'monorepo-layout' }, { label: 'Changelog & releases', targetId: 'changelog-releases' }] },
+      {
+        title: 'What it does',
+        bullets: [
+          'Hosts Git repositories.',
+          'Manages branches, tags, and protected rules.',
+          'Provides code review workflows.',
+          'Triggers CI pipelines.',
+          'Tracks repository identity and signatures.',
+        ],
+      },
+      {
+        title: 'How it runs',
+        bullets: [
+          'Uses an internal Git RPC engine.',
+          'Stores repository metadata in the platform database.',
+          'Registers repository identity in LDAP.',
+          'Applies RBAC for clone, push, merge, and delete operations.',
+          'Integrates directly with pipelines and deployments.',
+        ],
+      },
     ],
-    searchTerms: ['repository role', 'github repository'],
+    searchTerms: ['repositories', 'git', 'code review', 'branch rules'],
   },
   {
     id: 'monorepo-layout',
@@ -401,6 +543,32 @@ const landingPages: LandingPage[] = [
       { title: 'Expected endpoints', bullets: ['UI: http://localhost:5050', 'Gateway HTTP: http://localhost:8080', 'Gateway health: http://localhost:8080/healthz'] },
     ],
     searchTerms: ['bootstrap locally', 'make up', 'local stack'],
+  },
+  {
+    id: 'runtime-strategies',
+    label: 'Deployment',
+    title: 'Deployment across Kubernetes, OpenStack, Docker, and bare metal',
+    intro: 'Deployment in GITORC moves identity-verified artifacts into live environments through CD pipelines with full rollout history, policy-controlled authentication, and governed rollback paths.',
+    sections: [
+      {
+        title: 'What it does',
+        bullets: [
+          'Deploys artifacts to Kubernetes, OpenStack, Docker, and bare metal.',
+          'Supports rolling, blue-green, and canary strategies.',
+          'Tracks deployment identity and history.',
+        ],
+      },
+      {
+        title: 'How it runs',
+        bullets: [
+          'CD pipelines trigger deployments.',
+          'Deployment agents authenticate through RBAC.',
+          'Logs stream in real time.',
+          'Rollbacks are identity-verified.',
+        ],
+      },
+    ],
+    searchTerms: ['deployment', 'rollout', 'canary', 'rollback'],
   },
   {
     id: 'changelog-releases',
@@ -528,27 +696,28 @@ const landingSidebarGroups: LandingSidebarGroup[] = [
     label: 'Start here',
     items: [
       { id: 'landing-overview', label: 'Overview', icon: 'overview' },
-      { id: 'download-center', label: 'Download', icon: 'download' },
-      { id: 'ci-cd-engine', label: 'CI/CD engine', icon: 'automation' },
-      { id: 'platform-pipelines-workflows', label: 'Pipelines & workflows', icon: 'pipelines' },
+      { id: 'platform-overview', label: 'Platform overview', icon: 'overview' },
+      { id: 'repository-role', label: 'Repositories', icon: 'repository' },
+      { id: 'platform-pipelines-workflows', label: 'Pipelines (CI/CD)', icon: 'pipelines' },
     ],
   },
   {
-    label: 'Developer workflow',
+    label: 'Core systems',
     items: [
-      { id: 'repository-role', label: 'Repository role', icon: 'repository' },
+      { id: 'ci-cd-engine', label: 'Automation engine', icon: 'automation' },
+      { id: 'security-model', label: 'Identity & security', icon: 'security' },
+      { id: 'private-cloud-hpc', label: 'Virtualization', icon: 'cloud' },
+      { id: 'runtime-strategies', label: 'Deployment', icon: 'workflow' },
+    ],
+  },
+  {
+    label: 'Operations and docs',
+    items: [
+      { id: 'device-node-integration', label: 'System operations', icon: 'devices' },
+      { id: 'docs-inventory', label: 'Documentation', icon: 'docs' },
       { id: 'bootstrap-locally', label: 'Bootstrap locally', icon: 'automation' },
-      { id: 'docs-inventory', label: 'Developer documentation', icon: 'docs' },
-      { id: 'developer-community', label: 'Community & support', icon: 'community' },
-    ],
-  },
-  {
-    label: 'Reference links',
-    items: [
-      { id: 'changelog-releases', label: 'View changelog', icon: 'repository' },
-      { id: 'discord-channels', label: 'Join community', icon: 'channel' },
       { id: 'api-reference', label: 'API reference', icon: 'docs' },
-      { id: 'security-model', label: 'Security model', icon: 'security' },
+      { id: 'discord-channels', label: 'Join community', icon: 'channel' },
     ],
   },
 ];
@@ -996,13 +1165,6 @@ export function App() {
         }
       });
 
-    return () => {
-      active = false;
-    };
-  }, [authToken]);
-
-  useEffect(() => {
-    let active = true;
     let interval: number | undefined;
 
     if (publicLandingMode) {
@@ -1259,6 +1421,8 @@ export function App() {
     const targetPageId = pageId ?? activeLandingPage;
     if (page === 'signin') {
       window.location.hash = '#/signin';
+    } else if (page === 'signup') {
+      window.location.hash = '#/signup';
     } else if (page === 'platform') {
       window.location.hash = `#/platform/${targetPageId}`;
       setActiveLandingPage(targetPageId);
@@ -2592,8 +2756,9 @@ export function App() {
             <p className="eyebrow">Hardware & Software Automation</p>
             <h1>GITORC</h1>
             <p className="landing-hero-tagline">CI/CD Automation for Hardware & Software.</p>
-            <p className="lede">A clean operator platform for repositories, pipelines, RBAC-governed access, and cloud deployment workflows across Proxmox, OpenStack, Kubernetes, Rancher, networking, and observability.</p>
             <div className="landing-hero-actions">
+              <a className="button button-ghost" href="https://discord.com" rel="noreferrer" target="_blank">Join Discord</a>
+              <a className="button button-ghost" href="https://slack.com" rel="noreferrer" target="_blank">Join Slack</a>
               <a className="button button-ghost" href="https://github.com/AtonixCorp/gitorc" rel="noreferrer" target="_blank">Open repository</a>
             </div>
           </article>
