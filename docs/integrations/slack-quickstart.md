@@ -52,7 +52,7 @@ From your Slack App dashboard (https://api.slack.com/apps):
 
 ### Option A: Docker Compose
 
-Edit your `.env` file or `docker-compose.yml`:
+## Edit your `.env` file or `docker-compose.yml`:
 
 ```bash
 SLACK_BOT_TOKEN=xoxb-... # replace with your Slack bot token
