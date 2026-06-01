@@ -17,6 +17,34 @@
   --surface-highlight: rgba(255, 255, 255, 0.14);
 }
 
+/* Override earlier mobile stacking: keep header horizontal and show single hamburger */
+@media (max-width: 768px) {
+  .landing-header {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .landing-header-nav {
+    display: none !important;
+  }
+
+  .landing-hamburger {
+    display: inline-flex !important;
+    order: 2;
+  }
+
+  .landing-header-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+  }
+
+  .landing-brand-copy { display: none !important; }
+  .landing-brand-mark { width: 34px !important; height: 34px !important; }
+}
+
 * {
   box-sizing: border-box;
 }
