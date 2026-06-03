@@ -63,10 +63,22 @@ jobs:
           cd gitorcapi
           go run ./cmd/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:6fb4b8d3-32e3-4725-bd52-db9f5a6d0f14 --binary-path ../gitorcweb/dist/index.html --build-reference "${GITHUB_SHA}:pages" --private-key dist/pages-signing/private.pem --public-key dist/pages-signing/public.pem --output ../gitorcweb/dist/orca-attestation.json
           cp dist/pages-signing/public.pem ../gitorcweb/dist/orca-public.pem
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+      - name: Archive Pages artifact
+        run: |
+          tar \
+            --dereference --hard-dereference \
+            --directory gitorcweb/dist \
+            -cvf "$RUNNER_TEMP/github-pages.tar" \
+            --exclude=.git \
+            --exclude=.github \
+            .
+      - name: Upload Pages artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          path: gitorcweb/dist
+          name: github-pages
+          path: ${{ runner.temp }}/github-pages.tar
+          retention-days: 1
+          if-no-files-found: error
 
   # Deployment job
   deploy:
