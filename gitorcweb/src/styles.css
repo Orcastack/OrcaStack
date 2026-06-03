@@ -7,8 +7,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --panel: #111111;
-  --panel-strong: #0a0a0a;
+  --panel: #4a4a4a;
+  --panel-strong: #4a4a4a;
   --line: rgba(255, 255, 255, 0.14);
   --text-strong: #ffffff;
   --text-muted: #d9d9d9;
@@ -165,9 +165,9 @@ body {
   --landing-panel-strong: #e9edf2;
   --landing-line: rgba(39, 49, 63, 0.14);
   --landing-line-strong: rgba(39, 49, 63, 0.3);
-  --landing-text: #11161d;
-  --landing-muted: #405063;
-  --landing-soft: #5f6d7d;
+  --landing-text: #252525;
+  --landing-muted: #252525;
+  --landing-soft: #252525;
 }
 
 .signin-shell {
@@ -555,6 +555,7 @@ body {
   .landing-header { padding-right: 0.5rem; }
   .landing-nav-link { justify-content: flex-start; width: 100%; }
   .landing-nav-icon { margin-right: 0.6rem; }
+  .landing-workbench > .landing-sidebar { display: none; }
 }
 
 .landing-hero-grid-plane-secondary {
@@ -2856,9 +2857,9 @@ button, a, input, textarea, select { transition: color var(--p-dur-1) var(--p-ea
   --landing-panel-strong: #fffaf7;
   --landing-line: rgba(99,81,71,0.14);
   --landing-line-strong: rgba(99,81,71,0.28);
-  --landing-text: #241b17;
-  --landing-muted: #635147;
-  --landing-soft: #816f64;
+  --landing-text: #252525;
+  --landing-muted: #252525;
+  --landing-soft: #252525;
   background:
     radial-gradient(1100px 600px at 10% -10%, rgba(99,81,71,0.16), transparent 55%),
     radial-gradient(900px 500px at 92% 0%, rgba(159,139,126,0.14), transparent 55%),
@@ -2943,10 +2944,8 @@ button, a, input, textarea, select { transition: color var(--p-dur-1) var(--p-ea
   color: transparent;
 }
 .landing-theme-paper .landing-brand-copy strong {
-  background: linear-gradient(120deg, #3b2d26 0%, #635147 60%, #9f8b7e 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background: none;
+  color: #252525;
 }
 
 /* nav links: pill hover */
@@ -3173,10 +3172,8 @@ code, pre, kbd, samp {
   text-shadow: none;
 }
 .landing-theme-paper .landing-hero-panel h1 {
-  background: linear-gradient(180deg, #3b2d26 0%, #635147 70%, #9f8b7e 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background: none;
+  color: #252525;
 }
 
 .landing-hero-tagline {
@@ -3255,10 +3252,8 @@ code, pre, kbd, samp {
   color: transparent;
 }
 .landing-theme-paper .landing-page-hero h1 {
-  background: linear-gradient(180deg, #3b2d26, #635147);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background: none;
+  color: #252525;
 }
 
 /* AUTH cards — keep dark but refine */
