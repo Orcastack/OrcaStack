@@ -2814,16 +2814,6 @@ export function App() {
                 <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
             </button>
-            <button
-              aria-label={mobileNavOpen ? 'Close menu' : 'Open menu'}
-              className="landing-icon-button landing-hamburger"
-              onClick={() => setMobileNavOpen((s) => !s)}
-              type="button"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
-            </button>
             <a
               aria-label="Open AtonixCorp on GitHub"
               className="landing-icon-button"

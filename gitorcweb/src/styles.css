@@ -2331,7 +2331,6 @@ h1 {
   }
 
   .landing-header,
-  .landing-header-controls,
   .landing-search,
   .landing-section-intro,
   .landing-link-row,
@@ -2399,7 +2398,6 @@ h1 {
 
 @media (max-width: 960px) {
   .landing-header,
-  .landing-header-controls,
   .landing-search,
   .landing-page-hero,
   .landing-page-actions {
