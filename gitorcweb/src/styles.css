@@ -22,45 +22,63 @@
   .landing-header-nav { display: none !important; }
   .landing-hamburger { display: inline-flex !important; }
   .landing-hamburger svg { width: 18px; height: 18px; }
-  .landing-header-controls { display: flex !important; align-items: center !important; gap: 0.4rem !important; }
+  .landing-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    overflow: visible;
+  }
+  .landing-header-controls {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end;
+    gap: 0.4rem !important;
+    margin-left: auto;
+  }
+  .landing-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .landing-brand-copy {
+    align-items: flex-start;
+    text-align: left;
+    min-width: 0;
+  }
   .landing-brand-mark { width: 34px !important; height: 34px !important; }
-  .landing-header { overflow: visible; }
 }
 
-/* Small screens: stack header vertically with icons row above brand text */
+/* Small screens: keep brand and controls on one row and preserve left alignment */
 @media (max-width: 600px) {
   .landing-header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
-    gap: 0.35rem;
-    padding: 0.6rem 0.6rem 0.8rem;
-    overflow: visible;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem;
   }
 
   .landing-header-controls {
-    width: 100%;
-    display: flex !important;
+    width: auto;
     justify-content: flex-end;
-    order: 1;
-    padding-bottom: 0.15rem;
+    padding-bottom: 0;
   }
 
-  .landing-hamburger { order: 1; }
-
   .landing-brand {
-    order: 2;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 0.1rem;
-    padding-top: 0.15rem;
+    gap: 0.45rem;
+    padding-top: 0;
   }
 
   .landing-brand-copy {
     display: flex !important;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    text-align: left;
     overflow: visible;
   }
 
@@ -2330,7 +2348,6 @@ h1 {
     padding-top: 2rem;
   }
 
-  .landing-header,
   .landing-search,
   .landing-section-intro,
   .landing-link-row,
@@ -2397,7 +2414,6 @@ h1 {
 }
 
 @media (max-width: 960px) {
-  .landing-header,
   .landing-search,
   .landing-page-hero,
   .landing-page-actions {
