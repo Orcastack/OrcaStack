@@ -35,6 +35,28 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    container_name: gitorc-redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  minio:
+    image: minio/minio:RELEASE.2025-01-20T14-49-07Z
+    container_name: gitorc-minio
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-gitorc}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-gitorcminio123}
+    ports:
+      - "9002:9002"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v24.2.10
     container_name: gitorc-redpanda
@@ -92,7 +114,7 @@ services:
       - namenode
 
   gateway:
-    image: golang:1.24
+    image: golang:1.25
     container_name: gitorc-gateway
     working_dir: /workspace/gitorcapi
     command: sh -c "go mod download && go run ./cmd/gitorc-gateway"
@@ -123,7 +145,7 @@ services:
         condition: service_started
 
   git-service:
-    image: golang:1.24
+    image: golang:1.25
     container_name: gitorc-git-service
     working_dir: /workspace/gitorcapi
     command: sh -c "go mod download && go run ./cmd/gitorc-git-service"
@@ -135,6 +157,7 @@ services:
       GITORC_GIT_HTTP_PORT: 8081
       GITORC_GIT_GRPC_PORT: 9081
       GITORC_GIT_IDENTITY: ${GITORC_GIT_IDENTITY:-orca:service:dce9129f-783a-4816-8ee1-8676fa5192a8}
+      GITORC_GIT_TOKEN_SECRET: ${GITORC_GIT_TOKEN_SECRET:-gitorc-dev-secret}
       <<: *gitorc-security-env
     ports:
       - "8081:8081"
@@ -144,7 +167,7 @@ services:
         condition: service_healthy
 
   review-service:
-    image: golang:1.24
+    image: golang:1.25
     container_name: gitorc-review-service
     working_dir: /workspace/gitorcapi
     command: sh -c "go mod download && go run ./cmd/gitorc-review-service"
@@ -157,14 +180,14 @@ services:
       GITORC_REVIEW_IDENTITY: ${GITORC_REVIEW_IDENTITY:-orca:service:4cc2c0ec-0af8-4d25-a565-a301e2e8f324}
       <<: *gitorc-security-env
     ports:
-      - "8086:8082"
+      - "8087:8082"
       - "9082:9082"
     depends_on:
       git-service:
         condition: service_started
 
   ci-service:
-    image: golang:1.24
+    image: golang:1.25
     container_name: gitorc-ci-service
     working_dir: /workspace/gitorcapi
     command: sh -c "go mod download && go run ./cmd/gitorc-ci-service"
@@ -187,7 +210,7 @@ services:
         condition: service_started
 
   cd-service:
-    image: golang:1.24
+    image: golang:1.25
     container_name: gitorc-cd-service
     working_dir: /workspace/gitorcapi
     command: sh -c "go mod download && go run ./cmd/gitorc-cd-service"
@@ -208,7 +231,7 @@ services:
         condition: service_started
 
   analytics-service:
-    image: golang:1.24
+    image: golang:1.25
     container_name: gitorc-analytics-service
     working_dir: /workspace/gitorcapi
     command: sh -c "go mod download && go run ./cmd/gitorc-analytics-service"
@@ -227,6 +250,169 @@ services:
       hbase:
         condition: service_started
 
+  runner:
+    image: golang:1.25
+    container_name: gitorc-runner
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-runner"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+      - ./infra/artifacts:/workspace/artifacts
+      - ./infra/security:/run/secrets:ro
+    environment:
+      GITORC_RUNNER_HTTP_PORT: 8086
+      GITORC_RUNNER_GRPC_PORT: 9086
+      GITORC_RUNNER_IDENTITY: ${GITORC_RUNNER_IDENTITY:-orca:service:bd40c208-0bc0-4fef-b52c-69334b283a74}
+      <<: *gitorc-security-env
+    ports:
+      - "8086:8086"
+      - "9086:9086"
+    depends_on:
+      git-service:
+        condition: service_started
+      ci-service:
+        condition: service_started
+
+  hw-automation:
+    image: golang:1.25
+    container_name: gitorc-hw-automation
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-hw-automation"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+      - ./infra/automation:/workspace/automation
+      - ./infra/security:/run/secrets:ro
+    environment:
+      GITORC_HW_AUTOMATION_HTTP_PORT: 8087
+      GITORC_HW_AUTOMATION_GRPC_PORT: 9087
+      GITORC_HW_AUTOMATION_IDENTITY: ${GITORC_HW_AUTOMATION_IDENTITY:-orca:service:851e44cf-4838-445c-97e0-fbf12ff0c938}
+      <<: *gitorc-security-env
+    ports:
+      - "8087:8087"
+      - "9087:9087"
+
+  sw-automation:
+    image: golang:1.25
+    container_name: gitorc-sw-automation
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-sw-automation"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+      - ./infra/automation:/workspace/automation
+      - ./infra/security:/run/secrets:ro
+    environment:
+      GITORC_SW_AUTOMATION_HTTP_PORT: 8088
+      GITORC_SW_AUTOMATION_GRPC_PORT: 9088
+      GITORC_SW_AUTOMATION_IDENTITY: ${GITORC_SW_AUTOMATION_IDENTITY:-orca:service:4dc90d73-dcb1-4401-b2ff-6ca4fb898dbd}
+      <<: *gitorc-security-env
+    ports:
+      - "8088:8088"
+      - "9088:9088"
+
+  device-orch:
+    image: golang:1.25
+    container_name: gitorc-device-orch
+    working_dir: /workspace/gitorcapi
+    command: sh -c "go mod download && go run ./cmd/gitorc-device-orch"
+    volumes:
+      - ./gitorcapi:/workspace/gitorcapi
+      - ./infra/automation:/workspace/automation
+      - ./infra/security:/run/secrets:ro
+    environment:
+      GITORC_DEVICE_ORCH_HTTP_PORT: 8089
+      GITORC_DEVICE_ORCH_GRPC_PORT: 9089
+      GITORC_DEVICE_ORCH_IDENTITY: ${GITORC_DEVICE_ORCH_IDENTITY:-orca:service:1d57024d-3989-4847-b56c-7cabdfdfd321}
+      <<: *gitorc-security-env
+    ports:
+      - "8089:8089"
+      - "9089:9089"
+
+  ruby-app:
+    image: ruby:3.3
+    container_name: gitorc-ruby-app
+    working_dir: /workspace/services/ruby-app
+    command: sh -c "bundle install && bundle exec ruby server.rb"
+    volumes:
+      - ./services/ruby-app:/workspace/services/ruby-app
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://gitorc:gitorc@postgres:5432/gitorc
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: http://minio:9000
+      GITORC_GIT_TOKEN_SECRET: ${GITORC_GIT_TOKEN_SECRET:-gitorc-dev-secret}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  sidekiq:
+    image: ruby:3.3
+    container_name: gitorc-sidekiq
+    working_dir: /workspace/services/ruby-app
+    command: sh -c "bundle install && bundle exec sidekiq -r ./worker_boot.rb -C config/sidekiq.yml"
+    volumes:
+      - ./services/ruby-app:/workspace/services/ruby-app
+    environment:
+      DATABASE_URL: postgres://gitorc:gitorc@postgres:5432/gitorc
+      REDIS_URL: redis://redis:6379/0
+      GITORC_GIT_TOKEN_SECRET: ${GITORC_GIT_TOKEN_SECRET:-gitorc-dev-secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:v2.53.4
+    container_name: gitorc-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./infra/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9091:9090"
+    depends_on:
+      gateway:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: gitorc-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin12345}
+    volumes:
+      - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/observability/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      prometheus:
+        condition: service_started
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: gitorc-nginx
+    volumes:
+      - ./infra/nginx/local.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "18080:80"
+    depends_on:
+      web:
+        condition: service_started
+      ruby-app:
+        condition: service_started
+      git-service:
+        condition: service_started
+      runner:
+        condition: service_started
+      device-orch:
+        condition: service_started
+
   web:
     image: node:20-alpine
     container_name: gitorc-web
@@ -240,9 +426,14 @@ services:
     depends_on:
       gateway:
         condition: service_started
+      ruby-app:
+        condition: service_started
 
 volumes:
   postgres_data:
+  redis_data:
+  minio_data:
   hadoop_namenode:
   hadoop_datanode:
   gitorcweb_node_modules:
+  grafana_data:

@@ -12,6 +12,10 @@ const (
 	DefaultCIIdentity        = security.DefaultCIIdentity
 	DefaultCDIdentity        = security.DefaultCDIdentity
 	DefaultAnalyticsIdentity = security.DefaultAnalyticsIdentity
+	DefaultRunnerIdentity    = security.DefaultRunnerIdentity
+	DefaultHWAutoIdentity    = security.DefaultHWAutoIdentity
+	DefaultSWAutoIdentity    = security.DefaultSWAutoIdentity
+	DefaultDeviceOrchIdentity = security.DefaultDeviceOrchIdentity
 )
 
 func WithServiceSecurity(cfg Config, componentIdentityKey, componentIdentityDefault string) Config {

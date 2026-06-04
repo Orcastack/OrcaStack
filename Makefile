@@ -2,7 +2,7 @@ API_DIR := gitorcapi
 WEB_DIR := gitorcweb
 TF_ENV_DIR := infra/terraform/environments/private-cloud
 
-.PHONY: api-build api-run gateway git review ci cd analytics web-install web-build up down infra-fmt infra-validate bootstrap-local deploy-private-cloud cloud-bootstrap proxmox-bootstrap openstack-bootstrap network-fabric kubernetes-bootstrap rancher-register gpu-bootstrap observability-bootstrap release-build apt-repo-update
+.PHONY: api-build api-run gateway git review ci cd analytics runner hw-automation sw-automation device-orch ruby-app web-install web-build up down infra-fmt infra-validate bootstrap-local deploy-private-cloud cloud-bootstrap proxmox-bootstrap openstack-bootstrap network-fabric kubernetes-bootstrap rancher-register gpu-bootstrap observability-bootstrap release-build apt-repo-update
 
 api-build:
 	cd $(API_DIR) && go build ./...
@@ -25,6 +25,21 @@ cd:
 analytics:
 	cd $(API_DIR) && go run ./cmd/gitorc-analytics-service
 
+runner:
+	cd $(API_DIR) && go run ./cmd/gitorc-runner
+
+hw-automation:
+	cd $(API_DIR) && go run ./cmd/gitorc-hw-automation
+
+sw-automation:
+	cd $(API_DIR) && go run ./cmd/gitorc-sw-automation
+
+device-orch:
+	cd $(API_DIR) && go run ./cmd/gitorc-device-orch
+
+ruby-app:
+	cd services/ruby-app && ruby server.rb
+
 web-install:
 	cd $(WEB_DIR) && npm install
 
@@ -46,7 +61,7 @@ infra-validate:
 	terraform fmt -check -recursive infra/terraform
 
 bootstrap-local:
-	docker compose up -d postgres redpanda namenode datanode hbase gateway git-service review-service ci-service cd-service analytics-service web
+	docker compose up -d postgres redis minio redpanda namenode datanode hbase gateway git-service review-service ci-service cd-service analytics-service runner hw-automation sw-automation device-orch ruby-app web prometheus grafana nginx
 
 deploy-private-cloud:
 	kubectl apply -f infra/kubernetes/base/namespace.yaml

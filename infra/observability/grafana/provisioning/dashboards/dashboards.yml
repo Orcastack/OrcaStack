@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: GITORC
+    orgId: 1
+    folder: GITORC
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

@@ -59,6 +59,7 @@ make deploy-private-cloud
 ## Documentation
 
 - [Platform architecture](docs/platform-architecture.md)
+- [Go-first platform blueprint and capability matrix](docs/GITORC-Full-Platform-Blueprint.md)
 - [Private-cloud deployment](docs/Private-Cloud-Deployment.md)
 - [CI/CD engine](docs/CI-CD-Engine.md)
 - [Cloud automation workflows](docs/Cloud-Automation-Workflows.md)

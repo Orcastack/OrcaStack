@@ -3,11 +3,13 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -38,6 +40,9 @@ type Config struct {
 
 func Run(ctx context.Context, cfg Config) error {
 	logger := log.New(os.Stdout, cfg.Name+" ", log.LstdFlags|log.Lmicroseconds)
+	startedAt := time.Now().UTC()
+	var ready int32 = 1
+	var requestsTotal uint64
 
 	runtimePolicy, err := security.BuildRuntimePolicy(security.RuntimeOptions{
 		RepositoryIdentity: cfg.RepositoryIdentity,
@@ -70,6 +75,15 @@ func Run(ctx context.Context, cfg Config) error {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"status":"ok","service":"` + cfg.Name + `","role":"` + cfg.Role + `","identity":"` + runtimePolicy.ComponentIdentity.Raw + `"}`))
 	})
+	httpMux.HandleFunc("/readyz", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if atomic.LoadInt32(&ready) == 0 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			_, _ = w.Write([]byte(`{"status":"not-ready","service":"` + cfg.Name + `"}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"status":"ready","service":"` + cfg.Name + `"}`))
+	})
 	httpMux.HandleFunc("/metadata", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"name":"` + cfg.Name + `","role":"` + cfg.Role + `","summary":"` + cfg.Summary + `","identity":"` + runtimePolicy.ComponentIdentity.Raw + `","repository_identity":"` + runtimePolicy.RepositoryIdentity.Raw + `","process_identity":"` + runtimePolicy.ProcessIdentity.Raw + `"}`))
@@ -78,10 +92,36 @@ func Run(ctx context.Context, cfg Config) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(runtimePolicy)
 	})
+	httpMux.HandleFunc("/metrics", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
+		_, _ = fmt.Fprintf(w,
+			"# HELP gitorc_service_info Static metadata about the running service.\n"+
+				"# TYPE gitorc_service_info gauge\n"+
+				"gitorc_service_info{service=%q,role=%q,identity=%q} 1\n"+
+				"# HELP gitorc_service_ready Whether the service is ready to receive requests.\n"+
+				"# TYPE gitorc_service_ready gauge\n"+
+				"gitorc_service_ready{service=%q} %d\n"+
+				"# HELP gitorc_service_requests_total Total HTTP requests served by the service harness.\n"+
+				"# TYPE gitorc_service_requests_total counter\n"+
+				"gitorc_service_requests_total{service=%q} %d\n"+
+				"# HELP gitorc_service_uptime_seconds Service uptime in seconds.\n"+
+				"# TYPE gitorc_service_uptime_seconds gauge\n"+
+				"gitorc_service_uptime_seconds{service=%q} %d\n",
+			cfg.Name,
+			cfg.Role,
+			runtimePolicy.ComponentIdentity.Raw,
+			cfg.Name,
+			atomic.LoadInt32(&ready),
+			cfg.Name,
+			atomic.LoadUint64(&requestsTotal),
+			cfg.Name,
+			time.Since(startedAt).Milliseconds()/1000,
+		)
+	})
 
 	httpServer := &http.Server{
 		Addr:              ":" + cfg.HTTPPort,
-		Handler:           withCORS(httpMux),
+		Handler:           withCORS(withMetrics(httpMux, &requestsTotal)),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -121,12 +161,21 @@ func Run(ctx context.Context, cfg Config) error {
 		logger.Printf("service failure: %v", serveErr)
 	}
 
+	atomic.StoreInt32(&ready, 0)
+
 	grpcServer.GracefulStop()
 
 	httpShutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	return httpServer.Shutdown(httpShutdownCtx)
+}
+
+func withMetrics(next http.Handler, requestsTotal *uint64) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddUint64(requestsTotal, 1)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func withCORS(next http.Handler) http.Handler {
