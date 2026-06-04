@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import {
   fetchDevices,
@@ -17,11 +18,17 @@ import {
 } from './api';
 import { PublicFooter } from './components/PublicFooter';
 import { PublicHeader } from './components/PublicHeader';
+import { WorkspaceLayout } from './components/WorkspaceLayout';
+import { AutomationPage } from './pages/AutomationPage';
+import { DevicesPage } from './pages/DevicesPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { CommunityPage } from './pages/CommunityPage';
 import { DeveloperPage } from './pages/DeveloperPage';
 import { DocsPage } from './pages/DocsPage';
 import { HomePage } from './pages/HomePage';
+import { PipelinesPage } from './pages/PipelinesPage';
+import { RepositoriesPage } from './pages/RepositoriesPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { type AuthMode, type DashboardState, emptyDashboardState, type PublicRoute } from './types';
 
 const authTokenStorageKey = 'gitorc.auth.token';
@@ -47,14 +54,17 @@ function storeAuthToken(token: string | null) {
   window.localStorage.removeItem(authTokenStorageKey);
 }
 
-function readPublicRoute(): PublicRoute {
-  if (typeof window === 'undefined') {
-    return 'home';
+function pathToPublicRoute(pathname: string): PublicRoute {
+  if (pathname === '/docs') {
+    return 'docs';
   }
 
-  const value = window.location.hash.replace('#', '');
-  if (value === 'docs' || value === 'developer' || value === 'community') {
-    return value;
+  if (pathname === '/developer') {
+    return 'developer';
+  }
+
+  if (pathname === '/community') {
+    return 'community';
   }
 
   return 'home';
@@ -62,7 +72,6 @@ function readPublicRoute(): PublicRoute {
 
 export function App() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const [publicRoute, setPublicRoute] = useState<PublicRoute>(() => readPublicRoute());
   const [authToken, setAuthToken] = useState<string | null>(() => readStoredAuthToken());
   const [authSession, setAuthSession] = useState<AuthSession | null>(null);
   const [dashboard, setDashboard] = useState<DashboardState>(emptyDashboardState);
@@ -73,19 +82,11 @@ export function App() {
   const [loginForm, setLoginForm] = useState({ username: 'admin', password: 'admin12345' });
   const [signupForm, setSignupForm] = useState({ username: '', email: '', password: '' });
   const [reviewBusyId, setReviewBusyId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const isPlatformAdmin = authSession?.user.role === 'platform-admin';
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
-    const handleHashChange = () => setPublicRoute(readPublicRoute());
-    window.addEventListener('hashchange', handleHashChange);
-
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  const publicRoute = pathToPublicRoute(location.pathname);
 
   useEffect(() => {
     if (!authToken) {
@@ -171,6 +172,7 @@ export function App() {
       storeAuthToken(session.token);
       setAuthToken(session.token);
       setAuthSession(session);
+      navigate('/app/dashboard', { replace: true });
     } catch (loginError) {
       const message = loginError instanceof Error ? loginError.message : 'Login failed';
       setError(message);
@@ -211,6 +213,7 @@ export function App() {
     setAuthSession(null);
     setDashboard(emptyDashboardState);
     setNotice(null);
+    navigate('/', { replace: true });
   }
 
   async function handleReview(id: string, status: 'approved' | 'rejected') {
@@ -236,22 +239,16 @@ export function App() {
   }
 
   function navigatePublic(route: PublicRoute) {
-    setPublicRoute(route);
-
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const nextHash = route === 'home' ? '' : `#${route}`;
-    window.history.pushState(null, '', `${window.location.pathname}${window.location.search}${nextHash}`);
+    const nextPath = route === 'home' ? '/' : `/${route}`;
+    navigate(nextPath);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function openAuthPanel(mode: AuthMode) {
     setAuthMode(mode);
 
-    if (publicRoute !== 'home') {
-      navigatePublic('home');
+    if (location.pathname !== '/') {
+      navigate('/', { replace: false });
     }
 
     if (typeof window === 'undefined') {
@@ -278,35 +275,179 @@ export function App() {
   }
 
   if (!authToken || !authSession) {
-    const publicPage =
-      publicRoute === 'docs' ? <DocsPage onLogin={() => openAuthPanel('login')} onSignup={() => openAuthPanel('signup')} /> :
-      publicRoute === 'developer' ? <DeveloperPage onLogin={() => openAuthPanel('login')} onSignup={() => openAuthPanel('signup')} /> :
-      publicRoute === 'community' ? <CommunityPage onLogin={() => openAuthPanel('login')} onSignup={() => openAuthPanel('signup')} /> :
-      <HomePage
-        authChecking={authChecking}
-        authMode={authMode}
-        error={error}
-        loading={loading}
-        loginForm={loginForm}
-        notice={notice}
-        onAuthModeChange={setAuthMode}
-        onLogin={() => openAuthPanel('login')}
-        onLoginFieldChange={(field, value) => setLoginForm((current) => ({ ...current, [field]: value }))}
-        onLoginSubmit={handleLogin}
-        onSignup={() => openAuthPanel('signup')}
-        onSignupFieldChange={(field, value) => setSignupForm((current) => ({ ...current, [field]: value }))}
-        onSignupSubmit={handleSignup}
-        signupForm={signupForm}
-      />;
-
     return (
-      <main className="public-shell">
-        <PublicHeader currentPage={publicRoute} onLogin={() => openAuthPanel('login')} onNavigate={navigatePublic} onSignup={() => openAuthPanel('signup')} />
-        {publicPage}
-        <PublicFooter />
-      </main>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <main className="public-shell">
+              <PublicHeader currentPage="home" onLogin={() => openAuthPanel('login')} onNavigate={navigatePublic} onSignup={() => openAuthPanel('signup')} />
+              <HomePage
+                authChecking={authChecking}
+                authMode={authMode}
+                error={error}
+                loading={loading}
+                loginForm={loginForm}
+                notice={notice}
+                onAuthModeChange={setAuthMode}
+                onLogin={() => openAuthPanel('login')}
+                onLoginFieldChange={(field, value) => setLoginForm((current) => ({ ...current, [field]: value }))}
+                onLoginSubmit={handleLogin}
+                onSignup={() => openAuthPanel('signup')}
+                onSignupFieldChange={(field, value) => setSignupForm((current) => ({ ...current, [field]: value }))}
+                onSignupSubmit={handleSignup}
+                signupForm={signupForm}
+              />
+              <PublicFooter />
+            </main>
+          }
+        />
+        <Route
+          path="/docs"
+          element={
+            <main className="public-shell">
+              <PublicHeader currentPage="docs" onLogin={() => openAuthPanel('login')} onNavigate={navigatePublic} onSignup={() => openAuthPanel('signup')} />
+              <DocsPage onLogin={() => openAuthPanel('login')} onSignup={() => openAuthPanel('signup')} />
+              <PublicFooter />
+            </main>
+          }
+        />
+        <Route
+          path="/developer"
+          element={
+            <main className="public-shell">
+              <PublicHeader currentPage="developer" onLogin={() => openAuthPanel('login')} onNavigate={navigatePublic} onSignup={() => openAuthPanel('signup')} />
+              <DeveloperPage onLogin={() => openAuthPanel('login')} onSignup={() => openAuthPanel('signup')} />
+              <PublicFooter />
+            </main>
+          }
+        />
+        <Route
+          path="/community"
+          element={
+            <main className="public-shell">
+              <PublicHeader currentPage="community" onLogin={() => openAuthPanel('login')} onNavigate={navigatePublic} onSignup={() => openAuthPanel('signup')} />
+              <CommunityPage onLogin={() => openAuthPanel('login')} onSignup={() => openAuthPanel('signup')} />
+              <PublicFooter />
+            </main>
+          }
+        />
+        <Route path="/app/*" element={<Navigate replace to="/" />} />
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Routes>
     );
   }
 
-  return <DashboardPage authSession={authSession} dashboard={dashboard} error={error} isPlatformAdmin={isPlatformAdmin} loading={loading} onLogout={handleLogout} onRefresh={() => window.location.reload()} onReview={handleReview} reviewBusyId={reviewBusyId} />;
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate replace to="/app/dashboard" />} />
+      <Route path="/docs" element={<Navigate replace to="/app/dashboard" />} />
+      <Route path="/developer" element={<Navigate replace to="/app/dashboard" />} />
+      <Route path="/community" element={<Navigate replace to="/app/dashboard" />} />
+      <Route
+        path="/app/dashboard"
+        element={
+          <WorkspaceLayout
+            authSession={authSession}
+            dashboard={dashboard}
+            error={error}
+            loading={loading}
+            onLogout={handleLogout}
+            onRefresh={() => window.location.reload()}
+            summary="Monitor repositories, CI/CD execution, deployments, labs, and approval workflows from one production-grade engineering surface."
+            title="Platform dashboard"
+          >
+            <DashboardPage dashboard={dashboard} isPlatformAdmin={isPlatformAdmin} onReview={handleReview} reviewBusyId={reviewBusyId} />
+          </WorkspaceLayout>
+        }
+      />
+      <Route
+        path="/app/repositories"
+        element={
+          <WorkspaceLayout
+            authSession={authSession}
+            dashboard={dashboard}
+            error={error}
+            loading={loading}
+            onLogout={handleLogout}
+            onRefresh={() => window.location.reload()}
+            summary="Review governed repositories, approval flow, and identity posture with the same structured workspace shell used across the platform."
+            title="Repositories"
+          >
+            <RepositoriesPage dashboard={dashboard} />
+          </WorkspaceLayout>
+        }
+      />
+      <Route
+        path="/app/pipelines"
+        element={
+          <WorkspaceLayout
+            authSession={authSession}
+            dashboard={dashboard}
+            error={error}
+            loading={loading}
+            onLogout={handleLogout}
+            onRefresh={() => window.location.reload()}
+            summary="Track pipeline inventory, execution state, and runner utilization through dedicated route-based navigation."
+            title="Pipelines"
+          >
+            <PipelinesPage dashboard={dashboard} />
+          </WorkspaceLayout>
+        }
+      />
+      <Route
+        path="/app/devices"
+        element={
+          <WorkspaceLayout
+            authSession={authSession}
+            dashboard={dashboard}
+            error={error}
+            loading={loading}
+            onLogout={handleLogout}
+            onRefresh={() => window.location.reload()}
+            summary="Inspect every connected device target, assignment state, and hardware health from a dedicated internal workspace page."
+            title="Devices"
+          >
+            <DevicesPage dashboard={dashboard} />
+          </WorkspaceLayout>
+        }
+      />
+      <Route
+        path="/app/automation"
+        element={
+          <WorkspaceLayout
+            authSession={authSession}
+            dashboard={dashboard}
+            error={error}
+            loading={loading}
+            onLogout={handleLogout}
+            onRefresh={() => window.location.reload()}
+            summary="Coordinate hardware and software automation lanes with one consistent navigation, layout, and card system."
+            title="Automation"
+          >
+            <AutomationPage dashboard={dashboard} />
+          </WorkspaceLayout>
+        }
+      />
+      <Route
+        path="/app/settings"
+        element={
+          <WorkspaceLayout
+            authSession={authSession}
+            dashboard={dashboard}
+            error={error}
+            loading={loading}
+            onLogout={handleLogout}
+            onRefresh={() => window.location.reload()}
+            summary="Manage access posture, identity, and workspace-level settings using the same design system as the rest of the platform."
+            title="Settings"
+          >
+            <SettingsPage authSession={authSession} dashboard={dashboard} />
+          </WorkspaceLayout>
+        }
+      />
+      <Route path="/app" element={<Navigate replace to="/app/dashboard" />} />
+      <Route path="*" element={<Navigate replace to="/app/dashboard" />} />
+    </Routes>
+  );
 }
