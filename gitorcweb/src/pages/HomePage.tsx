@@ -3,24 +3,24 @@ import { HeroSection } from '../components/HeroSection';
 import type { AuthMode } from '../types';
 
 const landingStats = [
-  { label: 'Protected repositories', value: '2.4K+' },
-  { label: 'Pipeline runs per day', value: '18K' },
-  { label: 'Managed device labs', value: '320' },
-  { label: 'Mean approval latency', value: '< 4 min' },
+  { label: 'Projects under governance', value: '2.4K+' },
+  { label: 'Daily pipeline jobs', value: '18K' },
+  { label: 'Connected device targets', value: '320' },
+  { label: 'Median approval time', value: '< 4 min' },
 ];
 
 const landingFeatureCards = [
   {
-    title: 'One control plane for source to release',
-    description: 'Coordinate review, CI, CD, fleet automation, and policy from a single operating surface tuned for regulated engineering teams.',
+    title: 'A navigation model that feels product-grade',
+    description: 'The home page now leads with platform positioning, module navigation, and a clear entry path instead of collapsing immediately into an auth form.',
   },
   {
-    title: 'Git, runners, hardware, and automation in one graph',
-    description: 'Track repositories, execution capacity, physical devices, and workflow health without context switching across separate products.',
+    title: 'Delivery signals visible at the front door',
+    description: 'Repositories, pipeline pressure, device capacity, and governance signals are presented the way an enterprise DevSecOps suite would introduce itself.',
   },
   {
-    title: 'Built for platform operators, not demo screenshots',
-    description: 'Surface approvals, queues, security posture, and live activity in a layout that supports operational decisions under load.',
+    title: 'Hardware and software automation in the same story',
+    description: 'The landing experience now reflects what makes GITORC distinct: software delivery controls combined with physical lab and orchestration capability.',
   },
 ];
 
@@ -57,8 +57,8 @@ export function HomePage(props: HomePageProps) {
 
       <section className="landing-section" id="operations">
         <div className="section-heading">
-          <span className="eyebrow">Operational view</span>
-          <h2>Built to make the front page feel like a platform, not a form.</h2>
+          <span className="eyebrow">Why it now reads like a platform</span>
+          <h2>Designed to feel closer to a GitLab-style enterprise landing screen.</h2>
         </div>
         <div className="feature-grid">
           {landingFeatureCards.map((card) => (
@@ -72,24 +72,24 @@ export function HomePage(props: HomePageProps) {
 
       <section className="landing-section landing-section--split">
         <div className="section-heading">
-          <span className="eyebrow">Why this surface works</span>
-          <h2>A structured entry point for engineers, approvers, and platform operators.</h2>
+          <span className="eyebrow">Enterprise entry point</span>
+          <h2>A front page for engineers, approvers, and platform operators.</h2>
           <p>
-            The home page establishes product context first. Authentication remains embedded below, so first-time visitors see the platform header, positioning, and footer before any credential prompt.
+            The copy and layout now lead with suite positioning, product modules, and operational credibility. Authentication remains available below, but it no longer replaces the homepage itself.
           </p>
         </div>
         <div className="proof-card">
           <div>
-            <span>Repository governance</span>
-            <strong>Verified review flows and controlled approvals</strong>
+            <span>Governance</span>
+            <strong>Review flows, policy checks, and controlled approvals</strong>
           </div>
           <div>
-            <span>Runtime operations</span>
-            <strong>Runner capacity, queue pressure, deployments, and device health</strong>
+            <span>Operations</span>
+            <strong>Runner capacity, queue pressure, deployments, and target health</strong>
           </div>
           <div>
-            <span>Automation reach</span>
-            <strong>Hardware and software workflows tracked from one control layer</strong>
+            <span>Automation</span>
+            <strong>Hardware and software workflows coordinated from one control layer</strong>
           </div>
         </div>
       </section>

@@ -23,20 +23,44 @@ export function HeroSection({ onLogin, onSignup }: HeroSectionProps) {
     <section className="hero-grid" id="platform">
       <div className="hero-copy">
         <div className="hero-copy__intro">
-          <span className="eyebrow">Source control, delivery, automation</span>
-          <h1>Operate your engineering estate like a premium internal GitLab.</h1>
+          <span className="eyebrow">The complete DevSecOps platform</span>
+          <div className="hero-kicker">
+            <span>Plan</span>
+            <span>Code</span>
+            <span>Secure</span>
+            <span>Deploy</span>
+            <span>Operate</span>
+          </div>
+          <h1>One control plane for source code, delivery pipelines, devices, and policy.</h1>
           <p>
-            GITORC gives platform teams a single front door for repository governance, CI/CD, device orchestration, and runtime policy.
-            The public home page leads with product value first, while sign-in stays available when users are ready.
+            Built for internal engineering organizations that want a GitLab-style front door with stronger control over hardware labs,
+            software automation, approval flows, and runtime operations.
+          </p>
+          <p className="hero-copy__supporting">
+            Repositories, runners, deployments, access requests, and operational telemetry stay connected in one premium interface instead of being split across disconnected tools.
           </p>
         </div>
         <div className="hero-actions">
           <button className="primary-button primary-button--warm" onClick={onSignup} type="button">
-            Start with controlled access
+            Start free evaluation
           </button>
           <button className="secondary-button secondary-button--ghost" onClick={onLogin} type="button">
-            Open operator login
+            Sign in to workspace
           </button>
+        </div>
+        <div className="hero-proofstrip" aria-label="Product proof points">
+          <div>
+            <span>Single application</span>
+            <strong>Source to production visibility</strong>
+          </div>
+          <div>
+            <span>Built-in governance</span>
+            <strong>Approvals, policies, auditability</strong>
+          </div>
+          <div>
+            <span>Hybrid execution</span>
+            <strong>Cloud runners and physical device labs</strong>
+          </div>
         </div>
         <ul className="hero-pillars">
           {landingPillars.map((item) => (
@@ -47,7 +71,7 @@ export function HeroSection({ onLogin, onSignup }: HeroSectionProps) {
 
       <aside className="hero-console" aria-label="Platform summary">
         <div className="hero-console__header">
-          <span>Platform status</span>
+          <span>Platform overview</span>
           <StatusPill value="healthy" />
         </div>
         <div className="hero-console__body">
@@ -60,12 +84,12 @@ export function HeroSection({ onLogin, onSignup }: HeroSectionProps) {
         </div>
         <div className="hero-console__footer">
           <div>
-            <span>Control surfaces</span>
-            <strong>Repos, runners, labs, policies</strong>
+            <span>Core modules</span>
+            <strong>Repos, CI/CD, labs, governance</strong>
           </div>
           <div>
-            <span>Operator model</span>
-            <strong>Approval-driven access</strong>
+            <span>Operating model</span>
+            <strong>Role-based access with approvals</strong>
           </div>
         </div>
       </aside>

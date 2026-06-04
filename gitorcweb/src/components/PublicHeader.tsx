@@ -17,12 +17,15 @@ export function PublicHeader({ currentPage, onNavigate, onLogin, onSignup }: Pub
 
   return (
     <header className="landing-header">
-      <div className="brand-lockup">
-        <span className="brand-mark">G</span>
-        <div>
-          <span className="eyebrow">GITORC</span>
-          <strong>Cloud Engineering Platform</strong>
+      <div className="landing-header__left">
+        <div className="brand-lockup">
+          <span className="brand-mark">G</span>
+          <div>
+            <span className="eyebrow">GITORC</span>
+            <strong>DevSecOps Platform</strong>
+          </div>
         </div>
+        <span className="brand-badge">Self-managed premium edition</span>
       </div>
       <nav className="landing-nav" aria-label="Primary">
         {routes.map((item) => (
