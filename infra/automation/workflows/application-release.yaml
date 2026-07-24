@@ -14,7 +14,7 @@ workflow:
       stage: policy-gate
     - name: deploy-dev
       type: kubernetes
-      manifest: infra/kubernetes/platform/gitorc-services.yaml
+      manifest: infra/kubernetes/platform/orcastack-services.yaml
     - name: monitor
       type: kubernetes
       manifest: infra/kubernetes/platform/monitoring.yaml

@@ -1,4 +1,4 @@
-name: gitorc validation
+name: orcastack validation
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
   api-build:
     runs-on: ubuntu-latest
     env:
-      GITORC_REPOSITORY_IDENTITY: orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a
+      ORCASTACK_REPOSITORY_IDENTITY: orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a
 
     steps:
     - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -23,38 +23,38 @@ jobs:
 
     - name: Build API services
       run: |
-        cd gitorcapi
+        cd orcastackapi
         go mod tidy
         mkdir -p dist
-        go build -o dist/gitorc-gateway ./cmd/gitorc-gateway
-        go build -o dist/gitorc-git-service ./cmd/gitorc-git-service
-        go build -o dist/gitorc-review-service ./cmd/gitorc-review-service
-        go build -o dist/gitorc-ci-service ./cmd/gitorc-ci-service
-        go build -o dist/gitorc-cd-service ./cmd/gitorc-cd-service
-        go build -o dist/gitorc-analytics-service ./cmd/gitorc-analytics-service
-        go build -o dist/gitorc-secctl ./cmd/gitorc-secctl
+        go build -o dist/orcastack-gateway ./cmd/orcastack-gateway
+        go build -o dist/orcastack-git-service ./cmd/orcastack-git-service
+        go build -o dist/orcastack-review-service ./cmd/orcastack-review-service
+        go build -o dist/orcastack-ci-service ./cmd/orcastack-ci-service
+        go build -o dist/orcastack-cd-service ./cmd/orcastack-cd-service
+        go build -o dist/orcastack-analytics-service ./cmd/orcastack-analytics-service
+        go build -o dist/orcastack-secctl ./cmd/orcastack-secctl
 
     - name: Generate signing keys
       run: |
-        cd gitorcapi
-        ./dist/gitorc-secctl genkeys --private dist/signing/private.pem --public dist/signing/public.pem
+        cd orcastackapi
+        ./dist/orcastack-secctl genkeys --private dist/signing/private.pem --public dist/signing/public.pem
 
     - name: Generate API attestations
       run: |
-        cd gitorcapi
+        cd orcastackapi
         mkdir -p dist/attestations
-        ./dist/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:4c3f7ef4-bf28-4dc0-903c-b3cfd4fdd9b4 --binary-path dist/gitorc-gateway --build-reference "${GITHUB_SHA}:gitorc-gateway" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/gateway.json
-        ./dist/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:dce9129f-783a-4816-8ee1-8676fa5192a8 --binary-path dist/gitorc-git-service --build-reference "${GITHUB_SHA}:gitorc-git-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/git-service.json
-        ./dist/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:4cc2c0ec-0af8-4d25-a565-a301e2e8f324 --binary-path dist/gitorc-review-service --build-reference "${GITHUB_SHA}:gitorc-review-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/review-service.json
-        ./dist/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:71f1ba7b-db62-4369-a133-7be30c1d9e2d --binary-path dist/gitorc-ci-service --build-reference "${GITHUB_SHA}:gitorc-ci-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/ci-service.json
-        ./dist/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:dd3490dc-e08d-43bb-abaf-2874e46ad7ec --binary-path dist/gitorc-cd-service --build-reference "${GITHUB_SHA}:gitorc-cd-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/cd-service.json
-        ./dist/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:f4ea4140-9117-4351-b0f4-71d90b4cd0b5 --binary-path dist/gitorc-analytics-service --build-reference "${GITHUB_SHA}:gitorc-analytics-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/analytics-service.json
+        ./dist/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:4c3f7ef4-bf28-4dc0-903c-b3cfd4fdd9b4 --binary-path dist/orcastack-gateway --build-reference "${GITHUB_SHA}:orcastack-gateway" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/gateway.json
+        ./dist/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:dce9129f-783a-4816-8ee1-8676fa5192a8 --binary-path dist/orcastack-git-service --build-reference "${GITHUB_SHA}:orcastack-git-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/git-service.json
+        ./dist/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:4cc2c0ec-0af8-4d25-a565-a301e2e8f324 --binary-path dist/orcastack-review-service --build-reference "${GITHUB_SHA}:orcastack-review-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/review-service.json
+        ./dist/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:71f1ba7b-db62-4369-a133-7be30c1d9e2d --binary-path dist/orcastack-ci-service --build-reference "${GITHUB_SHA}:orcastack-ci-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/ci-service.json
+        ./dist/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:dd3490dc-e08d-43bb-abaf-2874e46ad7ec --binary-path dist/orcastack-cd-service --build-reference "${GITHUB_SHA}:orcastack-cd-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/cd-service.json
+        ./dist/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:f4ea4140-9117-4351-b0f4-71d90b4cd0b5 --binary-path dist/orcastack-analytics-service --build-reference "${GITHUB_SHA}:orcastack-analytics-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/analytics-service.json
 
     - name: Upload signed API artifacts
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:
-        name: gitorc-api-signed
-        path: gitorcapi/dist
+        name: orcastack-api-signed
+        path: orcastackapi/dist
 
   infra-validate:
     runs-on: ubuntu-latest
@@ -109,15 +109,15 @@ jobs:
         version: latest
 
     - name: Run OPA policy gate
-      run: opa eval --fail-defined --data infra/policy/opa/runtime-governance.rego --input infra/policy/examples/stage-approval-input.json 'data.gitorc.runtime.deny'
+      run: opa eval --fail-defined --data infra/policy/opa/runtime-governance.rego --input infra/policy/examples/stage-approval-input.json 'data.orcastack.runtime.deny'
 
     - name: Render platform manifests
-      run: kubectl kustomize infra/kubernetes/platform >/tmp/gitorc-platform.yaml
+      run: kubectl kustomize infra/kubernetes/platform >/tmp/orcastack-platform.yaml
 
   web-build:
     runs-on: ubuntu-latest
     env:
-      GITORC_REPOSITORY_IDENTITY: orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a
+      ORCASTACK_REPOSITORY_IDENTITY: orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a
 
     steps:
     - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -127,11 +127,11 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: gitorcweb/package-lock.json
+        cache-dependency-path: orcastackweb/package-lock.json
 
     - name: Install dependencies
       run: |
-        cd gitorcweb
+        cd orcastackweb
         npm ci
 
     - name: Set up Go for attestation tool
@@ -141,23 +141,23 @@ jobs:
 
     - name: Build frontend
       run: |
-        cd gitorcweb
+        cd orcastackweb
         npm run build
 
     - name: Sign frontend build
       run: |
-        cd gitorcapi
+        cd orcastackapi
         mkdir -p dist/web-signing
-        go run ./cmd/gitorc-secctl genkeys --private dist/web-signing/private.pem --public dist/web-signing/public.pem
-        go run ./cmd/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:6fb4b8d3-32e3-4725-bd52-db9f5a6d0f14 --binary-path ../gitorcweb/dist/index.html --build-reference "${GITHUB_SHA}:gitorcweb" --private-key dist/web-signing/private.pem --public-key dist/web-signing/public.pem --output ../gitorcweb/dist/orca-attestation.json
+        go run ./cmd/orcastack-secctl genkeys --private dist/web-signing/private.pem --public dist/web-signing/public.pem
+        go run ./cmd/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:6fb4b8d3-32e3-4725-bd52-db9f5a6d0f14 --binary-path ../orcastackweb/dist/index.html --build-reference "${GITHUB_SHA}:orcastackweb" --private-key dist/web-signing/private.pem --public-key dist/web-signing/public.pem --output ../orcastackweb/dist/orca-attestation.json
 
     - name: Upload signed frontend artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:
-        name: gitorc-web-signed
+        name: orcastack-web-signed
         path: |
-          gitorcweb/dist
-          gitorcapi/dist/web-signing/public.pem
+          orcastackweb/dist
+          orcastackapi/dist/web-signing/public.pem
 
   release-assets-smoke:
     if: startsWith(github.ref, 'refs/tags/v')

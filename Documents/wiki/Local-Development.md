@@ -12,7 +12,7 @@
 
 ### Backend
 
-The backend lives under `gitorcapi`.
+The backend lives under `orcastackapi`.
 
 Common commands:
 
@@ -28,14 +28,14 @@ make analytics
 
 ### Frontend
 
-The frontend lives under `gitorcweb`.
+The frontend lives under `orcastackweb`.
 
 Common commands:
 
 ```bash
 make web-install
-cd gitorcweb && npm run dev
-cd gitorcweb && npm run build
+cd orcastackweb && npm run dev
+cd orcastackweb && npm run build
 ```
 
 ## Docker development
@@ -107,6 +107,6 @@ curl http://localhost:8083/healthz
 ## Recommended development workflow
 
 1. Build the backend with `make api-build` before changing service entrypoints.
-2. Build the frontend with `cd gitorcweb && npm run build` before changing Pages or container deployment logic.
+2. Build the frontend with `cd orcastackweb && npm run build` before changing Pages or container deployment logic.
 3. Use Docker Compose when you need the full Postgres, HDFS, and HBase topology.
 4. Use native service execution when you only need fast iteration on one Go service or the frontend.

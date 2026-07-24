@@ -2,11 +2,11 @@
   hosts: rancher_management
   become: false
   vars:
-    rancher_cluster_name: gitorc-private-cloud
+    rancher_cluster_name: orcastack-private-cloud
   tasks:
     - name: Call Rancher registration API
       ansible.builtin.uri:
-        url: "{{ gitorc_rancher_server_url }}/v3/clusters"
+        url: "{{ orcastack_rancher_server_url }}/v3/clusters"
         method: POST
         body_format: json
         headers:

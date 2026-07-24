@@ -1,6 +1,6 @@
-# GITORC Integrations
+# ORCASTACK Integrations
 
-This directory contains integration guides and examples for connecting GITORC with external services.
+This directory contains integration guides and examples for connecting ORCASTACK with external services.
 
 ## Available Integrations
 
@@ -107,7 +107,7 @@ All integrations follow these principles:
 ## Module Structure
 
 ```
-gitorcapi/
+orcastackapi/
 └── internal/
     └── platform/
         ├── discord/
@@ -134,7 +134,7 @@ gitorcapi/
 ### 1. Import Discord Manager
 
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 
 // Initialize (usually in main or service startup)
 discord.Initialize()
@@ -168,7 +168,7 @@ mgr.NotifyUserEvent(ctx, "signup", user, email, "details", url)
 ### Unit Tests
 
 ```bash
-cd gitorcapi/internal/platform/discord
+cd orcastackapi/internal/platform/discord
 go test -v
 ```
 
@@ -180,7 +180,7 @@ export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
 export DISCORD_NOTIFICATIONS_ENABLED=true
 
 # Run service and trigger events
-go run ./cmd/gitorc-gateway/main.go
+go run ./cmd/orcastack-gateway/main.go
 ```
 
 ---
@@ -192,17 +192,17 @@ go run ./cmd/gitorc-gateway/main.go
 ```bash
 curl -X POST "$DISCORD_WEBHOOK_URL" \
   -H "Content-Type: application/json" \
-  -d '{"content":"Test from GITORC"}'
+  -d '{"content":"Test from ORCASTACK"}'
 ```
 
 ### View Logs
 
 ```bash
 # Docker
-docker logs gitorc-gateway | grep -i discord
+docker logs orcastack-gateway | grep -i discord
 
 # Systemd
-journalctl -u gitorc-gateway | grep -i discord
+journalctl -u orcastack-gateway | grep -i discord
 ```
 
 ### Enable Debug Logging
@@ -333,4 +333,4 @@ To add new integrations:
 ---
 
 *Last Updated: 2026-06-02*
-*GITORC Platform*
+*ORCASTACK Platform*

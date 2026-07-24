@@ -1,6 +1,6 @@
-gitorc_platform_domain: gitorc.internal.example
-gitorc_rancher_server_url: https://rancher.internal.example
-gitorc_openstack_region: RegionOne
-gitorc_ovn_encap_type: geneve
-gitorc_frr_asn: 64512
-gitorc_gpu_runtime_class: nvidia
+orcastack_platform_domain: orcastack.internal.example
+orcastack_rancher_server_url: https://rancher.internal.example
+orcastack_openstack_region: RegionOne
+orcastack_ovn_encap_type: geneve
+orcastack_frr_asn: 64512
+orcastack_gpu_runtime_class: nvidia

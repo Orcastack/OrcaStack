@@ -1,38 +1,38 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gitorc-runner
+  name: orcastack-runner
   annotations:
-    gitorc.io/identity-mode: keystone-linked
+    orcastack.io/identity-mode: keystone-linked
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gitorc-runner-controller
+  name: orcastack-runner-controller
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: gitorc-runner-controller
+      app: orcastack-runner-controller
   template:
     metadata:
       labels:
-        app: gitorc-runner-controller
-        gitorc.io/scheduling: private-cloud
+        app: orcastack-runner-controller
+        orcastack.io/scheduling: private-cloud
     spec:
-      serviceAccountName: gitorc-runner
+      serviceAccountName: orcastack-runner
       containers:
         - name: runner-controller
-          image: registry.internal.example/gitorc/runner-controller:latest
+          image: registry.internal.example/orcastack/runner-controller:latest
           args:
             - --queue=governed-pipelines
             - --identity-provider=keystone
             - --executor=kubernetes
-            - --artifact-volume=/var/lib/gitorc/artifacts
+            - --artifact-volume=/var/lib/orcastack/artifacts
           volumeMounts:
             - name: artifacts
-              mountPath: /var/lib/gitorc/artifacts
+              mountPath: /var/lib/orcastack/artifacts
       volumes:
         - name: artifacts
           persistentVolumeClaim:
-            claimName: gitorc-artifacts
+            claimName: orcastack-artifacts

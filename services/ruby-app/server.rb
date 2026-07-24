@@ -16,7 +16,7 @@ require_relative './app/controllers/api/v1/git_controller'
 require_relative './app/jobs/webhook_delivery_job'
 require_relative './config/routes'
 
-module Gitorc
+module OrcaStack
   module RubyApp
     class Request
       attr_reader :method, :path, :headers, :body

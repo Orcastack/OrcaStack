@@ -1,8 +1,8 @@
-# GITORC platform architecture
+# ORCASTACK platform architecture
 
 ## Current system shape
 
-GITORC in this repository is a Go-first platform built around a React control-plane UI, a Go gateway, specialized Go services, and a private-cloud automation/runtime layer. The architecture is service-oriented, with infrastructure workflows and policy assets carrying a substantial part of the platform behavior.
+ORCASTACK in this repository is a Go-first platform built around a React control-plane UI, a Go gateway, specialized Go services, and a private-cloud automation/runtime layer. The architecture is service-oriented, with infrastructure workflows and policy assets carrying a substantial part of the platform behavior.
 
 ## Current end-to-end flow
 
@@ -33,20 +33,20 @@ flowchart TD
 
 ## Platform blueprint
 
-GITORC should be described and evolved as a Go-first platform with these implementation boundaries:
+ORCASTACK should be described and evolved as a Go-first platform with these implementation boundaries:
 
-- Presentation layer in `gitorcweb/`.
-- Gateway and service layer in `gitorcapi/cmd/` and `gitorcapi/internal/`.
+- Presentation layer in `orcastackweb/`.
+- Gateway and service layer in `orcastackapi/cmd/` and `orcastackapi/internal/`.
 - Automation, policy, and deployment layer in `infra/`.
 - Data and event backing services through local runtime and private-cloud infrastructure.
 
-For the detailed architecture matrix and target operating shape, see [Full Platform Blueprint](./GITORC-Full-Platform-Blueprint.md).
+For the detailed architecture matrix and target operating shape, see [Full Platform Blueprint](./ORCASTACK-Full-Platform-Blueprint.md).
 
 ## Infrastructure layers
 
 - Private-cloud automation assets live under `infra/terraform/`, `infra/ansible/`, `infra/kubernetes/`, `infra/policy/`, and `infra/automation/`.
 - Local bootstrap uses PostgreSQL, Redpanda, HBase, Hadoop NameNode, and Hadoop DataNode as declared in `docker-compose.yml`.
-- The web UI is built from `gitorcweb/`, while the API gateway and service binaries come from `gitorcapi/`.
+- The web UI is built from `orcastackweb/`, while the API gateway and service binaries come from `orcastackapi/`.
 - A production Nginx configuration exists in `nginx.production.conf`, but Nginx is not part of the default local compose stack.
 
 ## Governance model
@@ -57,9 +57,9 @@ For the detailed architecture matrix and target operating shape, see [Full Platf
 
 ## Key repo entry points
 
-- `gitorcweb/`: React control-plane UI.
-- `gitorcapi/cmd/`: Go service entrypoints for gateway, Git, review, CI, CD, analytics, and security control.
-- `gitorcapi/internal/gatewayapi/`: Auth, projects, signup, and overview API handlers.
+- `orcastackweb/`: React control-plane UI.
+- `orcastackapi/cmd/`: Go service entrypoints for gateway, Git, review, CI, CD, analytics, and security control.
+- `orcastackapi/internal/gatewayapi/`: Auth, projects, signup, and overview API handlers.
 - `infra/terraform/environments/private-cloud`: private-cloud provisioning.
 - `infra/kubernetes/platform`: cluster-level platform services.
 - `infra/policy`: attestation and runtime governance.

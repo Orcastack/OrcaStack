@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines how GITORC is deployed onto sovereign infrastructure using Proxmox VE, OpenStack, OVN and OVS, FRR, Kubernetes, Rancher, Keystone, internal signing, and runtime governance.
+This document defines how ORCASTACK is deployed onto sovereign infrastructure using Proxmox VE, OpenStack, OVN and OVS, FRR, Kubernetes, Rancher, Keystone, internal signing, and runtime governance.
 
 ## What the deployment stack does
 
@@ -20,7 +20,7 @@ This document defines how GITORC is deployed onto sovereign infrastructure using
 
 1. Terraform provisions the OpenStack and Kubernetes foundation.
 2. Ansible configures Proxmox VE hosts, network fabric, OpenStack nodes, Kubernetes nodes, Rancher registration, and GPU workers.
-3. Kubernetes manifests deploy GITORC services and operational components.
+3. Kubernetes manifests deploy ORCASTACK services and operational components.
 4. Deployment environments encode promotion and rollback rules.
 5. Kyverno and OPA block unapproved or unsigned runtime changes.
 
@@ -38,7 +38,7 @@ flowchart TD
   Fabric --> K8sNS[Kubernetes Namespace and StorageClass]
   TF --> K8sNS[Kubernetes Namespace and StorageClass]
   K8sNS --> Manifests[Platform Manifests]
-  Manifests --> Services[GITORC Services]
+  Manifests --> Services[ORCASTACK Services]
   Manifests --> Rancher[Rancher Registration]
   Manifests --> GPU[GPU Support]
   Manifests --> Ops[Ingress, Monitoring, Logging, Secrets]
@@ -57,8 +57,8 @@ make deploy-private-cloud
 
 ## How it connects to the rest of the system
 
-- `gitorcapi` services run inside the target Kubernetes cluster.
-- `.gitorc-ci.yml` drives the governed build, sign, promote, and rollback flow.
+- `orcastackapi` services run inside the target Kubernetes cluster.
+- `.orcastack-ci.yml` drives the governed build, sign, promote, and rollback flow.
 - `infra/ansible` is the host-automation layer for hardware, VM, network, Rancher, and GPU preparation.
 - `infra/policy` governs deployment admission and runtime authorization.
 - `infra/deploy/environments` defines dev, stage, and prod rollout behavior.

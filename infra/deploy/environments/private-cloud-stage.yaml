@@ -1,6 +1,6 @@
 environment: stage
-cluster: gitorc-stage
-namespace: gitorc-system
+cluster: orcastack-stage
+namespace: orcastack-system
 strategy: canary
 promotionRules:
   requireSuccessfulPipeline: true

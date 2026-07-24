@@ -2,7 +2,7 @@
 
 ## Objective
 
-gitorc now centralizes identity and cryptographic runtime policy in one shared backend module so services do not invent their own formats or signing flows.
+orcastack now centralizes identity and cryptographic runtime policy in one shared backend module so services do not invent their own formats or signing flows.
 
 ## Unified identity pattern
 
@@ -16,11 +16,11 @@ Examples:
 - `orca:process:1b4e28ba-2fa1-41d2-883f-0016d3cca427`
 - `orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a`
 
-The shared implementation lives in `gitorcapi/internal/platform/security/identity.go`.
+The shared implementation lives in `orcastackapi/internal/platform/security/identity.go`.
 
 ## Shared cryptography pattern
 
-The shared cryptography implementation lives in `gitorcapi/internal/platform/security/crypto.go`.
+The shared cryptography implementation lives in `orcastackapi/internal/platform/security/crypto.go`.
 
 Current enforced primitives:
 
@@ -35,7 +35,7 @@ Repository -> Component -> Binary -> Process
 
 ## Runtime policy surface
 
-The backend runtime now builds a unified security policy for every Go service in `gitorcapi/internal/platform/app/service.go`.
+The backend runtime now builds a unified security policy for every Go service in `orcastackapi/internal/platform/app/service.go`.
 
 Each service now exposes:
 
@@ -102,22 +102,22 @@ What still requires deeper platform work:
 
 Common environment variables used by the shared runtime:
 
-- `GITORC_REPOSITORY_IDENTITY`
-- `GITORC_BUILD_HASH`
-- `GITORC_SIGNING_PRIVATE_KEY_PATH`
-- `GITORC_SIGNING_PUBLIC_KEY_PATH`
-- `GITORC_ENFORCE_SIGNING`
-- `GITORC_ENFORCE_DIRECTORY`
-- `GITORC_LDAP_ADDRESS`
-- `GITORC_LDAP_SERVICE_ACCOUNT_DN`
-- `GITORC_LDAP_SERVICE_ACCOUNT_PASSWORD_FILE`
-- `GITORC_LDAP_COMPONENT_BASE_DN`
-- `GITORC_LDAP_REPOSITORY_BASE_DN`
-- `GITORC_LDAP_AUDIT_BASE_DN`
-- `GITORC_LDAP_AUTO_REGISTER`
-- `GITORC_RBAC_REALM`
-- `GITORC_RBAC_ROLE_BASE_DN`
-- `GITORC_RBAC_REQUIRED_ROLE`
+- `ORCASTACK_REPOSITORY_IDENTITY`
+- `ORCASTACK_BUILD_HASH`
+- `ORCASTACK_SIGNING_PRIVATE_KEY_PATH`
+- `ORCASTACK_SIGNING_PUBLIC_KEY_PATH`
+- `ORCASTACK_ENFORCE_SIGNING`
+- `ORCASTACK_ENFORCE_DIRECTORY`
+- `ORCASTACK_LDAP_ADDRESS`
+- `ORCASTACK_LDAP_SERVICE_ACCOUNT_DN`
+- `ORCASTACK_LDAP_SERVICE_ACCOUNT_PASSWORD_FILE`
+- `ORCASTACK_LDAP_COMPONENT_BASE_DN`
+- `ORCASTACK_LDAP_REPOSITORY_BASE_DN`
+- `ORCASTACK_LDAP_AUDIT_BASE_DN`
+- `ORCASTACK_LDAP_AUTO_REGISTER`
+- `ORCASTACK_RBAC_REALM`
+- `ORCASTACK_RBAC_ROLE_BASE_DN`
+- `ORCASTACK_RBAC_REQUIRED_ROLE`
 
 ## Developer rule
 

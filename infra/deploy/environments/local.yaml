@@ -2,7 +2,7 @@ environment: local
 targets:
   - name: docker-compose
     type: docker
-    namespace: gitorc-local
+    namespace: orcastack-local
 promotionRules:
   requireSuccessfulPipeline: true
   requireReviewApproval: true

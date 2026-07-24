@@ -1,43 +1,43 @@
-x-gitorc-security-env: &gitorc-security-env
-  GITORC_REPOSITORY_IDENTITY: ${GITORC_REPOSITORY_IDENTITY:-orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a}
-  GITORC_BUILD_HASH: ${GITORC_BUILD_HASH:-sha256:local-development}
-  GITORC_SIGNING_PRIVATE_KEY_PATH: ${GITORC_SIGNING_PRIVATE_KEY_PATH:-/run/secrets/orca-signing-private.pem}
-  GITORC_SIGNING_PUBLIC_KEY_PATH: ${GITORC_SIGNING_PUBLIC_KEY_PATH:-/run/secrets/orca-signing-public.pem}
-  GITORC_ENFORCE_SIGNING: ${GITORC_ENFORCE_SIGNING:-false}
-  GITORC_ENFORCE_DIRECTORY: ${GITORC_ENFORCE_DIRECTORY:-false}
-  GITORC_LDAP_ADDRESS: ${GITORC_LDAP_ADDRESS:-ldap://ldap:389}
-  GITORC_LDAP_SERVICE_ACCOUNT_DN: ${GITORC_LDAP_SERVICE_ACCOUNT_DN:-cn=service-account,ou=system,dc=orca,dc=local}
-  GITORC_LDAP_SERVICE_ACCOUNT_PASSWORD_FILE: ${GITORC_LDAP_SERVICE_ACCOUNT_PASSWORD_FILE:-/run/secrets/ldap-bind-password.txt}
-  GITORC_LDAP_COMPONENT_BASE_DN: ${GITORC_LDAP_COMPONENT_BASE_DN:-ou=components,dc=orca,dc=local}
-  GITORC_LDAP_REPOSITORY_BASE_DN: ${GITORC_LDAP_REPOSITORY_BASE_DN:-ou=repositories,dc=orca,dc=local}
-  GITORC_LDAP_AUDIT_BASE_DN: ${GITORC_LDAP_AUDIT_BASE_DN:-ou=audit,dc=orca,dc=local}
-  GITORC_LDAP_AUTO_REGISTER: ${GITORC_LDAP_AUTO_REGISTER:-false}
-  GITORC_RBAC_REALM: ${GITORC_RBAC_REALM:-gitorc-platform}
-  GITORC_RBAC_ROLE_BASE_DN: ${GITORC_RBAC_ROLE_BASE_DN:-ou=roles,dc=orca,dc=local}
-  GITORC_RBAC_REQUIRED_ROLE: ${GITORC_RBAC_REQUIRED_ROLE:-platform-service}
+x-orcastack-security-env: &orcastack-security-env
+  ORCASTACK_REPOSITORY_IDENTITY: ${ORCASTACK_REPOSITORY_IDENTITY:-orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a}
+  ORCASTACK_BUILD_HASH: ${ORCASTACK_BUILD_HASH:-sha256:local-development}
+  ORCASTACK_SIGNING_PRIVATE_KEY_PATH: ${ORCASTACK_SIGNING_PRIVATE_KEY_PATH:-/run/secrets/orca-signing-private.pem}
+  ORCASTACK_SIGNING_PUBLIC_KEY_PATH: ${ORCASTACK_SIGNING_PUBLIC_KEY_PATH:-/run/secrets/orca-signing-public.pem}
+  ORCASTACK_ENFORCE_SIGNING: ${ORCASTACK_ENFORCE_SIGNING:-false}
+  ORCASTACK_ENFORCE_DIRECTORY: ${ORCASTACK_ENFORCE_DIRECTORY:-false}
+  ORCASTACK_LDAP_ADDRESS: ${ORCASTACK_LDAP_ADDRESS:-ldap://ldap:389}
+  ORCASTACK_LDAP_SERVICE_ACCOUNT_DN: ${ORCASTACK_LDAP_SERVICE_ACCOUNT_DN:-cn=service-account,ou=system,dc=orca,dc=local}
+  ORCASTACK_LDAP_SERVICE_ACCOUNT_PASSWORD_FILE: ${ORCASTACK_LDAP_SERVICE_ACCOUNT_PASSWORD_FILE:-/run/secrets/ldap-bind-password.txt}
+  ORCASTACK_LDAP_COMPONENT_BASE_DN: ${ORCASTACK_LDAP_COMPONENT_BASE_DN:-ou=components,dc=orca,dc=local}
+  ORCASTACK_LDAP_REPOSITORY_BASE_DN: ${ORCASTACK_LDAP_REPOSITORY_BASE_DN:-ou=repositories,dc=orca,dc=local}
+  ORCASTACK_LDAP_AUDIT_BASE_DN: ${ORCASTACK_LDAP_AUDIT_BASE_DN:-ou=audit,dc=orca,dc=local}
+  ORCASTACK_LDAP_AUTO_REGISTER: ${ORCASTACK_LDAP_AUTO_REGISTER:-false}
+  ORCASTACK_RBAC_REALM: ${ORCASTACK_RBAC_REALM:-orcastack-platform}
+  ORCASTACK_RBAC_ROLE_BASE_DN: ${ORCASTACK_RBAC_ROLE_BASE_DN:-ou=roles,dc=orca,dc=local}
+  ORCASTACK_RBAC_REQUIRED_ROLE: ${ORCASTACK_RBAC_REQUIRED_ROLE:-platform-service}
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: gitorc-postgres
+    container_name: orcastack-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-gitorc}
-      POSTGRES_USER: ${POSTGRES_USER:-gitorc}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gitorc}
+      POSTGRES_DB: ${POSTGRES_DB:-orcastack}
+      POSTGRES_USER: ${POSTGRES_USER:-orcastack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orcastack}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gitorc} -d ${POSTGRES_DB:-gitorc}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-orcastack} -d ${POSTGRES_DB:-orcastack}"]
       interval: 10s
       timeout: 5s
       retries: 10
 
   redis:
     image: redis:7-alpine
-    container_name: gitorc-redis
+    container_name: orcastack-redis
     command: redis-server --appendonly yes
     ports:
       - "6379:6379"
@@ -46,11 +46,11 @@ services:
 
   minio:
     image: minio/minio:RELEASE.2025-01-20T14-49-07Z
-    container_name: gitorc-minio
+    container_name: orcastack-minio
     command: server /data --console-address :9001
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-gitorc}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-gitorcminio123}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-orcastack}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-orcastackminio123}
     ports:
       - "9002:9002"
       - "9001:9001"
@@ -59,7 +59,7 @@ services:
 
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v24.2.10
-    container_name: gitorc-redpanda
+    container_name: orcastack-redpanda
     command:
       - redpanda
       - start
@@ -78,9 +78,9 @@ services:
 
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
-    container_name: gitorc-namenode
+    container_name: orcastack-namenode
     environment:
-      CLUSTER_NAME: gitorc-hadoop
+      CLUSTER_NAME: orcastack-hadoop
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
     ports:
       - "9870:9870"
@@ -90,7 +90,7 @@ services:
 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: gitorc-datanode
+    container_name: orcastack-datanode
     environment:
       SERVICE_PRECONDITION: namenode:9870
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
@@ -103,7 +103,7 @@ services:
 
   hbase:
     image: harisekhon/hbase:latest
-    container_name: gitorc-hbase
+    container_name: orcastack-hbase
     environment:
       HBASE_MANAGES_ZK: "true"
     ports:
@@ -115,26 +115,26 @@ services:
 
   gateway:
     image: golang:1.25
-    container_name: gitorc-gateway
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-gateway"
+    container_name: orcastack-gateway
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-gateway"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/git/repos:/srv/git
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_GATEWAY_HTTP_PORT: 8080
-      GITORC_GATEWAY_GRPC_PORT: 9080
-      GITORC_GATEWAY_IDENTITY: ${GITORC_GATEWAY_IDENTITY:-orca:service:4c3f7ef4-bf28-4dc0-903c-b3cfd4fdd9b4}
-      GITORC_AUTH_LOCAL_ENABLED: ${GITORC_AUTH_LOCAL_ENABLED:-true}
-      GITORC_AUTH_LOCAL_AUTO_APPROVE: ${GITORC_AUTH_LOCAL_AUTO_APPROVE:-true}
-      GITORC_AUTH_LOCAL_ADMIN_USERNAME: ${GITORC_AUTH_LOCAL_ADMIN_USERNAME:-admin}
-      GITORC_AUTH_LOCAL_ADMIN_PASSWORD: ${GITORC_AUTH_LOCAL_ADMIN_PASSWORD:-admin12345}
-      GITORC_AUTH_LOCAL_ADMIN_EMAIL: ${GITORC_AUTH_LOCAL_ADMIN_EMAIL:-admin@gitorc.local}
-      GITORC_REPO_ROOT: /srv/git
-      GITORC_REPO_PUBLIC_ROOT: ${PWD:-/workspace}/infra/git/repos
-      GITORC_PUBLIC_GIT_BASE: http://localhost:8080/git
-      <<: *gitorc-security-env
+      ORCASTACK_GATEWAY_HTTP_PORT: 8080
+      ORCASTACK_GATEWAY_GRPC_PORT: 9080
+      ORCASTACK_GATEWAY_IDENTITY: ${ORCASTACK_GATEWAY_IDENTITY:-orca:service:4c3f7ef4-bf28-4dc0-903c-b3cfd4fdd9b4}
+      ORCASTACK_AUTH_LOCAL_ENABLED: ${ORCASTACK_AUTH_LOCAL_ENABLED:-true}
+      ORCASTACK_AUTH_LOCAL_AUTO_APPROVE: ${ORCASTACK_AUTH_LOCAL_AUTO_APPROVE:-true}
+      ORCASTACK_AUTH_LOCAL_ADMIN_USERNAME: ${ORCASTACK_AUTH_LOCAL_ADMIN_USERNAME:-admin}
+      ORCASTACK_AUTH_LOCAL_ADMIN_PASSWORD: ${ORCASTACK_AUTH_LOCAL_ADMIN_PASSWORD:-admin12345}
+      ORCASTACK_AUTH_LOCAL_ADMIN_EMAIL: ${ORCASTACK_AUTH_LOCAL_ADMIN_EMAIL:-admin@orcastack.local}
+      ORCASTACK_REPO_ROOT: /srv/git
+      ORCASTACK_REPO_PUBLIC_ROOT: ${PWD:-/workspace}/infra/git/repos
+      ORCASTACK_PUBLIC_GIT_BASE: http://localhost:8080/git
+      <<: *orcastack-security-env
     ports:
       - "8080:8080"
       - "9080:9080"
@@ -146,19 +146,19 @@ services:
 
   git-service:
     image: golang:1.25
-    container_name: gitorc-git-service
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-git-service"
+    container_name: orcastack-git-service
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-git-service"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/git/repos:/srv/git
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_GIT_HTTP_PORT: 8081
-      GITORC_GIT_GRPC_PORT: 9081
-      GITORC_GIT_IDENTITY: ${GITORC_GIT_IDENTITY:-orca:service:dce9129f-783a-4816-8ee1-8676fa5192a8}
-      GITORC_GIT_TOKEN_SECRET: ${GITORC_GIT_TOKEN_SECRET:-gitorc-dev-secret}
-      <<: *gitorc-security-env
+      ORCASTACK_GIT_HTTP_PORT: 8081
+      ORCASTACK_GIT_GRPC_PORT: 9081
+      ORCASTACK_GIT_IDENTITY: ${ORCASTACK_GIT_IDENTITY:-orca:service:dce9129f-783a-4816-8ee1-8676fa5192a8}
+      ORCASTACK_GIT_TOKEN_SECRET: ${ORCASTACK_GIT_TOKEN_SECRET:-orcastack-dev-secret}
+      <<: *orcastack-security-env
     ports:
       - "8081:8081"
       - "9081:9081"
@@ -168,17 +168,17 @@ services:
 
   review-service:
     image: golang:1.25
-    container_name: gitorc-review-service
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-review-service"
+    container_name: orcastack-review-service
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-review-service"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_REVIEW_HTTP_PORT: 8082
-      GITORC_REVIEW_GRPC_PORT: 9082
-      GITORC_REVIEW_IDENTITY: ${GITORC_REVIEW_IDENTITY:-orca:service:4cc2c0ec-0af8-4d25-a565-a301e2e8f324}
-      <<: *gitorc-security-env
+      ORCASTACK_REVIEW_HTTP_PORT: 8082
+      ORCASTACK_REVIEW_GRPC_PORT: 9082
+      ORCASTACK_REVIEW_IDENTITY: ${ORCASTACK_REVIEW_IDENTITY:-orca:service:4cc2c0ec-0af8-4d25-a565-a301e2e8f324}
+      <<: *orcastack-security-env
     ports:
       - "8087:8082"
       - "9082:9082"
@@ -188,18 +188,18 @@ services:
 
   ci-service:
     image: golang:1.25
-    container_name: gitorc-ci-service
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-ci-service"
+    container_name: orcastack-ci-service
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-ci-service"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/artifacts:/workspace/artifacts
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_CI_HTTP_PORT: 8083
-      GITORC_CI_GRPC_PORT: 9083
-      GITORC_CI_IDENTITY: ${GITORC_CI_IDENTITY:-orca:service:71f1ba7b-db62-4369-a133-7be30c1d9e2d}
-      <<: *gitorc-security-env
+      ORCASTACK_CI_HTTP_PORT: 8083
+      ORCASTACK_CI_GRPC_PORT: 9083
+      ORCASTACK_CI_IDENTITY: ${ORCASTACK_CI_IDENTITY:-orca:service:71f1ba7b-db62-4369-a133-7be30c1d9e2d}
+      <<: *orcastack-security-env
     ports:
       - "8083:8083"
       - "9083:9083"
@@ -211,18 +211,18 @@ services:
 
   cd-service:
     image: golang:1.25
-    container_name: gitorc-cd-service
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-cd-service"
+    container_name: orcastack-cd-service
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-cd-service"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/deploy:/workspace/deploy
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_CD_HTTP_PORT: 8084
-      GITORC_CD_GRPC_PORT: 9084
-      GITORC_CD_IDENTITY: ${GITORC_CD_IDENTITY:-orca:service:dd3490dc-e08d-43bb-abaf-2874e46ad7ec}
-      <<: *gitorc-security-env
+      ORCASTACK_CD_HTTP_PORT: 8084
+      ORCASTACK_CD_GRPC_PORT: 9084
+      ORCASTACK_CD_IDENTITY: ${ORCASTACK_CD_IDENTITY:-orca:service:dd3490dc-e08d-43bb-abaf-2874e46ad7ec}
+      <<: *orcastack-security-env
     ports:
       - "8084:8084"
       - "9084:9084"
@@ -232,17 +232,17 @@ services:
 
   analytics-service:
     image: golang:1.25
-    container_name: gitorc-analytics-service
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-analytics-service"
+    container_name: orcastack-analytics-service
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-analytics-service"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_ANALYTICS_HTTP_PORT: 8085
-      GITORC_ANALYTICS_GRPC_PORT: 9085
-      GITORC_ANALYTICS_IDENTITY: ${GITORC_ANALYTICS_IDENTITY:-orca:service:f4ea4140-9117-4351-b0f4-71d90b4cd0b5}
-      <<: *gitorc-security-env
+      ORCASTACK_ANALYTICS_HTTP_PORT: 8085
+      ORCASTACK_ANALYTICS_GRPC_PORT: 9085
+      ORCASTACK_ANALYTICS_IDENTITY: ${ORCASTACK_ANALYTICS_IDENTITY:-orca:service:f4ea4140-9117-4351-b0f4-71d90b4cd0b5}
+      <<: *orcastack-security-env
     ports:
       - "8085:8085"
       - "9085:9085"
@@ -252,18 +252,18 @@ services:
 
   runner:
     image: golang:1.25
-    container_name: gitorc-runner
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-runner"
+    container_name: orcastack-runner
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-runner"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/artifacts:/workspace/artifacts
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_RUNNER_HTTP_PORT: 8086
-      GITORC_RUNNER_GRPC_PORT: 9086
-      GITORC_RUNNER_IDENTITY: ${GITORC_RUNNER_IDENTITY:-orca:service:bd40c208-0bc0-4fef-b52c-69334b283a74}
-      <<: *gitorc-security-env
+      ORCASTACK_RUNNER_HTTP_PORT: 8086
+      ORCASTACK_RUNNER_GRPC_PORT: 9086
+      ORCASTACK_RUNNER_IDENTITY: ${ORCASTACK_RUNNER_IDENTITY:-orca:service:bd40c208-0bc0-4fef-b52c-69334b283a74}
+      <<: *orcastack-security-env
     ports:
       - "8086:8086"
       - "9086:9086"
@@ -275,71 +275,71 @@ services:
 
   hw-automation:
     image: golang:1.25
-    container_name: gitorc-hw-automation
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-hw-automation"
+    container_name: orcastack-hw-automation
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-hw-automation"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/automation:/workspace/automation
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_HW_AUTOMATION_HTTP_PORT: 8087
-      GITORC_HW_AUTOMATION_GRPC_PORT: 9087
-      GITORC_HW_AUTOMATION_IDENTITY: ${GITORC_HW_AUTOMATION_IDENTITY:-orca:service:851e44cf-4838-445c-97e0-fbf12ff0c938}
-      <<: *gitorc-security-env
+      ORCASTACK_HW_AUTOMATION_HTTP_PORT: 8087
+      ORCASTACK_HW_AUTOMATION_GRPC_PORT: 9087
+      ORCASTACK_HW_AUTOMATION_IDENTITY: ${ORCASTACK_HW_AUTOMATION_IDENTITY:-orca:service:851e44cf-4838-445c-97e0-fbf12ff0c938}
+      <<: *orcastack-security-env
     ports:
       - "8087:8087"
       - "9087:9087"
 
   sw-automation:
     image: golang:1.25
-    container_name: gitorc-sw-automation
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-sw-automation"
+    container_name: orcastack-sw-automation
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-sw-automation"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/automation:/workspace/automation
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_SW_AUTOMATION_HTTP_PORT: 8088
-      GITORC_SW_AUTOMATION_GRPC_PORT: 9088
-      GITORC_SW_AUTOMATION_IDENTITY: ${GITORC_SW_AUTOMATION_IDENTITY:-orca:service:4dc90d73-dcb1-4401-b2ff-6ca4fb898dbd}
-      <<: *gitorc-security-env
+      ORCASTACK_SW_AUTOMATION_HTTP_PORT: 8088
+      ORCASTACK_SW_AUTOMATION_GRPC_PORT: 9088
+      ORCASTACK_SW_AUTOMATION_IDENTITY: ${ORCASTACK_SW_AUTOMATION_IDENTITY:-orca:service:4dc90d73-dcb1-4401-b2ff-6ca4fb898dbd}
+      <<: *orcastack-security-env
     ports:
       - "8088:8088"
       - "9088:9088"
 
   device-orch:
     image: golang:1.25
-    container_name: gitorc-device-orch
-    working_dir: /workspace/gitorcapi
-    command: sh -c "go mod download && go run ./cmd/gitorc-device-orch"
+    container_name: orcastack-device-orch
+    working_dir: /workspace/orcastackapi
+    command: sh -c "go mod download && go run ./cmd/orcastack-device-orch"
     volumes:
-      - ./gitorcapi:/workspace/gitorcapi
+      - ./orcastackapi:/workspace/orcastackapi
       - ./infra/automation:/workspace/automation
       - ./infra/security:/run/secrets:ro
     environment:
-      GITORC_DEVICE_ORCH_HTTP_PORT: 8089
-      GITORC_DEVICE_ORCH_GRPC_PORT: 9089
-      GITORC_DEVICE_ORCH_IDENTITY: ${GITORC_DEVICE_ORCH_IDENTITY:-orca:service:1d57024d-3989-4847-b56c-7cabdfdfd321}
-      <<: *gitorc-security-env
+      ORCASTACK_DEVICE_ORCH_HTTP_PORT: 8089
+      ORCASTACK_DEVICE_ORCH_GRPC_PORT: 9089
+      ORCASTACK_DEVICE_ORCH_IDENTITY: ${ORCASTACK_DEVICE_ORCH_IDENTITY:-orca:service:1d57024d-3989-4847-b56c-7cabdfdfd321}
+      <<: *orcastack-security-env
     ports:
       - "8089:8089"
       - "9089:9089"
 
   ruby-app:
     image: ruby:3.3
-    container_name: gitorc-ruby-app
+    container_name: orcastack-ruby-app
     working_dir: /workspace/services/ruby-app
     command: sh -c "bundle install && bundle exec ruby server.rb"
     volumes:
       - ./services/ruby-app:/workspace/services/ruby-app
     environment:
       PORT: 3000
-      DATABASE_URL: postgres://gitorc:gitorc@postgres:5432/gitorc
+      DATABASE_URL: postgres://orcastack:orcastack@postgres:5432/orcastack
       REDIS_URL: redis://redis:6379/0
       MINIO_ENDPOINT: http://minio:9000
-      GITORC_GIT_TOKEN_SECRET: ${GITORC_GIT_TOKEN_SECRET:-gitorc-dev-secret}
+      ORCASTACK_GIT_TOKEN_SECRET: ${ORCASTACK_GIT_TOKEN_SECRET:-orcastack-dev-secret}
     ports:
       - "3000:3000"
     depends_on:
@@ -350,15 +350,15 @@ services:
 
   sidekiq:
     image: ruby:3.3
-    container_name: gitorc-sidekiq
+    container_name: orcastack-sidekiq
     working_dir: /workspace/services/ruby-app
     command: sh -c "bundle install && bundle exec sidekiq -r ./worker_boot.rb -C config/sidekiq.yml"
     volumes:
       - ./services/ruby-app:/workspace/services/ruby-app
     environment:
-      DATABASE_URL: postgres://gitorc:gitorc@postgres:5432/gitorc
+      DATABASE_URL: postgres://orcastack:orcastack@postgres:5432/orcastack
       REDIS_URL: redis://redis:6379/0
-      GITORC_GIT_TOKEN_SECRET: ${GITORC_GIT_TOKEN_SECRET:-gitorc-dev-secret}
+      ORCASTACK_GIT_TOKEN_SECRET: ${ORCASTACK_GIT_TOKEN_SECRET:-orcastack-dev-secret}
     depends_on:
       postgres:
         condition: service_healthy
@@ -367,7 +367,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.53.4
-    container_name: gitorc-prometheus
+    container_name: orcastack-prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
@@ -380,7 +380,7 @@ services:
 
   grafana:
     image: grafana/grafana:11.1.0
-    container_name: gitorc-grafana
+    container_name: orcastack-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin12345}
@@ -396,7 +396,7 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
-    container_name: gitorc-nginx
+    container_name: orcastack-nginx
     volumes:
       - ./infra/nginx/local.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
@@ -415,12 +415,12 @@ services:
 
   web:
     image: node:20-alpine
-    container_name: gitorc-web
-    working_dir: /workspace/gitorcweb
+    container_name: orcastack-web
+    working_dir: /workspace/orcastackweb
     command: sh -c "npm install && npm run build && npm run preview -- --host 0.0.0.0 --port 5050"
     volumes:
-      - ./gitorcweb:/workspace/gitorcweb
-      - gitorcweb_node_modules:/workspace/gitorcweb/node_modules
+      - ./orcastackweb:/workspace/orcastackweb
+      - orcastackweb_node_modules:/workspace/orcastackweb/node_modules
     ports:
       - "5050:5050"
     depends_on:
@@ -435,5 +435,5 @@ volumes:
   minio_data:
   hadoop_namenode:
   hadoop_datanode:
-  gitorcweb_node_modules:
+  orcastackweb_node_modules:
   grafana_data:

@@ -1,4 +1,4 @@
-# gitorc - Project Summary
+# orcastack - Project Summary
 ## 📋 Project Overview
 A complete full-stack personal branding platform that allows you to showcase your skills, portfolio, services, and connect with potential clients. Built with modern web technologies for scalability and ease of use.
 ##  What's Included

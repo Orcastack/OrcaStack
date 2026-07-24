@@ -2,7 +2,7 @@
 
 ## Deployment surfaces in this repository
 
-gitorc currently has two practical deployment targets:
+orcastack currently has two practical deployment targets:
 
 - GitHub Pages for the frontend documentation/control-plane shell
 - Docker Compose for local self-hosted platform development
@@ -14,8 +14,8 @@ The Pages workflow lives in `.github/workflows/jekyll-gh-pages.yml`.
 Even though the workflow file started from GitHub's Jekyll sample, it now builds the Vite frontend instead of a Jekyll site. The important deployment behavior is:
 
 - the workflow installs frontend dependencies with `npm ci`
-- it builds `gitorcweb`
-- it uploads `gitorcweb/dist`
+- it builds `orcastackweb`
+- it uploads `orcastackweb/dist`
 - it deploys with GitHub Pages actions
 - the frontend base path is derived from the repository name at workflow runtime
 - it signs the deployed frontend artifact and publishes a public verification key alongside it
@@ -30,14 +30,14 @@ To publish successfully:
 4. The default Pages build runs in static snapshot mode and does not call a live gateway.
 5. Let the Pages workflow run on `main` or dispatch it manually.
 
-If you later host a real gateway, set `VITE_GITORC_GATEWAY_URL` during the frontend build to switch the UI from static snapshot mode to live API calls.
+If you later host a real gateway, set `VITE_ORCASTACK_GATEWAY_URL` during the frontend build to switch the UI from static snapshot mode to live API calls.
 
 ### Important owner rule
 
 The site host comes from the GitHub owner, not from the repository contents. For example:
 
-- `gitorc/gitorc` publishes under `https://gitorc.github.io/gitorc/`
-- `atonixcorp/gitorc` publishes under `https://atonixcorp.github.io/gitorc/`
+- `orcastack/orcastack` publishes under `https://orcastack.github.io/orcastack/`
+- `atonixcorp/orcastack` publishes under `https://atonixcorp.github.io/orcastack/`
 
 ## Docker Compose
 
@@ -95,7 +95,7 @@ This repository is not yet packaged as a hardened production deployment. The cur
 
 ## GitHub Actions signing
 
-The validation workflow now builds backend binaries, generates repository-owned Ed25519 keys during the workflow run, signs binary attestations with `gitorc-secctl`, and uploads signed artifacts.
+The validation workflow now builds backend binaries, generates repository-owned Ed25519 keys during the workflow run, signs binary attestations with `orcastack-secctl`, and uploads signed artifacts.
 
 The Pages workflow does the same for the frontend site artifact and publishes:
 

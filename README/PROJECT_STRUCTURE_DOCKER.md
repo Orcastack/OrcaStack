@@ -1,7 +1,7 @@
 # Project Structure with Docker
 ```
-gitorc-project/
-├── gitorc/                           # Root project directory
+orcastack-project/
+├── orcastack/                           # Root project directory
 │
 ├── 📄 DOCKER CONFIGURATION
 │   ├── docker-compose.yml            #  Enhanced - All services orchestration

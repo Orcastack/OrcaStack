@@ -1,4 +1,4 @@
-- name: Prepare Kubernetes nodes for GITORC automation
+- name: Prepare Kubernetes nodes for ORCASTACK automation
   hosts: kubernetes_control_plane:kubernetes_workers:kubernetes_gpu_workers
   become: true
   tasks:

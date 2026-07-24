@@ -1,11 +1,11 @@
 version: 1
 workflow:
   name: platform-self-hosting
-  description: Bootstrap, upgrade, and observe the GITORC control plane from inside the sovereign platform it manages.
+  description: Bootstrap, upgrade, and observe the ORCASTACK control plane from inside the sovereign platform it manages.
   lanes:
     - name: cloud-config-probe
       type: command
-      command: cc infra/automation/tools/gitorc_cloud_probe.c -o infra/automation/tools/gitorc_cloud_probe && infra/automation/tools/gitorc_cloud_probe --summary
+      command: cc infra/automation/tools/orcastack_cloud_probe.c -o infra/automation/tools/orcastack_cloud_probe && infra/automation/tools/orcastack_cloud_probe --summary
     - name: self-bootstrap
       type: kubernetes
       manifest: infra/kubernetes/platform/self-hosting.yaml

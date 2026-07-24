@@ -1,6 +1,6 @@
 # Slack Integration Architecture & Implementation
 
-Complete reference documentation for the GITORC Slack integration module.
+Complete reference documentation for the ORCASTACK Slack integration module.
 
 ## Table of Contents
 1. [Architecture Overview](#architecture-overview)
@@ -16,7 +16,7 @@ Complete reference documentation for the GITORC Slack integration module.
 
 ## Architecture Overview
 
-The GITORC Slack integration provides automated notifications to Slack with:
+The ORCASTACK Slack integration provides automated notifications to Slack with:
 - **Async message delivery** with retry logic (3 attempts, exponential backoff)
 - **Event verification** using HMAC-SHA256 signature validation
 - **OAuth 2.0 support** for app authorization
@@ -36,7 +36,7 @@ Slack Manager (singleton)
 
 ## Module Structure
 
-**Location**: `gitorcapi/internal/platform/slack/`
+**Location**: `orcastackapi/internal/platform/slack/`
 
 ```
 slack/
@@ -284,7 +284,7 @@ func NewOAuthHandler() *OAuthHandler {}
 func (oh *OAuthHandler) HandleInstall(w http.ResponseWriter, r *http.Request) {}
 func (oh *OAuthHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {}
 
-// Event Handler (Slack → GITORC)
+// Event Handler (Slack → ORCASTACK)
 type EventHandler struct {
 	verifier *EventVerifier
 	onEvent  func(ctx context.Context, event *SlackEventPayload) error
@@ -322,7 +322,7 @@ event := slack.NewPipelineEvent(
 	"api-service",          // Project name
 	"pipeline-12345",       // Pipeline ID
 	"#devops",              // Channel to post
-	"https://gitorc.example.com/pipelines/12345",
+	"https://orcastack.example.com/pipelines/12345",
 )
 slackMgr.NotifyPipelineEvent(event)
 ```
@@ -334,7 +334,7 @@ Details:
   Project: api-service
   Pipeline: pipeline-12345
   Status: success
-Link: https://gitorc.example.com/pipelines/12345
+Link: https://orcastack.example.com/pipelines/12345
 Color: Green (#36a64f)
 ```
 
@@ -351,7 +351,7 @@ event := slack.NewDeploymentEvent(
 	"api-service",          // Service name
 	"v2.1.0",              // Version
 	"#deployments",         // Channel
-	"https://gitorc.example.com/deployments",
+	"https://orcastack.example.com/deployments",
 )
 slackMgr.NotifyDeploymentEvent(event)
 ```
@@ -363,7 +363,7 @@ Details:
   Environment: production
   Service: api-service
   Version: v2.1.0
-Link: https://gitorc.example.com/deployments
+Link: https://orcastack.example.com/deployments
 Color: Green/Red based on success/failure
 ```
 
@@ -380,7 +380,7 @@ event := slack.NewSecurityEvent(
 	"user-123",             // User ID
 	"Unauthorized API access detected",  // Description
 	"#security",            // Channel
-	"https://gitorc.example.com/security",
+	"https://orcastack.example.com/security",
 )
 slackMgr.NotifySecurityEvent(event)
 ```
@@ -393,7 +393,7 @@ Details:
   Category: RBAC
   User: user-123
   Description: Unauthorized API access detected
-Link: https://gitorc.example.com/security
+Link: https://orcastack.example.com/security
 Color: Red (#ff0000)
 Severity: critical
 ```
@@ -409,7 +409,7 @@ event := slack.NewHealthEvent(
 	"degraded",             // "healthy", "degraded", "offline"
 	"database-replica",     // Service name
 	"#ops",                 // Channel
-	"https://gitorc.example.com/health",
+	"https://orcastack.example.com/health",
 )
 slackMgr.NotifyHealthEvent(event)
 ```
@@ -431,7 +431,7 @@ event := slack.NewCustomEvent(
 		"Duration":  "45 minutes",
 		"Status":    "Success",
 	},
-	"https://gitorc.example.com/backups",
+	"https://orcastack.example.com/backups",
 )
 slackMgr.NotifyCustomEvent(
 	event.Title,
@@ -528,7 +528,7 @@ X-Slack-Signature: v0=HMAC-SHA256(
 )
 ```
 
-GITORC automatically verifies this signature during event processing.
+ORCASTACK automatically verifies this signature during event processing.
 
 **Implementation**:
 ```go
@@ -624,7 +624,7 @@ After 3 failures: log error, continue
 package main
 
 import (
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	"log"
 )
 
@@ -642,7 +642,7 @@ func main() {
 			"my-project",
 			"build-12345",
 			"#devops",
-			"https://gitorc.example.com/pipelines/build-12345",
+			"https://orcastack.example.com/pipelines/build-12345",
 		)
 		mgr.NotifyPipelineEvent(event)
 	}
@@ -663,7 +663,7 @@ event := slack.NewSecurityEvent(
 	"attacker-user",
 	"Attempted access to production database without authorization",
 	"#security-alerts",
-	"https://gitorc.example.com/security/incident-456",
+	"https://orcastack.example.com/security/incident-456",
 )
 
 mgr.NotifySecurityEvent(event)
@@ -687,7 +687,7 @@ mgr.NotifyCustomEvent(
 		"Downtime": "5 minutes",
 		"Status": "Complete",
 	},
-	"https://gitorc.example.com/maintenance/789",
+	"https://orcastack.example.com/maintenance/789",
 )
 ```
 
@@ -710,7 +710,7 @@ if mgr != nil {
 ### Unit Tests
 
 ```bash
-cd /Users/ofidohubvm/gitorc/gitorcapi
+cd /Users/ofidohubvm/orcastack/orcastackapi
 go test -v ./internal/platform/slack/...
 ```
 

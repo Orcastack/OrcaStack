@@ -15,30 +15,30 @@ provider "kubernetes" {
 
 module "network" {
   source              = "../../modules/openstack-network"
-  name_prefix         = "gitorc"
+  name_prefix         = "orcastack"
   external_network_id = var.external_network_id
   floating_ip_pool    = var.floating_ip_pool
 }
 
 module "identity" {
   source                  = "../../modules/openstack-identity"
-  project_name            = "gitorc-platform"
-  service_user_name       = "gitorc-svc"
+  project_name            = "orcastack-platform"
+  service_user_name       = "orcastack-svc"
   service_user_password   = var.application_credential_secret
-  role_name               = "gitorc-operator"
-  repository_auditor_role = "gitorc-repository-auditor"
+  role_name               = "orcastack-operator"
+  repository_auditor_role = "orcastack-repository-auditor"
 }
 
 module "storage" {
   source                  = "../../modules/openstack-storage"
-  name_prefix             = "gitorc"
+  name_prefix             = "orcastack"
   barbican_secret_payload = var.barbican_secret_payload
   ceph_monitors           = var.storage_ceph_monitors
 }
 
 module "runners" {
   source            = "../../modules/ci-runner-pool"
-  name_prefix       = "gitorc"
+  name_prefix       = "orcastack"
   image_name        = var.image_name
   flavor_name       = var.runner_flavor_name
   key_pair          = var.runner_keypair
@@ -49,9 +49,9 @@ module "runners" {
 
 module "platform" {
   source                  = "../../modules/kubernetes-platform"
-  namespace               = "gitorc-system"
+  namespace               = "orcastack-system"
   ingress_floating_ip     = module.network.ingress_floating_ip
   barbican_secret_id      = module.storage.barbican_secret_id
   ceph_storage_class_name = module.storage.storage_class_name
-  runner_service_account  = "gitorc-runner"
+  runner_service_account  = "orcastack-runner"
 }

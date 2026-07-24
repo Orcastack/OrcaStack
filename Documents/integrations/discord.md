@@ -2,7 +2,7 @@
 
 ## Overview
 
-The GITORC platform includes native Discord webhook integration for automated notifications across multiple event categories. This guide covers setup, configuration, and integration points.
+The ORCASTACK platform includes native Discord webhook integration for automated notifications across multiple event categories. This guide covers setup, configuration, and integration points.
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ The GITORC platform includes native Discord webhook integration for automated no
 ## Prerequisites
 
 - Discord server with administrator privileges
-- GITORC platform deployed and running
+- ORCASTACK platform deployed and running
 - Ability to set environment variables in your deployment environment
 
 ---
@@ -35,7 +35,7 @@ The GITORC platform includes native Discord webhook integration for automated no
 3. Click on the channel name → **Channel Settings** (gear icon)
 4. Navigate to **Integrations** → **Webhooks**
 5. Click **New Webhook**
-6. Name the webhook: `GITORC Automation`
+6. Name the webhook: `ORCASTACK Automation`
 7. Optionally, upload an icon for the bot
 8. Click **Copy Webhook URL**
 9. Store the URL securely (see Configuration section)
@@ -53,7 +53,7 @@ Test the webhook manually using curl:
 curl -X POST https://discord.com/api/webhooks/{WEBHOOK_ID}/{WEBHOOK_TOKEN} \
   -H "Content-Type: application/json" \
   -d '{
-    "content": "GITORC Test Message",
+    "content": "ORCASTACK Test Message",
     "embeds": [{
       "title": "Test Notification",
       "description": "Discord integration is working!",
@@ -102,7 +102,7 @@ stringData:
 #### Docker Compose
 ```yaml
 services:
-  gitorc-gateway:
+  orcastack-gateway:
     environment:
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
       - DISCORD_NOTIFICATIONS_ENABLED=true
@@ -245,10 +245,10 @@ Fields:
 
 ## Integration Points
 
-### In CI Service (gitorc-ci-service)
+### In CI Service (orcastack-ci-service)
 
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 
 func (ps *PipelineService) ExecutePipeline(ctx context.Context, pipelineID string) error {
     discordMgr := discord.GetManager()
@@ -268,7 +268,7 @@ func (ps *PipelineService) ExecutePipeline(ctx context.Context, pipelineID strin
 }
 ```
 
-### In CD Service (gitorc-cd-service)
+### In CD Service (orcastack-cd-service)
 
 ```go
 func (ds *DeploymentService) Deploy(ctx context.Context, service, env, version string) error {
@@ -288,7 +288,7 @@ func (ds *DeploymentService) Deploy(ctx context.Context, service, env, version s
 }
 ```
 
-### In Git Service (gitorc-git-service)
+### In Git Service (orcastack-git-service)
 
 ```go
 func (gs *GitService) OnMerge(ctx context.Context, repoName, source, target string) error {
@@ -314,7 +314,7 @@ func (ah *AuthHandler) OnAuthFailure(ctx context.Context, username string) error
 }
 ```
 
-### In Health Checks (gitorc-analytics-service)
+### In Health Checks (orcastack-analytics-service)
 
 ```go
 func (hc *HealthChecker) CheckHealth(ctx context.Context) error {
@@ -388,7 +388,7 @@ WEBHOOK_URL="https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN"
 curl -X POST "$WEBHOOK_URL" \
   -H "Content-Type: application/json" \
   -d '{
-    "content": "GITORC Test",
+    "content": "ORCASTACK Test",
     "embeds": [{
       "title": "Pipeline success",
       "description": "Pipeline execution completed",
@@ -408,7 +408,7 @@ curl -X POST "$WEBHOOK_URL" \
 Run Discord module tests:
 
 ```bash
-cd gitorcapi/internal/platform/discord
+cd orcastackapi/internal/platform/discord
 go test -v
 ```
 
@@ -422,7 +422,7 @@ export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
 export DISCORD_NOTIFICATIONS_ENABLED=true
 
 # Run service
-go run ./cmd/gitorc-gateway/main.go
+go run ./cmd/orcastack-gateway/main.go
 
 # Trigger events (pipeline, deployment, etc.)
 # Check Discord channel for messages
@@ -516,10 +516,10 @@ Discord has rate limits (10 requests per 10 seconds per webhook).
 Enable debug output:
 ```bash
 # Check service logs
-docker logs gitorc-gateway
+docker logs orcastack-gateway
 
 # Look for Discord-related messages
-docker logs gitorc-gateway | grep -i discord
+docker logs orcastack-gateway | grep -i discord
 ```
 
 ---
@@ -563,10 +563,10 @@ docker logs gitorc-gateway | grep -i discord
 Create separate Discord channels for different event types:
 
 ```
-#gitorc-alerts-critical     (security, failures)
-#gitorc-alerts-info         (deployments, pipelines)
-#gitorc-health              (system metrics)
-#gitorc-audit               (user actions, access)
+#orcastack-alerts-critical     (security, failures)
+#orcastack-alerts-info         (deployments, pipelines)
+#orcastack-health              (system metrics)
+#orcastack-audit               (user actions, access)
 ```
 
 Use multiple webhooks (one per channel) for organization:
@@ -652,7 +652,7 @@ For issues or questions:
 2. Review logs: `docker logs <service>`
 3. Test webhook manually with cURL
 4. Check Discord webhook token validity
-5. Review GITORC documentation
+5. Review ORCASTACK documentation
 
 ---
 
@@ -669,4 +669,4 @@ For issues or questions:
 ---
 
 *Last Updated: 2026-06-02*
-*GITORC Platform Documentation*
+*ORCASTACK Platform Documentation*

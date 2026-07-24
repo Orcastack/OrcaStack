@@ -10,13 +10,13 @@ fi
 
 DIST_DIR="$ROOT_DIR/dist/release"
 APT_DIR="$DIST_DIR/apt"
-POOL_DIR="$APT_DIR/pool/main/g/gitorc"
-PKG_FILE="$DIST_DIR/packages/gitorc.deb"
-LIST_FILE="$ROOT_DIR/packaging/apt/gitorc.list"
+POOL_DIR="$APT_DIR/pool/main/o/orcastack"
+PKG_FILE="$DIST_DIR/packages/orcastack.deb"
+LIST_FILE="$ROOT_DIR/packaging/apt/orcastack.list"
 
 mkdir -p "$POOL_DIR" "$APT_DIR/dists/stable/main/binary-amd64"
-cp "$PKG_FILE" "$POOL_DIR/gitorc_${VERSION}_amd64.deb"
-cp "$LIST_FILE" "$APT_DIR/gitorc.list"
+cp "$PKG_FILE" "$POOL_DIR/orcastack_${VERSION}_amd64.deb"
+cp "$LIST_FILE" "$APT_DIR/orcastack.list"
 
 pushd "$APT_DIR" >/dev/null
 dpkg-scanpackages --multiversion pool > dists/stable/main/binary-amd64/Packages
@@ -26,6 +26,6 @@ apt-ftparchive release dists/stable > dists/stable/Release
 if [[ -n "${GPG_KEY_ID:-}" ]]; then
   gpg --batch --yes --local-user "$GPG_KEY_ID" --armor --detach-sign -o dists/stable/Release.gpg dists/stable/Release
   gpg --batch --yes --local-user "$GPG_KEY_ID" --clearsign -o dists/stable/InRelease dists/stable/Release
-  gpg --batch --yes --armor --export "$GPG_KEY_ID" > gitorc-archive-keyring.asc
+  gpg --batch --yes --armor --export "$GPG_KEY_ID" > orcastack-archive-keyring.asc
 fi
 popd >/dev/null

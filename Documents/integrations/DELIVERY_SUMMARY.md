@@ -10,7 +10,7 @@ All requirements have been implemented, tested, and documented.
 
 ### A. Webhook Sender Module ✅
 
-**Location:** `gitorcapi/internal/platform/discord/`
+**Location:** `orcastackapi/internal/platform/discord/`
 
 **Files Created:**
 - `webhook.go` - Core webhook client with retry logic
@@ -30,7 +30,7 @@ All requirements have been implemented, tested, and documented.
 
 **Code Example:**
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 
 // Initialize
 discord.Initialize()
@@ -157,15 +157,15 @@ Color: Severity indicator
 
 **Integration points documented for:**
 
-1. **CI Service** (gitorc-ci-service)
+1. **CI Service** (orcastack-ci-service)
    - After pipeline execution
    - Supports: start, success, failure
 
-2. **CD Service** (gitorc-cd-service)
+2. **CD Service** (orcastack-cd-service)
    - After deployment
    - Supports: start, success, failure, rollback
 
-3. **Git Service** (gitorc-git-service)
+3. **Git Service** (orcastack-git-service)
    - After merge/commit
    - Supports: created, branch_created, merged, commit
 
@@ -178,7 +178,7 @@ Color: Severity indicator
    - After authentication failure
    - Supports: auth_failure, violation, access_denied
 
-6. **Analytics Service** (gitorc-analytics-service)
+6. **Analytics Service** (orcastack-analytics-service)
    - After health checks
    - Supports: warning, critical, restart
 
@@ -196,7 +196,7 @@ Color: Severity indicator
 
 **Run Tests:**
 ```bash
-cd gitorcapi/internal/platform/discord
+cd orcastackapi/internal/platform/discord
 go test -v
 ```
 
@@ -263,7 +263,7 @@ go test -v
 **HTTP Configuration:**
 - Method: POST
 - Content-Type: application/json
-- User-Agent: GITORC/1.0
+- User-Agent: ORCASTACK/1.0
 - Timeout: 10 seconds per request
 
 **Retry Logic:**
@@ -341,7 +341,7 @@ HTTP POST to Discord (non-blocking)
 ## 4. File Structure
 
 ```
-gitorcapi/
+orcastackapi/
 └── internal/
     └── platform/
         └── discord/
@@ -399,7 +399,7 @@ mgr.NotifyUserEvent(ctx, "signup", user, email, details, url)
 ```bash
 curl -X POST "$DISCORD_WEBHOOK_URL" \
   -H "Content-Type: application/json" \
-  -d '{"content":"GITORC Test"}'
+  -d '{"content":"ORCASTACK Test"}'
 ```
 
 ---
@@ -484,7 +484,7 @@ if mgr.IsEnabled() {
 - Full guide: `docs/integrations/discord.md`
 - Quick start: `docs/integrations/QUICKSTART.md`
 - Implementation: `docs/integrations/IMPLEMENTATION.md`
-- Code examples: `gitorcapi/internal/platform/discord/integration_examples.go`
+- Code examples: `orcastackapi/internal/platform/discord/integration_examples.go`
 - Templates: `docs/integrations/.env.discord.template`
 
 **Troubleshooting:**
@@ -544,4 +544,4 @@ The Discord integration is **production-ready** and includes:
 ---
 
 *Last Updated: 2026-06-02*
-*GITORC Discord Integration v1.0.0*
+*ORCASTACK Discord Integration v1.0.0*

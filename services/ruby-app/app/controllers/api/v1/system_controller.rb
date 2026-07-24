@@ -1,4 +1,4 @@
-module Gitorc
+module OrcaStack
   module RubyApp
     module Api
       module V1
@@ -17,15 +17,15 @@ module Gitorc
             metrics = Store.metrics_snapshot
             uptime = Time.now.utc.to_i - metrics[:started_at].to_i
             payload = <<~METRICS
-              # HELP gitorc_ruby_app_info Static information about the Ruby application layer.
-              # TYPE gitorc_ruby_app_info gauge
-              gitorc_ruby_app_info{service="ruby-app",runtime="ruby"} 1
-              # HELP gitorc_ruby_app_requests_total Total handled HTTP requests.
-              # TYPE gitorc_ruby_app_requests_total counter
-              gitorc_ruby_app_requests_total #{metrics[:request_count]}
-              # HELP gitorc_ruby_app_uptime_seconds Uptime of the Ruby application process.
-              # TYPE gitorc_ruby_app_uptime_seconds gauge
-              gitorc_ruby_app_uptime_seconds #{uptime}
+              # HELP orcastack_ruby_app_info Static information about the Ruby application layer.
+              # TYPE orcastack_ruby_app_info gauge
+              orcastack_ruby_app_info{service="ruby-app",runtime="ruby"} 1
+              # HELP orcastack_ruby_app_requests_total Total handled HTTP requests.
+              # TYPE orcastack_ruby_app_requests_total counter
+              orcastack_ruby_app_requests_total #{metrics[:request_count]}
+              # HELP orcastack_ruby_app_uptime_seconds Uptime of the Ruby application process.
+              # TYPE orcastack_ruby_app_uptime_seconds gauge
+              orcastack_ruby_app_uptime_seconds #{uptime}
             METRICS
             [200, payload, { 'Content-Type' => 'text/plain; version=0.0.4' }]
           end

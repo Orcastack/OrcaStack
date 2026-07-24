@@ -1,4 +1,4 @@
-module Gitorc
+module OrcaStack
   module RubyApp
     module Api
       module V1

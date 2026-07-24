@@ -1,8 +1,8 @@
-# gitorc Wiki
+# orcastack Wiki
 
-gitorc is a self-hosted Git-centric DevOps platform intended for local machines, lab environments, and private infrastructure. The project combines owned Git services, Gerrit-style review workflows, CI/CD orchestration, and a data layer built around Postgres, Redpanda, HDFS, and HBase.
+orcastack is a self-hosted Git-centric DevOps platform intended for local machines, lab environments, and private infrastructure. The project combines owned Git services, Gerrit-style review workflows, CI/CD orchestration, and a data layer built around Postgres, Redpanda, HDFS, and HBase.
 
-## What gitorc is trying to become
+## What orcastack is trying to become
 
 - A Git hosting and review control plane you can run yourself.
 - A pipeline and deployment system that does not depend on SaaS CI providers.
@@ -33,12 +33,12 @@ It does not yet have full Git packfile ingestion, durable review persistence, or
 ## Repository layout
 
 ```text
-gitorc/
-├── gitorcapi/                  # Go services and protobuf contracts
+orcastack/
+├── orcastackapi/                  # Go services and protobuf contracts
 │   ├── cmd/                    # Service entrypoints
 │   ├── internal/               # Shared runtime and config helpers
 │   └── proto/                  # gRPC service definitions
-├── gitorcweb/                  # React/Vite control plane UI
+├── orcastackweb/                  # React/Vite control plane UI
 ├── docs/wiki/                  # Project wiki
 ├── infra/                      # Local infrastructure state and seeds
 │   ├── postgres/init/          # Metadata schema bootstrap
@@ -46,7 +46,7 @@ gitorc/
 │   ├── artifacts/              # Artifact staging area
 │   └── deploy/                 # Deployment-related assets
 ├── .github/workflows/          # CI and Pages workflows
-├── .gitorc-ci.yml              # Example internal pipeline config
+├── .orcastack-ci.yml              # Example internal pipeline config
 ├── docker-compose.yml          # Local stack definition
 └── Makefile                    # Common development commands
 ```
@@ -55,12 +55,12 @@ gitorc/
 
 ### Control plane services
 
-- `gitorc-gateway`: single HTTP/gRPC entrypoint for UI-facing and external traffic.
-- `gitorc-git-service`: repository metadata, refs, commits, trees, and future push ingestion.
-- `gitorc-review-service`: changes, patchsets, votes, and policy evaluation.
-- `gitorc-ci-service`: pipeline orchestration and future worker control.
-- `gitorc-cd-service`: deployment promotion and rollback orchestration.
-- `gitorc-analytics-service`: analytics and intelligence APIs backed by large-volume event storage.
+- `orcastack-gateway`: single HTTP/gRPC entrypoint for UI-facing and external traffic.
+- `orcastack-git-service`: repository metadata, refs, commits, trees, and future push ingestion.
+- `orcastack-review-service`: changes, patchsets, votes, and policy evaluation.
+- `orcastack-ci-service`: pipeline orchestration and future worker control.
+- `orcastack-cd-service`: deployment promotion and rollback orchestration.
+- `orcastack-analytics-service`: analytics and intelligence APIs backed by large-volume event storage.
 
 ### Data and infrastructure services
 

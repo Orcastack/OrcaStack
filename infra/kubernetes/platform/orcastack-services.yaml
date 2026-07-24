@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orcastack-ci-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orcastack-ci-service
+  template:
+    metadata:
+      labels:
+        app: orcastack-ci-service
+        orcastack.io/stage: build-test-sign
+    spec:
+      serviceAccountName: orcastack-runner
+      containers:
+        - name: ci-service
+          image: registry.internal.example/orcastack/ci-service:latest
+          env:
+            - name: ORCASTACK_EXECUTION_MODE
+              value: private-cloud
+            - name: ORCASTACK_SIGNING_REQUIRED
+              value: "true"
+            - name: ORCASTACK_POLICY_ENDPOINT
+              value: http://opa.orcastack-system.svc.cluster.local:8181
+          volumeMounts:
+            - name: artifacts
+              mountPath: /workspace/artifacts
+      volumes:
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: orcastack-artifacts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orcastack-cd-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orcastack-cd-service
+  template:
+    metadata:
+      labels:
+        app: orcastack-cd-service
+        orcastack.io/stage: deploy-runtime
+    spec:
+      serviceAccountName: orcastack-runner
+      containers:
+        - name: cd-service
+          image: registry.internal.example/orcastack/cd-service:latest
+          env:
+            - name: ORCASTACK_DEPLOYMENT_ENVS
+              value: dev,stage,prod
+            - name: ORCASTACK_ROLLBACK_ENABLED
+              value: "true"
+            - name: ORCASTACK_POLICY_ENDPOINT
+              value: http://opa.orcastack-system.svc.cluster.local:8181

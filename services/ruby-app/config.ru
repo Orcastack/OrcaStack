@@ -1,3 +1,3 @@
 require_relative './server'
 
-run proc { |env| Gitorc::RubyApp::Server.rack_call(env) }
+run proc { |env| OrcaStack::RubyApp::Server.rack_call(env) }

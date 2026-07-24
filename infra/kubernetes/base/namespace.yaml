@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gitorc-system
+  name: orcastack-system
   labels:
-    app.kubernetes.io/name: gitorc
-    app.kubernetes.io/part-of: gitorc-platform
-    gitorc.io/governance: enforced
+    app.kubernetes.io/name: orcastack
+    app.kubernetes.io/part-of: orcastack-platform
+    orcastack.io/governance: enforced

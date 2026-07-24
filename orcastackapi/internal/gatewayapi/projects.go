@@ -1,0 +1,919 @@
+package gatewayapi
+
+import (
+	"bufio"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/textproto"
+	"net/url"
+	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const repositoryMetadataFile = ".orcastack.json"
+
+var repositoryNamePattern = regexp.MustCompile(`[^a-z0-9._-]+`)
+
+type repositoryMetadata struct {
+	Name          string `json:"name"`
+	Summary       string `json:"summary"`
+	DefaultBranch string `json:"default_branch"`
+	ProviderID    string `json:"provider_id"`
+	SourceURL     string `json:"source_url,omitempty"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+	LastAction    string `json:"last_action"`
+}
+
+type createRepositoryRequest struct {
+	Name          string `json:"name"`
+	Summary       string `json:"summary"`
+	DefaultBranch string `json:"default_branch"`
+}
+
+type importRepositoryRequest struct {
+	Name          string `json:"name"`
+	Summary       string `json:"summary"`
+	DefaultBranch string `json:"default_branch"`
+	SourceURL     string `json:"source_url"`
+}
+
+type repositoryMutationResponse struct {
+	Repository     Repository     `json:"repository"`
+	CloneOperation CloneOperation `json:"clone_operation"`
+}
+
+func repositoryRoot() string {
+	if root := strings.TrimSpace(os.Getenv("ORCASTACK_REPO_ROOT")); root != "" {
+		return root
+	}
+
+	return "/srv/git"
+}
+
+func repositoryPublicRoot() string {
+	if root := strings.TrimSpace(os.Getenv("ORCASTACK_REPO_PUBLIC_ROOT")); root != "" {
+		return root
+	}
+
+	return repositoryRoot()
+}
+
+func publicGitBase() string {
+	if base := strings.TrimSpace(os.Getenv("ORCASTACK_PUBLIC_GIT_BASE")); base != "" {
+		return strings.TrimRight(base, "/")
+	}
+
+	return "http://localhost:8080/git"
+}
+
+func ensureRepositoryRoot() error {
+	return os.MkdirAll(repositoryRoot(), 0o755)
+}
+
+func repositoryDir(name string) string {
+	return filepath.Join(repositoryRoot(), name+".git")
+}
+
+func repositoryMetadataPath(repoDir string) string {
+	return filepath.Join(repoDir, repositoryMetadataFile)
+}
+
+func sanitizeRepositoryName(raw string) string {
+	cleaned := strings.ToLower(strings.TrimSpace(raw))
+	cleaned = strings.TrimSuffix(cleaned, ".git")
+	cleaned = strings.ReplaceAll(cleaned, " ", "-")
+	cleaned = repositoryNamePattern.ReplaceAllString(cleaned, "-")
+	cleaned = strings.Trim(cleaned, "-._")
+	for strings.Contains(cleaned, "--") {
+		cleaned = strings.ReplaceAll(cleaned, "--", "-")
+	}
+	return cleaned
+}
+
+func inferRepositoryName(sourceURL string) string {
+	parsed, err := url.Parse(sourceURL)
+	if err == nil && parsed.Path != "" {
+		return sanitizeRepositoryName(path.Base(parsed.Path))
+	}
+
+	parts := strings.Split(strings.TrimSpace(sourceURL), "/")
+	if len(parts) == 0 {
+		return ""
+	}
+
+	return sanitizeRepositoryName(parts[len(parts)-1])
+}
+
+func providerForSource(sourceURL string) string {
+	parsed, err := url.Parse(sourceURL)
+	if err != nil {
+		return "external"
+	}
+
+	host := strings.ToLower(parsed.Hostname())
+	switch {
+	case strings.Contains(host, "github"):
+		return "github"
+	case strings.Contains(host, "gitlab"):
+		return "gitlab"
+	case strings.Contains(host, "bitbucket"):
+		return "bitbucket"
+	case strings.Contains(host, "gitea"):
+		return "gitea"
+	case host == "":
+		return "external"
+	default:
+		return "external"
+	}
+}
+
+func repositoryCloneURL(name string) string {
+	return publicGitBase() + "/" + name + ".git"
+}
+
+func runGit(args ...string) (string, error) {
+	commandArgs := append([]string{"-c", "safe.directory=*"}, args...)
+	cmd := exec.Command("git", commandArgs...)
+	output, err := cmd.CombinedOutput()
+	trimmed := strings.TrimSpace(string(output))
+	if err != nil {
+		if trimmed == "" {
+			return "", err
+		}
+		return "", fmt.Errorf("%w: %s", err, trimmed)
+	}
+
+	return trimmed, nil
+}
+
+func enableRepositoryHTTPAccess(repoDir string) error {
+	if _, err := runGit("--git-dir", repoDir, "config", "http.receivepack", "true"); err != nil {
+		return err
+	}
+
+	if _, err := runGit("--git-dir", repoDir, "config", "http.uploadpack", "true"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func writeRepositoryMetadata(repoDir string, metadata repositoryMetadata) error {
+	payload, err := json.MarshalIndent(metadata, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(repositoryMetadataPath(repoDir), payload, 0o644)
+}
+
+func readRepositoryMetadata(repoDir string) (repositoryMetadata, error) {
+	metaPath := repositoryMetadataPath(repoDir)
+	payload, err := os.ReadFile(metaPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			name := strings.TrimSuffix(filepath.Base(repoDir), ".git")
+			now := time.Now().UTC().Format(time.RFC3339)
+			return repositoryMetadata{
+				Name:          name,
+				Summary:       "Local repository hosted by orcastack.",
+				DefaultBranch: "main",
+				ProviderID:    "orcastack",
+				CreatedAt:     now,
+				UpdatedAt:     now,
+				LastAction:    "created",
+			}, nil
+		}
+		return repositoryMetadata{}, err
+	}
+
+	var metadata repositoryMetadata
+	if err := json.Unmarshal(payload, &metadata); err != nil {
+		return repositoryMetadata{}, err
+	}
+
+	return metadata, nil
+}
+
+func inspectRepository(repoDir, fallbackBranch, fallbackUpdatedAt string) (string, string, string) {
+	branch := fallbackBranch
+	if output, err := runGit("--git-dir", repoDir, "symbolic-ref", "--short", "HEAD"); err == nil && output != "" {
+		branch = output
+	}
+
+	commit := "No commits yet"
+	if output, err := runGit("--git-dir", repoDir, "rev-parse", "--short", "HEAD"); err == nil && output != "" {
+		commit = output
+	}
+
+	lastCommitAt := fallbackUpdatedAt
+	if output, err := runGit("--git-dir", repoDir, "log", "-1", "--format=%cI"); err == nil && output != "" {
+		lastCommitAt = output
+	}
+
+	return branch, commit, lastCommitAt
+}
+
+func buildRepository(metadata repositoryMetadata) Repository {
+	repoDir := repositoryDir(metadata.Name)
+	branch, commit, lastCommitAt := inspectRepository(repoDir, metadata.DefaultBranch, metadata.UpdatedAt)
+	summary := strings.TrimSpace(metadata.Summary)
+	if summary == "" {
+		if metadata.SourceURL != "" {
+			summary = "Imported from " + metadata.SourceURL
+		} else {
+			summary = "Local repository hosted by orcastack."
+		}
+	}
+
+	return Repository{
+		ID:            metadata.Name,
+		ProviderID:    metadata.ProviderID,
+		Name:          metadata.Name,
+		Branch:        branch,
+		DefaultBranch: metadata.DefaultBranch,
+		Commit:        commit,
+		LastCommitAt:  lastCommitAt,
+		Reviewer:      "gateway",
+		Summary:       summary,
+		CloneURL:      repositoryCloneURL(metadata.Name),
+		Identity:      "orcastack:repo:" + metadata.Name,
+		Security: SecurityState{
+			LDAPRegistered:    false,
+			RBACVerified:      false,
+			AttestationSigned: false,
+			Verified:          false,
+		},
+	}
+}
+
+func buildCloneOperation(metadata repositoryMetadata, repository Repository) CloneOperation {
+	status := "ready"
+	if metadata.SourceURL != "" {
+		status = "completed"
+	}
+
+	return CloneOperation{
+		RepositoryID: repository.ID,
+		Status:       status,
+		CloneURL:     repository.CloneURL,
+		Command:      "git clone " + repository.CloneURL,
+		UPI:          "orcastack:clone:" + repository.ID,
+		UpdatedAt:    metadata.UpdatedAt,
+	}
+}
+
+func listRepositoryMetadata() ([]repositoryMetadata, error) {
+	if err := ensureRepositoryRoot(); err != nil {
+		return nil, err
+	}
+
+	entries, err := os.ReadDir(repositoryRoot())
+	if err != nil {
+		return nil, err
+	}
+
+	repositories := make([]repositoryMetadata, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsDir() || !strings.HasSuffix(entry.Name(), ".git") {
+			continue
+		}
+
+		metadata, err := readRepositoryMetadata(filepath.Join(repositoryRoot(), entry.Name()))
+		if err != nil {
+			return nil, err
+		}
+		repositories = append(repositories, metadata)
+	}
+
+	sort.Slice(repositories, func(i, j int) bool {
+		return repositories[i].Name < repositories[j].Name
+	})
+
+	return repositories, nil
+}
+
+func providerName(providerID string) string {
+	switch providerID {
+	case "orcastack":
+		return "orcastack"
+	case "github":
+		return "GitHub"
+	case "gitlab":
+		return "GitLab"
+	case "bitbucket":
+		return "Bitbucket"
+	case "gitea":
+		return "Gitea"
+	default:
+		return "External Git"
+	}
+}
+
+func overviewData() (Overview, error) {
+	now := time.Now().UTC().Format(time.RFC3339)
+	metadataEntries, err := listRepositoryMetadata()
+	if err != nil {
+		return Overview{}, err
+	}
+
+	cloudLayers := []CloudLayer{
+		{
+			Name:     "Bare metal and virtualization",
+			Platform: "Proxmox VE",
+			Status:   "ready",
+			Endpoint: "https://proxmox.internal.example:8006",
+			Identity: "orcastack:cloud:proxmox",
+			Summary:  "Bootstraps clustered KVM capacity for controller, worker, and GPU-backed VM pools.",
+			Coverage: []string{"Bare-metal installation", "VM-hosted control plane", "Clustered hypervisor orchestration"},
+		},
+		{
+			Name:     "Private IaaS",
+			Platform: "OpenStack",
+			Status:   "ready",
+			Endpoint: "https://keystone.internal.example:5000/v3",
+			Identity: "orcastack:cloud:openstack",
+			Summary:  "Manages controller and compute capacity, routed networking, floating IPs, and service identity.",
+			Coverage: []string{"Keystone identity", "Cinder and Ceph storage", "Security groups and load balancers"},
+		},
+		{
+			Name:     "Network fabric",
+			Platform: "OVN / OVS / FRR",
+			Status:   "ready",
+			Endpoint: "fabric://private-cloud/evpn",
+			Identity: "orcastack:cloud:fabric",
+			Summary:  "Provides routed multi-tenant networking with EVPN, VXLAN, and logical switch policy.",
+			Coverage: []string{"OVN logical networking", "Open vSwitch data plane", "FRR BGP and EVPN routing"},
+		},
+		{
+			Name:     "Container compute",
+			Platform: "Kubernetes",
+			Status:   "online",
+			Endpoint: "https://k8s.internal.example:6443",
+			Identity: "orcastack:cloud:kubernetes",
+			Summary:  "Runs cloud-native platform services, workload scheduling, and GPU-accelerated execution lanes.",
+			Coverage: []string{"General-purpose scheduling", "GPU scheduling", "Policy-governed runtime isolation"},
+		},
+		{
+			Name:     "Cluster management",
+			Platform: "Rancher",
+			Status:   "online",
+			Endpoint: "https://rancher.internal.example",
+			Identity: "orcastack:cloud:rancher",
+			Summary:  "Registers clusters, maps RBAC, and coordinates upgrades, fleet visibility, and node lifecycle.",
+			Coverage: []string{"Multi-cluster registration", "RBAC projection", "Upgrade and node lifecycle workflows"},
+		},
+	}
+
+	clusters := []Cluster{
+		{
+			ID:                 "orcastack-private-cloud",
+			Name:               "orcastack-private-cloud",
+			Provider:           "Rancher / RKE2",
+			Status:             "online",
+			Version:            "v1.31.2+rke2r1",
+			ControlPlanes:      3,
+			Workers:            5,
+			GPUWorkers:         2,
+			RancherProject:     "platform-ops",
+			RegistrationStatus: "registered",
+			UpgradePolicy:      "sequential-canary",
+			APIEndpoint:        "https://k8s.internal.example:6443",
+		},
+		{
+			ID:                 "orcastack-ai-factory",
+			Name:               "orcastack-ai-factory",
+			Provider:           "Rancher / Imported Cluster",
+			Status:             "syncing",
+			Version:            "v1.30.6+rke2r1",
+			ControlPlanes:      3,
+			Workers:            4,
+			GPUWorkers:         4,
+			RancherProject:     "ai-platform",
+			RegistrationStatus: "registration-token-ready",
+			UpgradePolicy:      "gpu-safe-window",
+			APIEndpoint:        "https://ai-cluster.internal.example:6443",
+		},
+	}
+
+	automationLanes := []AutomationLane{
+		{
+			Name:       "Cloud bootstrap",
+			Type:       "workflow",
+			Status:     "ready",
+			Entrypoint: "infra/automation/workflows/cloud-bootstrap.yaml",
+			Target:     "Proxmox, OpenStack, network fabric, Kubernetes, Rancher",
+			LastRun:    now,
+		},
+		{
+			Name:       "Rancher lifecycle",
+			Type:       "ansible",
+			Status:     "ready",
+			Entrypoint: "infra/ansible/playbooks/rancher-lifecycle.yml",
+			Target:     "Cluster registration, RBAC sync, upgrades, monitoring, node lifecycle",
+			LastRun:    now,
+		},
+		{
+			Name:       "Platform self-hosting",
+			Type:       "workflow",
+			Status:     "ready",
+			Entrypoint: "infra/automation/workflows/platform-self-hosting.yaml",
+			Target:     "Self-bootstrap, self-upgrade, self-monitoring",
+			LastRun:    now,
+		},
+	}
+
+	observability := []ObservabilitySurface{
+		{
+			Name:     "Prometheus",
+			Kind:     "metrics",
+			Status:   "running",
+			Endpoint: "https://prometheus.internal.example",
+			Backing:  "infra/kubernetes/platform/observability-stack.yaml",
+		},
+		{
+			Name:     "Grafana",
+			Kind:     "dashboards",
+			Status:   "running",
+			Endpoint: "https://grafana.internal.example",
+			Backing:  "infra/kubernetes/platform/observability-stack.yaml",
+		},
+		{
+			Name:     "Platform scrape config",
+			Kind:     "configuration",
+			Status:   "managed",
+			Endpoint: "config://orcastack-prometheus-scrape",
+			Backing:  "infra/kubernetes/platform/monitoring.yaml",
+		},
+	}
+
+	selfManagement := []SelfManagementCapability{
+		{
+			Name:     "Self-bootstrap",
+			Status:   "ready",
+			Workflow: "infra/automation/workflows/platform-self-hosting.yaml",
+			Summary:  "Deploys the ORCASTACK control plane into the management cluster from the governed bootstrap lane.",
+		},
+		{
+			Name:     "Self-upgrade",
+			Status:   "ready",
+			Workflow: "infra/automation/workflows/platform-self-hosting.yaml",
+			Summary:  "Rolls the gateway, runners, and platform services through a versioned upgrade lane with rollback checkpoints.",
+		},
+		{
+			Name:     "Self-monitoring",
+			Status:   "ready",
+			Workflow: "infra/automation/workflows/platform-self-hosting.yaml",
+			Summary:  "Publishes platform metrics, dashboards, and alerting hooks through the observability stack.",
+		},
+	}
+
+	repositories := make([]Repository, 0, len(metadataEntries))
+	cloneOperations := make([]CloneOperation, 0, len(metadataEntries))
+	events := make([]Event, 0, len(metadataEntries))
+	providerCounts := map[string]int{}
+	importedCount := 0
+	for _, metadata := range metadataEntries {
+		repository := buildRepository(metadata)
+		repositories = append(repositories, repository)
+		cloneOperations = append(cloneOperations, buildCloneOperation(metadata, repository))
+		providerCounts[metadata.ProviderID]++
+		if metadata.ProviderID != "orcastack" {
+			importedCount++
+		}
+		events = append(events, Event{
+			ID:           "evt-" + metadata.Name,
+			Time:         metadata.UpdatedAt,
+			Component:    metadata.Name,
+			Kind:         "repository",
+			RepositoryID: metadata.Name,
+			Action:       metadata.LastAction,
+			Result:       "success",
+			UPI:          "orcastack:event:" + metadata.Name,
+			Summary:      buildRepository(metadata).Summary,
+		})
+	}
+
+	providerIDs := make([]string, 0, len(providerCounts))
+	for providerID := range providerCounts {
+		providerIDs = append(providerIDs, providerID)
+	}
+	sort.Strings(providerIDs)
+
+	providers := make([]Provider, 0, len(providerIDs))
+	for _, providerID := range providerIDs {
+		status := "connected"
+		connected := true
+		if providerID == "orcastack" {
+			status = "primary"
+		}
+		providers = append(providers, Provider{
+			ID:        providerID,
+			Name:      providerName(providerID),
+			Status:    status,
+			Repos:     providerCounts[providerID],
+			Latency:   "local",
+			Identity:  "orcastack:provider:" + providerID,
+			Connected: connected,
+		})
+	}
+
+	pipelines := []Pipeline{
+		{
+			ID:           "pipeline-cloud-bootstrap",
+			RepositoryID: firstRepositoryID(repositories),
+			Name:         "cloud-bootstrap",
+			Branch:       "main",
+			LastRun:      now,
+			Status:       "success",
+			Stages: []PipelineStage{
+				{Name: "proxmox", Status: "success"},
+				{Name: "openstack", Status: "success"},
+				{Name: "rancher", Status: "success"},
+				{Name: "observability", Status: "success"},
+			},
+			RunHistory: []PipelineRun{
+				{ID: "run-cloud-1042", StartedAt: now, Status: "success", Trigger: "operator"},
+				{ID: "run-cloud-1037", StartedAt: now, Status: "success", Trigger: "scheduled"},
+			},
+			LogChannel: "infra/automation/workflows/cloud-bootstrap.yaml",
+			UPI:        "orcastack:pipeline:cloud-bootstrap",
+			Security: SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+			UpdatedAt: now,
+		},
+		{
+			ID:           "pipeline-self-hosting",
+			RepositoryID: firstRepositoryID(repositories),
+			Name:         "platform-self-hosting",
+			Branch:       "main",
+			LastRun:      now,
+			Status:       "running",
+			Stages: []PipelineStage{
+				{Name: "bootstrap", Status: "success"},
+				{Name: "upgrade", Status: "running"},
+				{Name: "observe", Status: "pending"},
+			},
+			RunHistory: []PipelineRun{
+				{ID: "run-platform-212", StartedAt: now, Status: "running", Trigger: "release"},
+			},
+			LogChannel: "infra/automation/workflows/platform-self-hosting.yaml",
+			UPI:        "orcastack:pipeline:platform-self-hosting",
+			Security: SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+			UpdatedAt: now,
+		},
+	}
+
+	deployments := []Deployment{
+		{
+			ID:              "deploy-orcastack-control-plane",
+			RepositoryID:    firstRepositoryID(repositories),
+			ServiceName:     "orcastack-control-plane",
+			Version:         "2026.06.0",
+			Environment:     "management-cluster",
+			Status:          "running",
+			Cluster:         "orcastack-private-cloud",
+			Artifact:        "registry.internal.example/orcastack/platform:2026.06.0",
+			TargetCommit:    firstRepositoryCommit(repositories),
+			PreviousVersion: "2026.05.4",
+			LogChannel:      "orcastack:deploy:management-cluster",
+			UPI:             "orcastack:deployment:control-plane",
+			Security:        SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+		},
+		{
+			ID:              "deploy-observability-stack",
+			RepositoryID:    firstRepositoryID(repositories),
+			ServiceName:     "observability-stack",
+			Version:         "11.2.0",
+			Environment:     "platform-monitoring",
+			Status:          "success",
+			Cluster:         "orcastack-private-cloud",
+			Artifact:        "infra/kubernetes/platform/observability-stack.yaml",
+			TargetCommit:    firstRepositoryCommit(repositories),
+			PreviousVersion: "11.1.2",
+			LogChannel:      "orcastack:deploy:observability",
+			UPI:             "orcastack:deployment:observability",
+			Security:        SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+		},
+	}
+
+	containers := []Container{
+		{
+			Name:       "orcastack-gateway",
+			UPI:        "orcastack:runtime:gateway",
+			State:      "running",
+			Host:       "cp-01.internal.example",
+			Actions:    []string{"logs", "metrics", "restart"},
+			CPU:        "650m",
+			Memory:     "768Mi",
+			Restarts:   0,
+			MetricsURL: "https://prometheus.internal.example/graph?g0.expr=orcastack_gateway_requests_total",
+			LogChannel: "orcastack:runtime:gateway",
+			Security:   SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+		},
+		{
+			Name:       "rancher-controller",
+			UPI:        "orcastack:runtime:rancher-controller",
+			State:      "running",
+			Host:       "rancher-01.internal.example",
+			Actions:    []string{"logs", "metrics"},
+			CPU:        "900m",
+			Memory:     "1.2Gi",
+			Restarts:   1,
+			MetricsURL: "https://grafana.internal.example/d/rancher-control-plane",
+			LogChannel: "orcastack:runtime:rancher-controller",
+			Security:   SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+		},
+		{
+			Name:       "prometheus",
+			UPI:        "orcastack:runtime:prometheus",
+			State:      "running",
+			Host:       "obs-01.internal.example",
+			Actions:    []string{"metrics", "dashboards"},
+			CPU:        "1200m",
+			Memory:     "2Gi",
+			Restarts:   0,
+			MetricsURL: "https://prometheus.internal.example",
+			LogChannel: "orcastack:runtime:prometheus",
+			Security:   SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+		},
+	}
+
+	events = append(events,
+		Event{ID: "evt-cloud-bootstrap", Time: now, Component: "cloud-bootstrap", Kind: "pipeline", RepositoryID: firstRepositoryID(repositories), Action: "bootstrap", Result: "success", UPI: "orcastack:event:cloud-bootstrap", Summary: "Private cloud foundation synchronized across Proxmox, OpenStack, networking, and Kubernetes."},
+		Event{ID: "evt-rancher-lifecycle", Time: now, Component: "rancher-lifecycle", Kind: "deployment", RepositoryID: firstRepositoryID(repositories), Action: "cluster-registration", Result: "success", UPI: "orcastack:event:rancher-lifecycle", Summary: "Rancher registration, RBAC mapping, and monitoring policy lanes are available for managed clusters."},
+		Event{ID: "evt-self-hosting", Time: now, Component: "platform-self-hosting", Kind: "process", RepositoryID: firstRepositoryID(repositories), Action: "self-upgrade", Result: "running", UPI: "orcastack:event:self-hosting", Summary: "ORCASTACK self-hosting lane is staged for bootstrap, upgrade, and observability validation."},
+	)
+
+	metrics := []Metric{
+		{Label: "Projects tracked", Value: fmt.Sprintf("%d", len(repositories)), Hint: "Repositories available for clone and push through the local control plane."},
+		{Label: "Hosted locally", Value: fmt.Sprintf("%d", providerCounts["orcastack"]), Hint: "Bare repositories created directly inside the orcastack repo store."},
+		{Label: "Imported remotes", Value: fmt.Sprintf("%d", importedCount), Hint: "Repositories mirrored from external Git sources."},
+		{Label: "Push targets ready", Value: fmt.Sprintf("%d", len(repositories)), Hint: "Each project exposes an HTTP Git remote you can clone from and push to over the network."},
+		{Label: "Cloud layers managed", Value: fmt.Sprintf("%d", len(cloudLayers)), Hint: "Bare metal, OpenStack, fabric, Kubernetes, and Rancher surfaces mapped into the control plane."},
+		{Label: "Clusters under Rancher", Value: fmt.Sprintf("%d", len(clusters)), Hint: "Management and workload clusters available for lifecycle operations and registration."},
+	}
+
+	activity := []string{
+		"Create local projects as bare Git remotes from the dashboard.",
+		"Import existing repositories with git clone --mirror.",
+		"Clone or push through HTTP Git remotes exposed by the gateway.",
+		"Run full private-cloud bootstrap across Proxmox, OpenStack, networking, Kubernetes, and Rancher.",
+		"Operate self-hosting lanes for ORCASTACK bootstrap, upgrades, and monitoring.",
+	}
+
+	overview := Overview{
+		Providers:       providers,
+		Repositories:    repositories,
+		CloneOperations: cloneOperations,
+		Reviews:         []Review{},
+		Pipelines:       pipelines,
+		Deployments:     deployments,
+		Containers:      containers,
+		Security: DashboardSecurity{
+			RepositoryIdentity: "orcastack:directory:repositories",
+			UIProcessIdentity:  "orcastack:ui:control-plane",
+			Directory:          SecurityState{LDAPRegistered: true, RBACVerified: true, AttestationSigned: true, Verified: true},
+		},
+		Events:          events,
+		UpdatedAt:       now,
+		Metrics:         metrics,
+		Activity:        activity,
+		CloudLayers:     cloudLayers,
+		Clusters:        clusters,
+		AutomationLanes: automationLanes,
+		Observability:   observability,
+		SelfManagement:  selfManagement,
+	}
+
+	enrichOverviewFromLiveAPIs(&overview, now)
+
+	return overview, nil
+}
+
+func firstRepositoryID(repositories []Repository) string {
+	if len(repositories) == 0 {
+		return "platform-control-plane"
+	}
+
+	return repositories[0].ID
+}
+
+func firstRepositoryCommit(repositories []Repository) string {
+	if len(repositories) == 0 {
+		return "infra-snapshot"
+	}
+
+	return repositories[0].Commit
+}
+
+func createRepository(req createRepositoryRequest) (repositoryMutationResponse, error) {
+	name := sanitizeRepositoryName(req.Name)
+	if name == "" {
+		return repositoryMutationResponse{}, errors.New("repository name is required")
+	}
+
+	defaultBranch := strings.TrimSpace(req.DefaultBranch)
+	if defaultBranch == "" {
+		defaultBranch = "main"
+	}
+
+	if err := ensureRepositoryRoot(); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+
+	repoDir := repositoryDir(name)
+	if _, err := os.Stat(repoDir); err == nil {
+		return repositoryMutationResponse{}, fmt.Errorf("repository %s already exists", name)
+	}
+
+	if _, err := runGit("init", "--bare", "--initial-branch", defaultBranch, repoDir); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+	if err := enableRepositoryHTTPAccess(repoDir); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+
+	now := time.Now().UTC().Format(time.RFC3339)
+	metadata := repositoryMetadata{
+		Name:          name,
+		Summary:       strings.TrimSpace(req.Summary),
+		DefaultBranch: defaultBranch,
+		ProviderID:    "orcastack",
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		LastAction:    "created",
+	}
+	if err := writeRepositoryMetadata(repoDir, metadata); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+
+	repository := buildRepository(metadata)
+	return repositoryMutationResponse{
+		Repository:     repository,
+		CloneOperation: buildCloneOperation(metadata, repository),
+	}, nil
+}
+
+func importRepository(req importRepositoryRequest) (repositoryMutationResponse, error) {
+	sourceURL := strings.TrimSpace(req.SourceURL)
+	if sourceURL == "" {
+		return repositoryMutationResponse{}, errors.New("source repository URL is required")
+	}
+
+	name := sanitizeRepositoryName(req.Name)
+	if name == "" {
+		name = inferRepositoryName(sourceURL)
+	}
+	if name == "" {
+		return repositoryMutationResponse{}, errors.New("repository name is required")
+	}
+
+	if err := ensureRepositoryRoot(); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+
+	repoDir := repositoryDir(name)
+	if _, err := os.Stat(repoDir); err == nil {
+		return repositoryMutationResponse{}, fmt.Errorf("repository %s already exists", name)
+	}
+
+	if _, err := runGit("clone", "--mirror", sourceURL, repoDir); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+	if err := enableRepositoryHTTPAccess(repoDir); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+
+	defaultBranch := strings.TrimSpace(req.DefaultBranch)
+	if defaultBranch == "" {
+		if branch, _, _ := inspectRepository(repoDir, "main", time.Now().UTC().Format(time.RFC3339)); branch != "" {
+			defaultBranch = branch
+		} else {
+			defaultBranch = "main"
+		}
+	}
+
+	now := time.Now().UTC().Format(time.RFC3339)
+	metadata := repositoryMetadata{
+		Name:          name,
+		Summary:       strings.TrimSpace(req.Summary),
+		DefaultBranch: defaultBranch,
+		ProviderID:    providerForSource(sourceURL),
+		SourceURL:     sourceURL,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		LastAction:    "imported",
+	}
+	if err := writeRepositoryMetadata(repoDir, metadata); err != nil {
+		return repositoryMutationResponse{}, err
+	}
+
+	repository := buildRepository(metadata)
+	return repositoryMutationResponse{
+		Repository:     repository,
+		CloneOperation: buildCloneOperation(metadata, repository),
+	}, nil
+}
+
+func decodeJSON(r *http.Request, target any) error {
+	defer r.Body.Close()
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	return decoder.Decode(target)
+}
+
+func writeError(w http.ResponseWriter, status int, err error) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+}
+
+func serveGitHTTP(w http.ResponseWriter, r *http.Request) {
+	pathInfo := strings.TrimPrefix(r.URL.Path, "/git")
+	pathInfo = path.Clean("/" + strings.TrimPrefix(pathInfo, "/"))
+	if pathInfo == "/" || strings.Contains(pathInfo, "..") {
+		http.NotFound(w, r)
+		return
+	}
+
+	var requestBody bytes.Buffer
+	if r.Body != nil {
+		_, _ = io.Copy(&requestBody, r.Body)
+		_ = r.Body.Close()
+	}
+
+	cmd := exec.Command("git", "http-backend")
+	cmd.Env = append(os.Environ(),
+		"GIT_PROJECT_ROOT="+repositoryRoot(),
+		"GIT_HTTP_EXPORT_ALL=1",
+		"PATH_INFO="+pathInfo,
+		"REQUEST_METHOD="+r.Method,
+		"QUERY_STRING="+r.URL.RawQuery,
+		"CONTENT_TYPE="+r.Header.Get("Content-Type"),
+		"CONTENT_LENGTH="+strconv.Itoa(requestBody.Len()),
+		"REMOTE_ADDR="+r.RemoteAddr,
+	)
+	cmd.Stdin = bytes.NewReader(requestBody.Bytes())
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil && stdout.Len() == 0 {
+		message := strings.TrimSpace(stderr.String())
+		if message == "" {
+			message = err.Error()
+		}
+		writeError(w, http.StatusInternalServerError, errors.New(message))
+		return
+	}
+
+	if err := writeCGIResponse(w, stdout.Bytes()); err != nil {
+		writeError(w, http.StatusInternalServerError, err)
+	}
+}
+
+func writeCGIResponse(w http.ResponseWriter, payload []byte) error {
+	reader := bufio.NewReader(bytes.NewReader(payload))
+	textReader := textproto.NewReader(reader)
+	headers, err := textReader.ReadMIMEHeader()
+	if err != nil {
+		return err
+	}
+
+	statusCode := http.StatusOK
+	if status := headers.Get("Status"); status != "" {
+		parts := strings.Fields(status)
+		if len(parts) > 0 {
+			if code, convErr := strconv.Atoi(parts[0]); convErr == nil {
+				statusCode = code
+			}
+		}
+	}
+
+	for key, values := range headers {
+		if strings.EqualFold(key, "Status") {
+			continue
+		}
+		for _, value := range values {
+			w.Header().Add(key, value)
+		}
+	}
+
+	w.WriteHeader(statusCode)
+	_, err = io.Copy(w, reader)
+	return err
+}

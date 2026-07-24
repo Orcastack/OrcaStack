@@ -1,6 +1,6 @@
 # Slack Integration - Quick Implementation Guide
 
-This guide shows how to quickly integrate Slack notifications into your GITORC services.
+This guide shows how to quickly integrate Slack notifications into your ORCASTACK services.
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
@@ -16,8 +16,8 @@ This guide shows how to quickly integrate Slack notifications into your GITORC s
 ## Prerequisites
 
 - Slack workspace with admin access
-- Created a Slack App for GITORC (https://api.slack.com/apps)
-- GITORC gateway service running
+- Created a Slack App for ORCASTACK (https://api.slack.com/apps)
+- ORCASTACK gateway service running
 - Basic understanding of Go environment variables
 
 ---
@@ -65,7 +65,7 @@ SLACK_NOTIFICATIONS_ENABLED=true
 ### Option B: Kubernetes
 
 ```bash
-kubectl create secret generic gitorc-slack-credentials \
+kubectl create secret generic orcastack-slack-credentials \
   --from-literal=SLACK_BOT_TOKEN=xoxb-... \
   --from-literal=SLACK_SIGNING_SECRET=... \
   --from-literal=SLACK_CLIENT_ID=... \
@@ -87,14 +87,14 @@ export SLACK_NOTIFICATIONS_ENABLED=true
 
 ## Step 3: Initialize Slack Manager
 
-Add to `gitorcapi/cmd/gitorc-gateway/main.go`:
+Add to `orcastackapi/cmd/orcastack-gateway/main.go`:
 
 ```go
 package main
 
 import (
 	"log"
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	// ... other imports
 )
 
@@ -115,13 +115,13 @@ func main() {
 
 ## Step 4: Register Event Handlers
 
-Add to `gitorcapi/internal/gatewayapi/api.go` in the `Register()` function:
+Add to `orcastackapi/internal/gatewayapi/api.go` in the `Register()` function:
 
 ```go
 package gatewayapi
 
 import (
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	// ... other imports
 )
 
@@ -137,7 +137,7 @@ func (a *API) Register() {
 		a.router.HandleFunc("/api/integrations/slack/oauth/callback",
 			slack.NewOAuthHandler().HandleCallback).Methods("GET")
 		
-		// Event handler (Slack events → GITORC)
+		// Event handler (Slack events → ORCASTACK)
 		a.router.HandleFunc("/api/integrations/slack/events",
 			slack.NewEventHandler(slackMgr).Handle).Methods("POST")
 		
@@ -162,7 +162,7 @@ In `internal/services/pipeline/pipeline.go`:
 package pipeline
 
 import (
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	// ... other imports
 )
 
@@ -181,7 +181,7 @@ func (s *PipelineService) CompletePipeline(pipelineID string, status string) err
 			"my-project",           // project name
 			pipelineID,             // pipeline ID
 			"#devops",              // channel
-			"https://gitorc.example.com/pipelines/" + pipelineID,
+			"https://orcastack.example.com/pipelines/" + pipelineID,
 		)
 		slackMgr.NotifyPipelineEvent(event)
 	}
@@ -198,7 +198,7 @@ In `internal/services/deployment/deployment.go`:
 package deployment
 
 import (
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	// ... other imports
 )
 
@@ -214,7 +214,7 @@ func (s *DeploymentService) Deploy(env string, service string, version string) e
 			service,                // service name
 			version,                // version tag
 			"#deployments",         // channel
-			"https://gitorc.example.com/deployments",
+			"https://orcastack.example.com/deployments",
 		)
 		slackMgr.NotifyDeploymentEvent(event)
 	}
@@ -231,7 +231,7 @@ In `internal/services/security/security.go`:
 package security
 
 import (
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	// ... other imports
 )
 
@@ -247,7 +247,7 @@ func (s *SecurityService) DetectViolation(userID string, action string) {
 			userID,                                 // user ID
 			"Unauthorized " + action + " attempt",  // description
 			"#security",                            // channel
-			"https://gitorc.example.com/security",
+			"https://orcastack.example.com/security",
 		)
 		slackMgr.NotifySecurityEvent(event)
 	}
@@ -259,7 +259,7 @@ func (s *SecurityService) DetectViolation(userID string, action string) {
 Send any custom message:
 
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/slack"
+import "github.com/orcastack/orcastackapi/internal/platform/slack"
 
 slackMgr := slack.GetManager()
 if slackMgr != nil {
@@ -272,7 +272,7 @@ if slackMgr != nil {
 			"Status": "Active",
 			"Count": "5",
 		},
-		"https://gitorc.example.com/alerts",
+		"https://orcastack.example.com/alerts",
 	)
 	slackMgr.NotifyCustomEvent(event)
 }
@@ -285,7 +285,7 @@ if slackMgr != nil {
 ### Unit Tests
 
 ```bash
-cd /Users/ofidohubvm/gitorc/gitorcapi
+cd /Users/ofidohubvm/orcastack/orcastackapi
 
 # Run Slack tests (13 should pass)
 go test -v ./internal/platform/slack/...
@@ -296,19 +296,19 @@ go test -v ./internal/platform/slack/...
 # === RUN   TestEventVerifierValidSignature
 # --- PASS: TestEventVerifierValidSignature (0.00s)
 # ... 11 more PASS ...
-# PASS    github.com/gitorc/gitorcapi/internal/platform/slack
+# PASS    github.com/orcastack/orcastackapi/internal/platform/slack
 ```
 
 ### Integration Test
 
-1. **Start GITORC with Slack enabled**:
+1. **Start ORCASTACK with Slack enabled**:
 ```bash
-docker-compose --env-file .env.slack up gitorc-gateway
+docker-compose --env-file .env.slack up orcastack-gateway
 ```
 
 2. **Verify initialization**:
 ```bash
-docker logs gitorc-gateway | grep -i slack
+docker logs orcastack-gateway | grep -i slack
 
 # Should show:
 # [Slack] Initializing notification manager
@@ -319,7 +319,7 @@ docker logs gitorc-gateway | grep -i slack
 ```bash
 # In your code or via direct call:
 slackMgr := slack.GetManager()
-event := slack.NewPipelineEvent("success", "test-project", "pipeline-123", "#test", "https://gitorc.example.com")
+event := slack.NewPipelineEvent("success", "test-project", "pipeline-123", "#test", "https://orcastack.example.com")
 slackMgr.NotifyPipelineEvent(event)
 
 # Should see message appear in your #test Slack channel
@@ -332,7 +332,7 @@ slackMgr.NotifyPipelineEvent(event)
      - Header: "Pipeline success"
      - Project: test-project
      - Pipeline ID: pipeline-123
-     - Link to GITORC
+     - Link to ORCASTACK
 
 ---
 

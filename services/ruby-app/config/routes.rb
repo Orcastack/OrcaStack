@@ -1,4 +1,4 @@
-module Gitorc
+module OrcaStack
   module RubyApp
     class Routes
       def initialize(controllers)

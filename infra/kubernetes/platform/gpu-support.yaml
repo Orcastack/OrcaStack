@@ -10,7 +10,7 @@ spec:
     metadata:
       labels:
         app: nvidia-device-plugin
-        gitorc.io/workload-class: gpu
+        orcastack.io/workload-class: gpu
     spec:
       nodeSelector:
         accelerator: nvidia

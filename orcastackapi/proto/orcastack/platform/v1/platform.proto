@@ -1,0 +1,187 @@
+syntax = "proto3";
+
+package orcastack.platform.v1;
+
+option go_package = "github.com/orcastack/orcastackapi/proto/orcastack/platform/v1;platformv1";
+
+message Repository {
+  string id = 1;
+  string name = 2;
+  string owner = 3;
+  string visibility = 4;
+}
+
+message Change {
+  string id = 1;
+  string repository_id = 2;
+  string target_branch = 3;
+  string status = 4;
+}
+
+message Pipeline {
+  string id = 1;
+  string repository_id = 2;
+  string commit_sha = 3;
+  string status = 4;
+}
+
+message Deployment {
+  string id = 1;
+  string pipeline_id = 2;
+  string environment = 3;
+  string status = 4;
+}
+
+message CreateRepositoryRequest {
+  string name = 1;
+  string owner = 2;
+  string visibility = 3;
+}
+
+message CreateRepositoryResponse {
+  Repository repository = 1;
+}
+
+message ListRepositoriesRequest {
+  string owner = 1;
+}
+
+message ListRepositoriesResponse {
+  repeated Repository repositories = 1;
+}
+
+message ListRefsRequest {
+  string repository_id = 1;
+}
+
+message Ref {
+  string name = 1;
+  string commit_sha = 2;
+}
+
+message ListRefsResponse {
+  repeated Ref refs = 1;
+}
+
+message GetCommitRequest {
+  string repository_id = 1;
+  string commit_id = 2;
+}
+
+message Commit {
+  string id = 1;
+  string author = 2;
+  string email = 3;
+  string message = 4;
+  int64 committed_at_epoch = 5;
+}
+
+message GetCommitResponse {
+  Commit commit = 1;
+}
+
+message GetFileRequest {
+  string repository_id = 1;
+  string commit_id = 2;
+  string path = 3;
+}
+
+message GetFileResponse {
+  bytes content = 1;
+}
+
+message DiffCommitsRequest {
+  string repository_id = 1;
+  string from_commit = 2;
+  string to_commit = 3;
+}
+
+message DiffFile {
+  string path = 1;
+  string patch = 2;
+}
+
+message DiffCommitsResponse {
+  repeated DiffFile files = 1;
+}
+
+message UpsertChangeFromPushRequest {
+  string repository_id = 1;
+  string branch = 2;
+  string commit_sha = 3;
+}
+
+message UpsertChangeFromPushResponse {
+  Change change = 1;
+}
+
+message VoteRequest {
+  string change_id = 1;
+  string patchset_id = 2;
+  string reviewer_id = 3;
+  int32 score = 4;
+  string label = 5;
+}
+
+message VoteResponse {
+  Change change = 1;
+}
+
+message StartPipelineRequest {
+  string repository_id = 1;
+  string commit_sha = 2;
+  string trigger = 3;
+}
+
+message StartPipelineResponse {
+  Pipeline pipeline = 1;
+}
+
+message StartDeploymentRequest {
+  string pipeline_id = 1;
+  string environment = 2;
+}
+
+message StartDeploymentResponse {
+  Deployment deployment = 1;
+}
+
+message ProjectAnalyticsRequest {
+  string project_id = 1;
+  string branch = 2;
+}
+
+message Insight {
+  string key = 1;
+  string value = 2;
+}
+
+message ProjectAnalyticsResponse {
+  repeated Insight insights = 1;
+}
+
+service GitService {
+  rpc CreateRepository(CreateRepositoryRequest) returns (CreateRepositoryResponse);
+  rpc ListRepositories(ListRepositoriesRequest) returns (ListRepositoriesResponse);
+  rpc ListRefs(ListRefsRequest) returns (ListRefsResponse);
+  rpc GetCommit(GetCommitRequest) returns (GetCommitResponse);
+  rpc GetFile(GetFileRequest) returns (GetFileResponse);
+  rpc DiffCommits(DiffCommitsRequest) returns (DiffCommitsResponse);
+}
+
+service ReviewService {
+  rpc UpsertChangeFromPush(UpsertChangeFromPushRequest) returns (UpsertChangeFromPushResponse);
+  rpc Vote(VoteRequest) returns (VoteResponse);
+}
+
+service CIService {
+  rpc StartPipeline(StartPipelineRequest) returns (StartPipelineResponse);
+}
+
+service CDService {
+  rpc StartDeployment(StartDeploymentRequest) returns (StartDeploymentResponse);
+}
+
+service AnalyticsService {
+  rpc GetProjectAnalytics(ProjectAnalyticsRequest) returns (ProjectAnalyticsResponse);
+}

@@ -1,14 +1,14 @@
-- name: Reconcile Rancher lifecycle controls for GITORC-managed clusters
+- name: Reconcile Rancher lifecycle controls for ORCASTACK-managed clusters
   hosts: rancher_management
   become: false
   vars:
-    rancher_cluster_name: gitorc-private-cloud
+    rancher_cluster_name: orcastack-private-cloud
     rancher_project_name: platform-ops
     rancher_upgrade_channel: stable
   tasks:
     - name: Ensure Rancher cluster registration request exists
       ansible.builtin.uri:
-        url: "{{ gitorc_rancher_server_url }}/v3/clusters"
+        url: "{{ orcastack_rancher_server_url }}/v3/clusters"
         method: POST
         body_format: json
         headers:
@@ -23,7 +23,7 @@
 
     - name: Synchronize Rancher project metadata for RBAC mapping
       ansible.builtin.uri:
-        url: "{{ gitorc_rancher_server_url }}/v3/projects"
+        url: "{{ orcastack_rancher_server_url }}/v3/projects"
         method: POST
         body_format: json
         headers:
@@ -31,7 +31,7 @@
         body:
           clusterId: "local"
           name: "{{ rancher_project_name }}"
-          description: Managed by GITORC for multi-cluster governance and RBAC projection.
+          description: Managed by ORCASTACK for multi-cluster governance and RBAC projection.
         status_code:
           - 200
           - 201
@@ -39,13 +39,13 @@
 
     - name: Record Rancher upgrade policy for cluster operators
       ansible.builtin.copy:
-        dest: /tmp/gitorc-rancher-upgrade-policy.json
+        dest: /tmp/orcastack-rancher-upgrade-policy.json
         mode: "0644"
         content: |
           {
             "cluster": "{{ rancher_cluster_name }}",
             "upgrade_channel": "{{ rancher_upgrade_channel }}",
-            "node_lifecycle": "gitorc-governed",
+            "node_lifecycle": "orcastack-governed",
             "monitoring": "prometheus-grafana",
             "rbac_source": "keystone-linked"
           }

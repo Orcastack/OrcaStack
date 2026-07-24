@@ -1,6 +1,6 @@
-# GITORC Private-Cloud Infrastructure
+# ORCASTACK Private-Cloud Infrastructure
 
-The `infra/` tree contains the sovereign infrastructure definition for GITORC. It is the source of truth for local bootstrap, private-cloud deployment, runtime governance, and operational policy.
+The `infra/` tree contains the sovereign infrastructure definition for ORCASTACK. It is the source of truth for local bootstrap, private-cloud deployment, runtime governance, and operational policy.
 
 ## Layout
 
@@ -14,7 +14,7 @@ infra/
 ├── kubernetes/
 │   ├── base/                        # Shared namespaces and platform primitives
 │   └── platform/                    # Ingress, runners, monitoring, logging, storage, secrets
-├── ansible/                         # Imperative cloud automation from GITORC workflows
+├── ansible/                         # Imperative cloud automation from ORCASTACK workflows
 ├── automation/
 │   └── workflows/                   # Cloud bootstrap and release workflow definitions
 ├── policy/
@@ -37,7 +37,7 @@ infra/
 - OVN, OVS, and FRR network automation for routed cluster fabrics.
 - Kubernetes platform modules: namespaces, storage classes, PVC-backed services, ingress, and service accounts.
 - Rancher registration and cluster lifecycle automation.
-- GITORC self-hosting automation for bootstrap, upgrade, and self-monitoring.
+- ORCASTACK self-hosting automation for bootstrap, upgrade, and self-monitoring.
 - CI/CD runner infrastructure: dedicated runner pools, runner service accounts, and workload isolation.
 - GPU worker enablement for accelerated workloads.
 - Monitoring and logging: Prometheus/Loki-oriented manifests and scrape configuration.

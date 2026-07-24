@@ -2,72 +2,72 @@
 
 ## Download options
 
-GITORC publishes these release artifacts for Linux distribution and manual installation:
+ORCASTACK publishes these release artifacts for Linux distribution and manual installation:
 
-- `gitorc.deb`
-- `gitorc.rpm`
-- `gitorc.tar.gz`
-- `go install github.com/atonixcorp/gitorc@latest`
+- `orcastack.deb`
+- `orcastack.rpm`
+- `orcastack.tar.gz`
+- `go install github.com/atonixcorp/orcastack@latest`
 
 ## Debian and Ubuntu
 
 Manual package install:
 
 ```bash
-sudo apt install ./gitorc.deb
+sudo apt install ./orcastack.deb
 ```
 
 APT repository install:
 
 ```bash
-curl -fsSL https://atonixcorp.github.io/gitorc/apt/gitorc-archive-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/gitorc-archive-keyring.gpg
-echo 'deb [signed-by=/usr/share/keyrings/gitorc-archive-keyring.gpg] https://atonixcorp.github.io/gitorc/apt stable main' | sudo tee /etc/apt/sources.list.d/gitorc.list
+curl -fsSL https://atonixcorp.github.io/orcastack/apt/orcastack-archive-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/orcastack-archive-keyring.gpg
+echo 'deb [signed-by=/usr/share/keyrings/orcastack-archive-keyring.gpg] https://atonixcorp.github.io/orcastack/apt stable main' | sudo tee /etc/apt/sources.list.d/orcastack.list
 sudo apt update
-sudo apt install gitorc
+sudo apt install orcastack
 ```
 
 ## RPM distributions
 
 ```bash
-sudo rpm -i gitorc.rpm
+sudo rpm -i orcastack.rpm
 ```
 
 ## Tarball
 
 ```bash
-tar -xvf gitorc.tar.gz
-cd gitorc
-sudo install -m 0755 gitorc /usr/bin/gitorc
-sudo install -m 0755 gitorc-gateway /usr/lib/gitorc/gitorc-gateway
-sudo install -m 0644 etc/systemd/system/gitorc.service /etc/systemd/system/gitorc.service
+tar -xvf orcastack.tar.gz
+cd orcastack
+sudo install -m 0755 orcastack /usr/bin/orcastack
+sudo install -m 0755 orcastack-gateway /usr/lib/orcastack/orcastack-gateway
+sudo install -m 0644 etc/systemd/system/orcastack.service /etc/systemd/system/orcastack.service
 ```
 
 ## Go install
 
 ```bash
-go install github.com/atonixcorp/gitorc@latest
+go install github.com/atonixcorp/orcastack@latest
 ```
 
-The installed `gitorc` binary is the platform launcher. Package-based installs also ship the packaged `gitorc-gateway` service binary used by `gitorc serve`.
+The installed `orcastack` binary is the platform launcher. Package-based installs also ship the packaged `orcastack-gateway` service binary used by `orcastack serve`.
 
 ## Systemd service
 
-All Linux package formats include `/etc/systemd/system/gitorc.service`.
+All Linux package formats include `/etc/systemd/system/orcastack.service`.
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable gitorc
-sudo systemctl start gitorc
-sudo systemctl status gitorc
+sudo systemctl enable orcastack
+sudo systemctl start orcastack
+sudo systemctl status orcastack
 ```
 
 ## Verification
 
 Every tagged release publishes SHA-256 checksum files and detached GPG signatures:
 
-- `gitorc.deb.sha256`
-- `gitorc.rpm.sha256`
-- `gitorc.tar.gz.sha256`
-- `gitorc.deb.asc`
-- `gitorc.rpm.asc`
-- `gitorc.tar.gz.asc`
+- `orcastack.deb.sha256`
+- `orcastack.rpm.sha256`
+- `orcastack.tar.gz.sha256`
+- `orcastack.deb.asc`
+- `orcastack.rpm.asc`
+- `orcastack.tar.gz.asc`

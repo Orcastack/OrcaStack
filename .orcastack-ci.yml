@@ -1,0 +1,108 @@
+version: 1
+
+pipeline:
+  name: governed-private-cloud
+  triggers:
+    - push
+    - change_merged
+  stages:
+    - name: cloud-bootstrap
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+        - ansible-playbook --syntax-check -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
+    - name: identity-bind
+      image: golang:1.23
+      commands:
+        - test -n "$ORCASTACK_REPOSITORY_IDENTITY"
+        - test -n "$ORCASTACK_ACTOR_IDENTITY"
+        - echo "Repository and actor identities are bound to this pipeline run"
+    - name: api-test
+      image: golang:1.23
+      commands:
+        - cd orcastackapi
+        - go test ./...
+    - name: web-build
+      image: node:20-alpine
+      commands:
+        - cd orcastackweb
+        - npm ci
+        - npm run build
+    - name: infra-validate
+      image: hashicorp/terraform:1.8
+      commands:
+        - terraform -chdir=infra/terraform/environments/private-cloud init -backend=false
+        - terraform -chdir=infra/terraform/environments/private-cloud validate
+        - terraform fmt -check -recursive infra/terraform
+    - name: proxmox-bootstrap
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/proxmox-bootstrap.yml
+    - name: openstack-control-plane
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/openstack-control-plane.yml
+    - name: network-fabric
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/network-fabric.yml
+    - name: kubernetes-rancher
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/kubernetes-cluster.yml
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/rancher-register.yml
+    - name: gpu-enablement
+      image: cytopia/ansible:latest-tools
+      commands:
+        - ansible-playbook -i infra/ansible/inventories/private-cloud/hosts.yml infra/ansible/playbooks/gpu-workers.yml
+    - name: sign-artifacts
+      image: golang:1.23
+      commands:
+        - cd orcastackapi
+        - mkdir -p dist/signing dist/attestations
+        - go build -o dist/orcastack-ci-service ./cmd/orcastack-ci-service
+        - go run ./cmd/orcastack-secctl genkeys --private dist/signing/private.pem --public dist/signing/public.pem
+        - go run ./cmd/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:71f1ba7b-db62-4369-a133-7be30c1d9e2d --binary-path dist/orcastack-ci-service --build-reference "$ORCASTACK_BUILD_REFERENCE" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/ci-service.json
+    - name: policy-gate
+      image: openpolicyagent/opa:0.68.0-static
+      commands:
+        - opa eval --fail-defined --data infra/policy/opa/runtime-governance.rego --input infra/policy/examples/stage-approval-input.json 'data.orcastack.runtime.deny'
+    - name: deploy-dev
+      image: bitnami/kubectl:1.31
+      commands:
+        - kubectl apply -f infra/kubernetes/base/namespace.yaml
+        - kubectl apply -k infra/kubernetes/platform
+        - kubectl apply -f infra/kubernetes/platform/observability-stack.yaml
+      when:
+        branch:
+          - main
+    - name: deploy-stage
+      image: bitnami/kubectl:1.31
+      commands:
+        - echo "Promote signed artifact to stage after review approval"
+      approval:
+        required: true
+    - name: deploy-prod
+      image: bitnami/kubectl:1.31
+      commands:
+        - echo "Promote signed artifact to prod with blue-green strategy and runtime policy enforcement"
+      approval:
+        required: true
+    - name: rollback
+      image: alpine:3.20
+      commands:
+        - echo "Rollback to last signed release revision when governance authorizes recovery"
+    - name: release-packages
+      image: golang:1.24
+      commands:
+        - apt-get update
+        - apt-get install -y rpm dpkg-dev apt-utils gnupg
+        - bash ./scripts/release/build-release.sh "$ORCASTACK_RELEASE_VERSION"
+        - bash ./scripts/release/update-apt-repo.sh "$ORCASTACK_RELEASE_VERSION"
+      when:
+        tag:
+          - v*

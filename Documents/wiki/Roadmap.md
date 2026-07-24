@@ -2,7 +2,7 @@
 
 ## Current maturity
 
-gitorc is in the platform-foundation stage. The repository already expresses the intended system shape, but most domain behavior is still scaffolded rather than fully implemented.
+orcastack is in the platform-foundation stage. The repository already expresses the intended system shape, but most domain behavior is still scaffolded rather than fully implemented.
 
 ## What is already in place
 
@@ -37,7 +37,7 @@ gitorc is in the platform-foundation stage. The repository already expresses the
 
 ### 4. Real CI execution
 
-- parse and execute `.gitorc-ci.yml`
+- parse and execute `.orcastack-ci.yml`
 - manage workers and step logs
 - stream logs to HBase
 - store artifacts in HDFS or an artifact abstraction

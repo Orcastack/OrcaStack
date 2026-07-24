@@ -1,6 +1,6 @@
-# GITORC Cloud Automation Playbooks
+# ORCASTACK Cloud Automation Playbooks
 
-These Ansible playbooks define the imperative automation layer that GITORC executes from pipelines after Terraform provisions the required infrastructure primitives.
+These Ansible playbooks define the imperative automation layer that ORCASTACK executes from pipelines after Terraform provisions the required infrastructure primitives.
 
 ## Coverage
 

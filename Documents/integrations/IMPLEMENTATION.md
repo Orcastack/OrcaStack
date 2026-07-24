@@ -1,6 +1,6 @@
 # Discord Integration - Implementation Guide
 
-This guide shows how to add Discord notifications to your GITORC gateway and services with working code examples.
+This guide shows how to add Discord notifications to your ORCASTACK gateway and services with working code examples.
 
 ## Overview
 
@@ -12,7 +12,7 @@ The Discord integration is designed to be:
 
 ## Step 1: Initialize Discord in Your Service
 
-### In `cmd/gitorc-gateway/main.go`
+### In `cmd/orcastack-gateway/main.go`
 
 ```go
 package main
@@ -21,10 +21,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/gitorc/gitorcapi/internal/gatewayapi"
-	"github.com/gitorc/gitorcapi/internal/platform/app"
-	"github.com/gitorc/gitorcapi/internal/platform/config"
-	"github.com/gitorc/gitorcapi/internal/platform/discord"  // Add this import
+	"github.com/orcastack/orcastackapi/internal/gatewayapi"
+	"github.com/orcastack/orcastackapi/internal/platform/app"
+	"github.com/orcastack/orcastackapi/internal/platform/config"
+	"github.com/orcastack/orcastackapi/internal/platform/discord"  // Add this import
 )
 
 func main() {
@@ -32,13 +32,13 @@ func main() {
 	discord.Initialize()
 
 	err := app.Run(context.Background(), app.WithServiceSecurity(app.Config{
-		Name:               "gitorc-gateway",
+		Name:               "orcastack-gateway",
 		Role:               "api-gateway",
 		Summary:            "Single entrypoint for projects, reviews, pipelines, deployments, and analytics.",
 		RegisterHTTPRoutes: gatewayapi.Register,
-		HTTPPort:           config.String("GITORC_GATEWAY_HTTP_PORT", "8080"),
-		GRPCPort:           config.String("GITORC_GATEWAY_GRPC_PORT", "9080"),
-	}, "GITORC_GATEWAY_IDENTITY", app.DefaultGatewayIdentity))
+		HTTPPort:           config.String("ORCASTACK_GATEWAY_HTTP_PORT", "8080"),
+		GRPCPort:           config.String("ORCASTACK_GATEWAY_GRPC_PORT", "9080"),
+	}, "ORCASTACK_GATEWAY_IDENTITY", app.DefaultGatewayIdentity))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func main() {
 
 Add import:
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 ```
 
 Add notification to handleSignup function:
@@ -95,7 +95,7 @@ func handleSignup(w http.ResponseWriter, r *http.Request) {
 		request.Username,
 		request.Email,
 		fmt.Sprintf("New user registered - Request ID: %s", requestID),
-		"https://gitorc.example.com/auth/signup-requests",
+		"https://orcastack.example.com/auth/signup-requests",
 	)
 
 	response := signupResponse{
@@ -114,7 +114,7 @@ func handleSignup(w http.ResponseWriter, r *http.Request) {
 
 Add import:
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 ```
 
 After the existing imports, add notification to request review:
@@ -159,7 +159,7 @@ func handleSignupRequestReview(w http.ResponseWriter, r *http.Request, session s
 		record.Username,
 		record.Email,
 		fmt.Sprintf("Access request %s by %s. Note: %s", record.Status, session.User.Username, decision.Note),
-		"https://gitorc.example.com/auth/signup-requests/"+requestID,
+		"https://orcastack.example.com/auth/signup-requests/"+requestID,
 	)
 
 	writeJSON(w, record)
@@ -172,7 +172,7 @@ func handleSignupRequestReview(w http.ResponseWriter, r *http.Request, session s
 
 Add import:
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 ```
 
 Add notification to authentication failures:
@@ -189,7 +189,7 @@ func authenticateLDAPUser(username, password string) (*AuthUser, error) {
 			"Failed authentication attempt",
 			username,
 			fmt.Sprintf("Authentication failed: %v", err),
-			"https://gitorc.example.com/security/audit",
+			"https://orcastack.example.com/security/audit",
 		)
 		return nil, errInvalidCredentials
 	}
@@ -213,7 +213,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/gitorc/gitorcapi/internal/platform/discord"
+	"github.com/orcastack/orcastackapi/internal/platform/discord"
 )
 
 // handleSignupWithDiscord demonstrates full Discord integration
@@ -261,7 +261,7 @@ func handleSignupWithDiscord(w http.ResponseWriter, r *http.Request) {
 		request.Username,                             // username
 		request.Email,                                // email
 		fmt.Sprintf("Signup request: %s", requestID), // details
-		"https://gitorc.example.com/requests/"+requestID, // dashboard URL
+		"https://orcastack.example.com/requests/"+requestID, // dashboard URL
 	)
 
 	// Send response immediately (Discord notification is async)
@@ -289,7 +289,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gitorc/gitorcapi/internal/platform/discord"
+	"github.com/orcastack/orcastackapi/internal/platform/discord"
 )
 
 func TestSignupWithDiscordNotification(t *testing.T) {
@@ -310,7 +310,7 @@ func TestSignupWithDiscordNotification(t *testing.T) {
 		"testuser",
 		"test@example.com",
 		"Test signup",
-		"https://gitorc.example.com",
+		"https://orcastack.example.com",
 	)
 
 	// Send notification
@@ -367,8 +367,8 @@ export DISCORD_NOTIFICATIONS_ENABLED=true
 export DISCORD_ENVIRONMENT=production
 
 # Start service
-cd /path/to/gitorc
-go run ./cmd/gitorc-gateway/main.go &
+cd /path/to/orcastack
+go run ./cmd/orcastack-gateway/main.go &
 SERVICE_PID=$!
 
 # Wait for startup
@@ -400,8 +400,8 @@ echo "✓ Integration test completed"
 version: '3.8'
 
 services:
-  gitorc-gateway:
-    image: gitorc/gateway:latest
+  orcastack-gateway:
+    image: orcastack/gateway:latest
     ports:
       - "8080:8080"
       - "9080:9080"
@@ -412,8 +412,8 @@ services:
       - DISCORD_ENVIRONMENT=production
       
       # Other settings
-      - GITORC_GATEWAY_HTTP_PORT=8080
-      - GITORC_GATEWAY_GRPC_PORT=9080
+      - ORCASTACK_GATEWAY_HTTP_PORT=8080
+      - ORCASTACK_GATEWAY_GRPC_PORT=9080
 ```
 
 ### Kubernetes Secrets
@@ -423,7 +423,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: discord-webhook
-  namespace: gitorc
+  namespace: orcastack
 type: Opaque
 stringData:
   webhook-url: https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
@@ -432,7 +432,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: discord-config
-  namespace: gitorc
+  namespace: orcastack
 data:
   enabled: "true"
   environment: "production"
@@ -440,13 +440,13 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gitorc-gateway
+  name: orcastack-gateway
 spec:
   template:
     spec:
       containers:
       - name: gateway
-        image: gitorc/gateway:latest
+        image: orcastack/gateway:latest
         env:
         - name: DISCORD_WEBHOOK_URL
           valueFrom:
@@ -501,7 +501,7 @@ event := &discord.NotificationEvent{
     Title:        "Custom Deployment Event",
     Description:  "Something custom happened",
     Severity:     discord.SeverityWarning,
-    DashboardURL: "https://gitorc.example.com/custom",
+    DashboardURL: "https://orcastack.example.com/custom",
     Timestamp:    time.Now(),
     Details: map[string]string{
         "CustomField1": "Value1",
@@ -534,7 +534,7 @@ discordMgr.NotifyCustomEvent(ctx, event)
 
 1. Check webhook URL is valid
 2. Verify `DISCORD_NOTIFICATIONS_ENABLED=true`
-3. Check service logs: `docker logs gitorc-gateway | grep -i discord`
+3. Check service logs: `docker logs orcastack-gateway | grep -i discord`
 4. Test webhook manually
 
 ### Webhook URL missing?

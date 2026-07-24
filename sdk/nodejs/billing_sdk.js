@@ -1,12 +1,12 @@
 'use strict';
 /**
- * Gitorc Billing & Usage — Node.js Event Emission SDK
+ * OrcaStack Billing & Usage — Node.js Event Emission SDK
  *
  * Usage:
  *   const { BillingSDK } = require('./billing_sdk');
  *
  *   const sdk = new BillingSDK({
- *     endpoint:  'https://gitorc.org/api/billing/events/ingest/',
+ *     endpoint:  'https://orcastack.org/api/billing/events/ingest/',
  *     apiKey:    process.env.BILLING_API_KEY,
  *     service:   'compute',
  *   });
@@ -89,7 +89,7 @@ function httpPost(endpoint, apiKey, body, timeoutMs = 10000) {
           'Content-Type':   'application/json',
           'Content-Length': data.length,
           'Authorization':  `Bearer ${apiKey}`,
-          'User-Agent':     'gitorc-billing-sdk/nodejs/1.0',
+          'User-Agent':     'orcastack-billing-sdk/nodejs/1.0',
         },
         timeout: timeoutMs,
       },

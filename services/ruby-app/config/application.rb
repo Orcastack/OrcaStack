@@ -5,7 +5,7 @@ require 'securerandom'
 require 'thread'
 require 'time'
 
-module Gitorc
+module OrcaStack
   module RubyApp
     module Database
       module_function
@@ -22,11 +22,11 @@ module Gitorc
 
       def database_url
         ENV.fetch('DATABASE_URL') do
-          host = ENV.fetch('GITORC_POSTGRES_HOST', 'postgres')
-          port = ENV.fetch('GITORC_POSTGRES_PORT', '5432')
-          user = ENV.fetch('GITORC_POSTGRES_USER', ENV.fetch('POSTGRES_USER', 'gitorc'))
-          password = ENV.fetch('GITORC_POSTGRES_PASSWORD', ENV.fetch('POSTGRES_PASSWORD', 'gitorc'))
-          database = ENV.fetch('GITORC_POSTGRES_DB', ENV.fetch('POSTGRES_DB', 'gitorc'))
+          host = ENV.fetch('ORCASTACK_POSTGRES_HOST', 'postgres')
+          port = ENV.fetch('ORCASTACK_POSTGRES_PORT', '5432')
+          user = ENV.fetch('ORCASTACK_POSTGRES_USER', ENV.fetch('POSTGRES_USER', 'orcastack'))
+          password = ENV.fetch('ORCASTACK_POSTGRES_PASSWORD', ENV.fetch('POSTGRES_PASSWORD', 'orcastack'))
+          database = ENV.fetch('ORCASTACK_POSTGRES_DB', ENV.fetch('POSTGRES_DB', 'orcastack'))
           "postgres://#{user}:#{password}@#{host}:#{port}/#{database}"
         end
       end
@@ -59,7 +59,7 @@ module Gitorc
       module_function
 
       def secret
-        ENV.fetch('GITORC_GIT_TOKEN_SECRET', 'gitorc-dev-secret')
+        ENV.fetch('ORCASTACK_GIT_TOKEN_SECRET', 'orcastack-dev-secret')
       end
 
       def issue(payload)
@@ -73,8 +73,8 @@ module Gitorc
       module_function
 
       STARTED_AT = Time.now.utc
-      REQUEST_COUNTER_KEY = 'gitorc:ruby-app:requests_total'
-      SESSION_PREFIX = 'gitorc:ruby-app:sessions:'
+      REQUEST_COUNTER_KEY = 'orcastack:ruby-app:requests_total'
+      SESSION_PREFIX = 'orcastack:ruby-app:sessions:'
 
       def bootstrap!
         ensure_schema!
@@ -231,7 +231,7 @@ module Gitorc
 
       def create_wiki_page(attributes)
         id = SecureRandom.uuid
-        project_slug = attributes['project_id'] || attributes[:project_id] || 'gitorc-platform'
+        project_slug = attributes['project_id'] || attributes[:project_id] || 'orcastack-platform'
         title = attributes['title'] || attributes[:title] || 'Untitled'
         slug = attributes['slug'] || attributes[:slug] || slugify(title)
         markdown = attributes['markdown'] || attributes[:markdown] || ''
@@ -283,7 +283,7 @@ module Gitorc
 
       def issue_git_access_token(username:, repo:, action:, source:, key_fingerprint: nil, command: nil)
         payload = {
-          iss: 'gitorc-ruby-app',
+          iss: 'orcastack-ruby-app',
           sub: username,
           repo: repo,
           action: action,
@@ -370,11 +370,11 @@ module Gitorc
         {
           id: 'local-admin',
           username: 'admin',
-          email: 'admin@gitorc.local',
+          email: 'admin@orcastack.local',
           full_name: 'Local Administrator',
           role: 'platform-admin',
           identity: 'local:user:admin',
-          rbac_realm: 'gitorc-platform',
+          rbac_realm: 'orcastack-platform',
           preferences: {
             theme: 'system',
             notifications: ['email'],
@@ -400,7 +400,7 @@ module Gitorc
           full_name: row['display_name'],
           role: row['role'],
           identity: row['identity'],
-          rbac_realm: ENV.fetch('GITORC_RBAC_REALM', 'gitorc-platform'),
+          rbac_realm: ENV.fetch('ORCASTACK_RBAC_REALM', 'orcastack-platform'),
           preferences: {
             theme: preferences ? preferences['theme'] : 'system',
             notifications: preferences ? JSON.parse(preferences['notification_channels']) : ['email'],
@@ -495,8 +495,8 @@ module Gitorc
         return if Database.first('select id from projects limit 1')
 
         project_id = SecureRandom.uuid
-        Database.query('insert into projects (id, slug, name, description, visibility) values ($1, $2, $3, $4, $5)', [project_id, 'gitorc-platform', 'gitorc/platform', 'GITORC control-plane project', 'private'])
-        Database.query('insert into repositories (id, project_id, name, default_branch, storage_path) values ($1, $2, $3, $4, $5)', [SecureRandom.uuid, project_id, 'gitorc/platform', 'main', '/srv/git/gitorc-platform.git'])
+        Database.query('insert into projects (id, slug, name, description, visibility) values ($1, $2, $3, $4, $5)', [project_id, 'orcastack-platform', 'orcastack/platform', 'ORCASTACK control-plane project', 'private'])
+        Database.query('insert into repositories (id, project_id, name, default_branch, storage_path) values ($1, $2, $3, $4, $5)', [SecureRandom.uuid, project_id, 'orcastack/platform', 'main', '/srv/git/orcastack-platform.git'])
       rescue StandardError
         nil
       end
@@ -528,11 +528,11 @@ module Gitorc
       end
 
       def seed_wiki!
-        return if Database.first("select id from wiki_pages where project_slug = 'gitorc-platform' and slug = 'home' limit 1")
+        return if Database.first("select id from wiki_pages where project_slug = 'orcastack-platform' and slug = 'home' limit 1")
 
         Database.query(
           'insert into wiki_pages (id, project_slug, slug, title, markdown, updated_at) values ($1, $2, $3, $4, $5, now())',
-          [SecureRandom.uuid, 'gitorc-platform', 'home', 'Home', "# GITORC\n\nPlatform operations wiki home."]
+          [SecureRandom.uuid, 'orcastack-platform', 'home', 'Home', "# ORCASTACK\n\nPlatform operations wiki home."]
         )
       end
 
@@ -540,7 +540,7 @@ module Gitorc
         username = profile[:username]
         Database.query(<<~SQL, [SecureRandom.uuid, username])
           insert into ssh_keys (id, username, title, fingerprint, public_key)
-          values ($1, $2, 'admin-laptop', 'SHA256:qY1YVv8WQn9tT1jM2Y+M4i2oK7ZtX1F4M7f2nK9m4nQ', 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGitorcExampleAdminKey admin@gitorc.local')
+          values ($1, $2, 'admin-laptop', 'SHA256:qY1YVv8WQn9tT1jM2Y+M4i2oK7ZtX1F4M7f2nK9m4nQ', 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrcaStackExampleAdminKey admin@orcastack.local')
           on conflict (fingerprint) do nothing
         SQL
       end
@@ -549,7 +549,7 @@ module Gitorc
         if defined?(Jobs::WebhookDeliveryJob) && Jobs::WebhookDeliveryJob.respond_to?(:enqueue)
           Jobs::WebhookDeliveryJob.enqueue(webhook_id)
         else
-          Cache.connection.lpush('gitorc:ruby-app:webhook-fallback', webhook_id)
+          Cache.connection.lpush('orcastack:ruby-app:webhook-fallback', webhook_id)
         end
       rescue StandardError
         nil

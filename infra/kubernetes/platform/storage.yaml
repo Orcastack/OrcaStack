@@ -1,37 +1,37 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: gitorc-ceph-rbd
+  name: orcastack-ceph-rbd
   annotations:
-    gitorc.io/role: artifacts
+    orcastack.io/role: artifacts
 provisioner: csi.ceph.com
 reclaimPolicy: Retain
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
 parameters:
-  clusterID: gitorc-private-cloud
-  pool: gitorc-artifacts
+  clusterID: orcastack-private-cloud
+  pool: orcastack-artifacts
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gitorc-artifacts
+  name: orcastack-artifacts
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 500Gi
-  storageClassName: gitorc-ceph-rbd
+  storageClassName: orcastack-ceph-rbd
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gitorc-logs
+  name: orcastack-logs
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 200Gi
-  storageClassName: gitorc-ceph-rbd
+  storageClassName: orcastack-ceph-rbd

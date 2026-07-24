@@ -1,39 +1,39 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gitorc-log-pipeline
+  name: orcastack-log-pipeline
 data:
   vector.yaml: |
     sources:
       kubernetes_logs:
         type: kubernetes_logs
     transforms:
-      gitorc_only:
+      orcastack_only:
         type: filter
         inputs: [kubernetes_logs]
-        condition: '.kubernetes.pod_namespace == "gitorc-system"'
+        condition: '.kubernetes.pod_namespace == "orcastack-system"'
     sinks:
       loki:
         type: loki
-        inputs: [gitorc_only]
-        endpoint: http://loki.gitorc-system.svc.cluster.local:3100
+        inputs: [orcastack_only]
+        endpoint: http://loki.orcastack-system.svc.cluster.local:3100
         encoding:
           codec: json
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: gitorc-log-agent
+  name: orcastack-log-agent
 spec:
   selector:
     matchLabels:
-      app: gitorc-log-agent
+      app: orcastack-log-agent
   template:
     metadata:
       labels:
-        app: gitorc-log-agent
+        app: orcastack-log-agent
     spec:
-      serviceAccountName: gitorc-runner
+      serviceAccountName: orcastack-runner
       containers:
         - name: vector
           image: timberio/vector:0.40.0-alpine
@@ -43,4 +43,4 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: gitorc-log-pipeline
+            name: orcastack-log-pipeline

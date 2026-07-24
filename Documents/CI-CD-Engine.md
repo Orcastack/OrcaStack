@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The GITORC CI/CD engine is a governed automation system, not a basic build runner. It links repository state, developer identity, pipeline actions, signed artifacts, environment promotion, and runtime policy.
+The ORCASTACK CI/CD engine is a governed automation system, not a basic build runner. It links repository state, developer identity, pipeline actions, signed artifacts, environment promotion, and runtime policy.
 
 ## What the engine does
 
@@ -14,10 +14,10 @@ The GITORC CI/CD engine is a governed automation system, not a basic build runne
 
 ## How it works
 
-1. A repository event triggers `.gitorc-ci.yml`.
+1. A repository event triggers `.orcastack-ci.yml`.
 2. Identity-binding verifies repository and actor context.
 3. API and web validation run on governed runner infrastructure.
-4. Artifacts are signed with `gitorc-secctl`.
+4. Artifacts are signed with `orcastack-secctl`.
 5. OPA and deployment environment policy decide whether promotion can continue.
 6. CD deploys the approved revision into dev, stage, or prod.
 7. Rollback remains available as a governed action.
@@ -41,21 +41,21 @@ stateDiagram-v2
 
 ## Developer usage
 
-- Define repository automation in `.gitorc-ci.yml`.
+- Define repository automation in `.orcastack-ci.yml`.
 - Store deployment policy in `infra/deploy/environments`.
 - Keep runtime governance in `infra/policy`.
 - Validate private-cloud infrastructure before rollout with `make infra-validate`.
 
 ## How it connects to the rest of the system
 
-- `gitorc-gateway` and `gitorc-git-service` provide the repository event surface.
-- `gitorc-review-service` contributes review approval signals.
-- `gitorc-ci-service` builds, tests, and signs.
-- `gitorc-cd-service` handles promotion and rollback.
+- `orcastack-gateway` and `orcastack-git-service` provide the repository event surface.
+- `orcastack-review-service` contributes review approval signals.
+- `orcastack-ci-service` builds, tests, and signs.
+- `orcastack-cd-service` handles promotion and rollback.
 - OpenStack and Kubernetes provide the private execution plane.
 
 ## Examples
 
-- Governed pipeline stages: `.gitorc-ci.yml`
+- Governed pipeline stages: `.orcastack-ci.yml`
 - Runtime policy: `infra/policy/opa/runtime-governance.rego`
 - Admission policy: `infra/policy/kyverno/verify-attestations.yaml`

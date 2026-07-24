@@ -1,6 +1,6 @@
 environment: dev
-cluster: gitorc-dev
-namespace: gitorc-system
+cluster: orcastack-dev
+namespace: orcastack-system
 strategy: rolling
 promotionRules:
   requireSuccessfulPipeline: true

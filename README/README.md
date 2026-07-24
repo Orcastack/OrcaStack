@@ -1,4 +1,4 @@
-# gitorc
+# orcastack
 A full-stack personal branding platform built with React and Django REST Framework.
 ##  Features
 ### Public Pages
@@ -32,7 +32,7 @@ A full-stack personal branding platform built with React and Django REST Framewo
 - Context API for state management
 ## 📦 Project Structure
 ```
-gitorc/
+orcastack/
 ├── backend/                 # Django backend
 │   ├── config/             # Django project settings
 │   ├── accounts/           # User profiles

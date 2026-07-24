@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gitorc-self-hosting
+  name: orcastack-self-hosting
 data:
   bootstrap-mode: sovereign-private-cloud
   upgrade-strategy: rolling
@@ -11,7 +11,7 @@ data:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: gitorc-self-monitor
+  name: orcastack-self-monitor
 spec:
   schedule: "*/15 * * * *"
   jobTemplate:
@@ -19,7 +19,7 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
-          serviceAccountName: gitorc-runner
+          serviceAccountName: orcastack-runner
           containers:
             - name: self-monitor
               image: curlimages/curl:8.8.0
@@ -27,7 +27,7 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  echo "Checking GITORC self-hosting endpoints" && \
-                  echo "gateway=https://gitorc.internal.example/healthz" && \
+                  echo "Checking ORCASTACK self-hosting endpoints" && \
+                  echo "gateway=https://orcastack.internal.example/healthz" && \
                   echo "grafana=https://grafana.internal.example" && \
                   echo "prometheus=https://prometheus.internal.example"

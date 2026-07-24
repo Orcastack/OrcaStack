@@ -1,6 +1,6 @@
 environment: prod
-cluster: gitorc-prod
-namespace: gitorc-system
+cluster: orcastack-prod
+namespace: orcastack-system
 strategy: blue-green
 promotionRules:
   requireSuccessfulPipeline: true

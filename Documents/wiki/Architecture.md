@@ -2,14 +2,14 @@
 
 ## Design goals
 
-gitorc is designed around one core idea: the Git host, code review system, CI/CD engine, and analytics layer should belong to the same self-hosted platform. Instead of bolting together disconnected tools, the repository defines one internal service model and one data flow.
+orcastack is designed around one core idea: the Git host, code review system, CI/CD engine, and analytics layer should belong to the same self-hosted platform. Instead of bolting together disconnected tools, the repository defines one internal service model and one data flow.
 
 ## End-to-end flow
 
 1. A developer creates or updates a repository in the Git Service.
 2. A branch update or review upload emits an internal event.
 3. Review Service creates or updates a change, patchset, and review state.
-4. CI Service starts a pipeline from `.gitorc-ci.yml` or a future pipeline definition source.
+4. CI Service starts a pipeline from `.orcastack-ci.yml` or a future pipeline definition source.
 5. CI logs and audit streams are written to HBase, while artifacts land in HDFS or a compatible artifact layer.
 6. CD Service promotes approved artifacts into target environments.
 7. Analytics Service computes branch, delivery, and risk insights from event history and operational records.
@@ -92,7 +92,7 @@ The local development topology keeps bare repositories under `infra/git/repos`. 
 
 ## Contracts
 
-The first shared contract is defined in `gitorcapi/proto/gitorc/platform/v1/platform.proto` and currently covers:
+The first shared contract is defined in `orcastackapi/proto/orcastack/platform/v1/platform.proto` and currently covers:
 
 - repository creation and listing
 - ref listing

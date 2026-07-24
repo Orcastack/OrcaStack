@@ -4,9 +4,9 @@
 
 The first shared service contract lives in:
 
-`gitorcapi/proto/gitorc/platform/v1/platform.proto`
+`orcastackapi/proto/orcastack/platform/v1/platform.proto`
 
-The protobuf package is `gitorc.platform.v1`.
+The protobuf package is `orcastack.platform.v1`.
 
 ## Service overview
 

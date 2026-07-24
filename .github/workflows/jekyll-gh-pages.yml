@@ -1,5 +1,5 @@
 # GitHub Pages deployment workflow
-name: Deploy gitorc to GitHub Pages
+name: Deploy orcastack to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -7,7 +7,7 @@ on:
     branches: ["main"]
     paths:
       - '.github/workflows/jekyll-gh-pages.yml'
-      - 'gitorcweb/**'
+      - 'orcastackweb/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -29,7 +29,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      GITORC_REPOSITORY_IDENTITY: orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a
+      ORCASTACK_REPOSITORY_IDENTITY: orca:repo:3f6d8c3e-6c96-4d8c-a2d3-6f4a8f4b7f2a
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: gitorcweb/package-lock.json
+          cache-dependency-path: orcastackweb/package-lock.json
       - name: Set up Go
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
@@ -46,28 +46,28 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - name: Install frontend dependencies
-        working-directory: gitorcweb
+        working-directory: orcastackweb
         run: npm ci
       - name: Build frontend
-        working-directory: gitorcweb
+        working-directory: orcastackweb
         env:
-          GITORC_WEB_BASE: /${{ github.event.repository.name }}/
+          ORCASTACK_WEB_BASE: /${{ github.event.repository.name }}/
         run: npm run build
       - name: Generate Pages signing keys
         run: |
-          cd gitorcapi
+          cd orcastackapi
           mkdir -p dist/pages-signing
-          go run ./cmd/gitorc-secctl genkeys --private dist/pages-signing/private.pem --public dist/pages-signing/public.pem
+          go run ./cmd/orcastack-secctl genkeys --private dist/pages-signing/private.pem --public dist/pages-signing/public.pem
       - name: Generate Pages attestation
         run: |
-          cd gitorcapi
-          go run ./cmd/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:6fb4b8d3-32e3-4725-bd52-db9f5a6d0f14 --binary-path ../gitorcweb/dist/index.html --build-reference "${GITHUB_SHA}:pages" --private-key dist/pages-signing/private.pem --public-key dist/pages-signing/public.pem --output ../gitorcweb/dist/orca-attestation.json
-          cp dist/pages-signing/public.pem ../gitorcweb/dist/orca-public.pem
+          cd orcastackapi
+          go run ./cmd/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:6fb4b8d3-32e3-4725-bd52-db9f5a6d0f14 --binary-path ../orcastackweb/dist/index.html --build-reference "${GITHUB_SHA}:pages" --private-key dist/pages-signing/private.pem --public-key dist/pages-signing/public.pem --output ../orcastackweb/dist/orca-attestation.json
+          cp dist/pages-signing/public.pem ../orcastackweb/dist/orca-public.pem
       - name: Archive Pages artifact
         run: |
           tar \
             --dereference --hard-dereference \
-            --directory gitorcweb/dist \
+            --directory orcastackweb/dist \
             -cvf "$RUNNER_TEMP/github-pages.tar" \
             --exclude=.git \
             --exclude=.github \

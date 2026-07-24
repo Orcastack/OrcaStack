@@ -1,5 +1,5 @@
-API_DIR := gitorcapi
-WEB_DIR := gitorcweb
+API_DIR := orcastackapi
+WEB_DIR := orcastackweb
 TF_ENV_DIR := infra/terraform/environments/private-cloud
 
 .PHONY: api-build api-run gateway git review ci cd analytics runner hw-automation sw-automation device-orch ruby-app web-install web-build up down infra-fmt infra-validate bootstrap-local deploy-private-cloud cloud-bootstrap proxmox-bootstrap openstack-bootstrap network-fabric kubernetes-bootstrap rancher-register gpu-bootstrap observability-bootstrap release-build apt-repo-update
@@ -8,34 +8,34 @@ api-build:
 	cd $(API_DIR) && go build ./...
 
 gateway:
-	cd $(API_DIR) && go run ./cmd/gitorc-gateway
+	cd $(API_DIR) && go run ./cmd/orcastack-gateway
 
 git:
-	cd $(API_DIR) && go run ./cmd/gitorc-git-service
+	cd $(API_DIR) && go run ./cmd/orcastack-git-service
 
 review:
-	cd $(API_DIR) && go run ./cmd/gitorc-review-service
+	cd $(API_DIR) && go run ./cmd/orcastack-review-service
 
 ci:
-	cd $(API_DIR) && go run ./cmd/gitorc-ci-service
+	cd $(API_DIR) && go run ./cmd/orcastack-ci-service
 
 cd:
-	cd $(API_DIR) && go run ./cmd/gitorc-cd-service
+	cd $(API_DIR) && go run ./cmd/orcastack-cd-service
 
 analytics:
-	cd $(API_DIR) && go run ./cmd/gitorc-analytics-service
+	cd $(API_DIR) && go run ./cmd/orcastack-analytics-service
 
 runner:
-	cd $(API_DIR) && go run ./cmd/gitorc-runner
+	cd $(API_DIR) && go run ./cmd/orcastack-runner
 
 hw-automation:
-	cd $(API_DIR) && go run ./cmd/gitorc-hw-automation
+	cd $(API_DIR) && go run ./cmd/orcastack-hw-automation
 
 sw-automation:
-	cd $(API_DIR) && go run ./cmd/gitorc-sw-automation
+	cd $(API_DIR) && go run ./cmd/orcastack-sw-automation
 
 device-orch:
-	cd $(API_DIR) && go run ./cmd/gitorc-device-orch
+	cd $(API_DIR) && go run ./cmd/orcastack-device-orch
 
 ruby-app:
 	cd services/ruby-app && ruby server.rb

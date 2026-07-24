@@ -1,4 +1,4 @@
-name: gitorc release
+name: orcastack release
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      GPG_KEY_ID: ${{ vars.GITORC_GPG_KEY_ID }}
+      GPG_KEY_ID: ${{ vars.ORCASTACK_GPG_KEY_ID }}
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -28,11 +28,11 @@ jobs:
           sudo apt-get install -y rpm dpkg-dev apt-utils gnupg
 
       - name: Import signing key
-        if: secrets.GITORC_GPG_PRIVATE_KEY != ''
+        if: secrets.ORCASTACK_GPG_PRIVATE_KEY != ''
         env:
-          GITORC_GPG_PRIVATE_KEY: ${{ secrets.GITORC_GPG_PRIVATE_KEY }}
+          ORCASTACK_GPG_PRIVATE_KEY: ${{ secrets.ORCASTACK_GPG_PRIVATE_KEY }}
         run: |
-          printf '%s' "$GITORC_GPG_PRIVATE_KEY" | gpg --batch --import
+          printf '%s' "$ORCASTACK_GPG_PRIVATE_KEY" | gpg --batch --import
 
       - name: Build release artifacts
         run: bash ./scripts/release/build-release.sh "${GITHUB_REF_NAME#v}"
@@ -44,15 +44,15 @@ jobs:
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           files: |
-            dist/release/packages/gitorc.deb
-            dist/release/packages/gitorc.deb.sha256
-            dist/release/packages/gitorc.deb.asc
-            dist/release/packages/gitorc.rpm
-            dist/release/packages/gitorc.rpm.sha256
-            dist/release/packages/gitorc.rpm.asc
-            dist/release/packages/gitorc.tar.gz
-            dist/release/packages/gitorc.tar.gz.sha256
-            dist/release/packages/gitorc.tar.gz.asc
+            dist/release/packages/orcastack.deb
+            dist/release/packages/orcastack.deb.sha256
+            dist/release/packages/orcastack.deb.asc
+            dist/release/packages/orcastack.rpm
+            dist/release/packages/orcastack.rpm.sha256
+            dist/release/packages/orcastack.rpm.asc
+            dist/release/packages/orcastack.tar.gz
+            dist/release/packages/orcastack.tar.gz.sha256
+            dist/release/packages/orcastack.tar.gz.asc
 
       - name: Publish apt repository
         uses: peaceiris/actions-gh-pages@329bcc8f12caed2cefe5a5b80781499a6f3b361b # v4

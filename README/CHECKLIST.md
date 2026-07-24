@@ -1,5 +1,5 @@
-# gitorc - Launch Checklist
-Use this checklist to set up and launch gitorc.
+# orcastack - Launch Checklist
+Use this checklist to set up and launch orcastack.
 ##  Initial Setup
 ### Backend Setup
 - [ ] Install Python 3.9+ (if not already installed)
@@ -199,9 +199,9 @@ Use this checklist to set up and launch gitorc.
 - [ ] Site tested and working
 - [ ] Content added and reviewed
 - [ ] Production deployment successful
-- [ ] Share your gitorc project with the world!
+- [ ] Share your orcastack project with the world!
 ---
-**Congratulations on building gitorc!**
+**Congratulations on building orcastack!**
 Remember to:
 - Keep your content fresh and updated
 - Respond to inquiries promptly

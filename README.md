@@ -1,10 +1,10 @@
-# gitorc
+# orcastack
 
-GITORC is a Git-centric automation platform for private-cloud environments. This repository is the implementation base, bootstrap entry point, audit trail, and architecture reference for the platform.
+ORCASTACK is a Git-centric automation platform for private-cloud environments. This repository is the implementation base, bootstrap entry point, audit trail, and architecture reference for the platform.
 
 ## Platform overview
 
-GITORC operates as the governed automation layer for private-cloud software delivery. It brings together Git workflows, CI/CD execution, policy enforcement, release movement, and infrastructure automation in one control surface for platform teams and operators.
+ORCASTACK operates as the governed automation layer for private-cloud software delivery. It brings together Git workflows, CI/CD execution, policy enforcement, release movement, and infrastructure automation in one control surface for platform teams and operators.
 
 ## Repository composition
 
@@ -12,16 +12,16 @@ This repository is organized around a few clear platform domains rather than a l
 
 | Domain | Purpose |
 | --- | --- |
-| `gitorcapi/` | Go services, gateway APIs, platform logic, and protobuf contracts. |
-| `gitorcweb/` | Control-plane UI for operators, reviewers, and governed workflow execution. |
+| `orcastackapi/` | Go services, gateway APIs, platform logic, and protobuf contracts. |
+| `orcastackweb/` | Control-plane UI for operators, reviewers, and governed workflow execution. |
 | `infra/` | Private-cloud infrastructure assets, deployment environments, runtime policy, bootstrap data, and artifact staging. |
 | `docs/` | Platform architecture, installation, deployment guidance, and workflow documentation. |
-| CI definitions | Governed validation and signed artifact workflows across GITORC CI, GitHub Actions, and GitLab CI. |
+| CI definitions | Governed validation and signed artifact workflows across ORCASTACK CI, GitHub Actions, and GitLab CI. |
 | Local runtime | Docker Compose and bootstrap assets for local platform bring-up. |
 
 ## Operating model
 
-GITORC covers the core operating surface required to build, validate, promote, and deploy software into private-cloud environments:
+ORCASTACK covers the core operating surface required to build, validate, promote, and deploy software into private-cloud environments:
 
 - Git-centric repository workflows and control plane APIs.
 - Web UI for platform operations and governed delivery.
@@ -30,7 +30,7 @@ GITORC covers the core operating surface required to build, validate, promote, a
 - Identity-linked RBAC, signing, attestation, and runtime policy enforcement.
 - Linux packages, release artifacts, and delivery automation.
 
-GITORC does not include firmware, drivers, or device runtimes.
+ORCASTACK does not include firmware, drivers, or device runtimes.
 
 ## Quick start
 
@@ -59,7 +59,7 @@ make deploy-private-cloud
 ## Documentation
 
 - [Platform architecture](docs/platform-architecture.md)
-- [Go-first platform blueprint and capability matrix](docs/GITORC-Full-Platform-Blueprint.md)
+- [Go-first platform blueprint and capability matrix](docs/ORCASTACK-Full-Platform-Blueprint.md)
 - [Private-cloud deployment](docs/Private-Cloud-Deployment.md)
 - [CI/CD engine](docs/CI-CD-Engine.md)
 - [Cloud automation workflows](docs/Cloud-Automation-Workflows.md)
@@ -68,4 +68,4 @@ make deploy-private-cloud
 
 ## Why this repository matters
 
-This repository is not only source code. It is the implementation boundary, control-plane reference, deployment bootstrap, and documentation surface for the platform. For engineering teams, it is where GITORC is built and governed. For operators, it is where architecture, rollout mechanics, and release movement remain auditable.
+This repository is not only source code. It is the implementation boundary, control-plane reference, deployment bootstrap, and documentation surface for the platform. For engineering teams, it is where ORCASTACK is built and governed. For operators, it is where architecture, rollout mechanics, and release movement remain auditable.

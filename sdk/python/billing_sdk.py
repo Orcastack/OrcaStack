@@ -1,11 +1,11 @@
 """
-Gitorc Billing & Usage — Python Event Emission SDK
+OrcaStack Billing & Usage - Python Event Emission SDK
 
 Usage:
     from billing_sdk import BillingSDK
 
     sdk = BillingSDK(
-        endpoint='https://gitorc.org/api/billing/events/ingest/',
+        endpoint='https://orcastack.org/api/billing/events/ingest/',
         api_key='<your-api-key>',
         service='compute',
     )
@@ -36,7 +36,7 @@ try:
 except ImportError:
     _HAS_URLLIB = False
 
-log = logging.getLogger('gitorc.billing_sdk')
+log = logging.getLogger('orcastack.billing_sdk')
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Schema
@@ -96,7 +96,7 @@ class _Transport:
         headers = {
             'Content-Type':  'application/json',
             'Authorization': f'Bearer {self.api_key}',
-            'User-Agent':    'gitorc-billing-sdk/python/1.0',
+            'User-Agent':    'orcastack-billing-sdk/python/1.0',
         }
         req = _urllib.Request(self.endpoint + '/', data=body, headers=headers, method='POST')
         try:
@@ -111,7 +111,7 @@ class _Transport:
         headers = {
             'Content-Type':  'application/json',
             'Authorization': f'Bearer {self.api_key}',
-            'User-Agent':    'gitorc-billing-sdk/python/1.0',
+            'User-Agent':    'orcastack-billing-sdk/python/1.0',
         }
         req = _urllib.Request(
             self.endpoint.replace('/ingest/', '/ingest/batch/') + '/',
@@ -221,12 +221,12 @@ class _AsyncWorker(threading.Thread):
 
 class BillingSDK:
     """
-    Thread-safe Gitorc Billing SDK.
+    Thread-safe OrcaStack Billing SDK.
 
     Parameters
     ----------
     endpoint  : Full URL to the ingest endpoint
-                e.g. 'https://gitorc.org/api/billing/events/ingest/'
+                e.g. 'https://orcastack.org/api/billing/events/ingest/'
     api_key   : Bearer token for the billing API
     service   : Service identifier (compute/storage/email/…)
     async_mode: If True, events are queued and sent in background batches.

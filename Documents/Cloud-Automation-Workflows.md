@@ -2,7 +2,7 @@
 
 ## Purpose
 
-GITORC is not the cloud platform. It is the CI/CD and automation layer that deploys and manages Proxmox VE, OpenStack, OVN/OVS, FRR, Kubernetes, Rancher, observability, and application workloads.
+ORCASTACK is not the cloud platform. It is the CI/CD and automation layer that deploys and manages Proxmox VE, OpenStack, OVN/OVS, FRR, Kubernetes, Rancher, observability, and application workloads.
 
 ## What the workflows do
 
@@ -18,14 +18,14 @@ GITORC is not the cloud platform. It is the CI/CD and automation layer that depl
 
 1. Terraform provisions private-cloud primitives.
 2. Ansible playbooks configure the operating environment on the hosts that make up the cloud stack.
-3. Kubernetes manifests deploy GITORC, observability, Rancher integration helpers, and GPU device support.
+3. Kubernetes manifests deploy ORCASTACK, observability, Rancher integration helpers, and GPU device support.
 4. Pipelines execute these steps as governed workflow lanes.
 
 ## Workflow diagram
 
 ```mermaid
 flowchart TD
-  Pipeline[GITORC Pipeline] --> Proxmox[Proxmox Bootstrap]
+  Pipeline[ORCASTACK Pipeline] --> Proxmox[Proxmox Bootstrap]
   Proxmox --> OpenStack[OpenStack Foundation]
   OpenStack --> Fabric[OVN OVS FRR Fabric]
   Fabric --> K8s[Kubernetes Cluster]

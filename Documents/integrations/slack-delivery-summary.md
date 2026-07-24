@@ -1,6 +1,6 @@
 # Slack Integration - Delivery Summary
 
-**Project**: Slack App integration for GITORC platform
+**Project**: Slack App integration for ORCASTACK platform
 **Status**: ✅ Complete (Code + Documentation)
 **Delivery Date**: Current session
 **Testing**: 13/14 unit tests passing
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The GITORC platform now has full Slack App integration enabling automated notifications for:
+The ORCASTACK platform now has full Slack App integration enabling automated notifications for:
 - Pipeline events (success, failure, running status)
 - Deployment events (success/failure to production, staging, development)
 - Security events (violations, intrusions, compliance issues)
@@ -33,7 +33,7 @@ The GITORC platform now has full Slack App integration enabling automated notifi
 
 ### 1. Code Implementation
 
-**Location**: `gitorcapi/internal/platform/slack/`
+**Location**: `orcastackapi/internal/platform/slack/`
 
 **Files Delivered**:
 
@@ -130,7 +130,7 @@ SLACK_NOTIFICATIONS_ENABLED=true
 **File**: `docker-compose.yml`
 ```yaml
 services:
-  gitorc-gateway:
+  orcastack-gateway:
     environment:
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
@@ -140,21 +140,21 @@ services:
 #### Method 3: Kubernetes Secrets
 **Command**:
 ```bash
-kubectl create secret generic gitorc-slack-credentials \
+kubectl create secret generic orcastack-slack-credentials \
   --from-literal=SLACK_BOT_TOKEN=xoxb-... \
   # ... other credentials
 ```
 
 ### Code Integration Points
 
-**File 1**: `gitorcapi/cmd/gitorc-gateway/main.go`
+**File 1**: `orcastackapi/cmd/orcastack-gateway/main.go`
 ```go
 if err := slack.Initialize(); err != nil {
     log.Printf("[Slack] Warning: %v", err)
 }
 ```
 
-**File 2**: `gitorcapi/internal/gatewayapi/api.go`
+**File 2**: `orcastackapi/internal/gatewayapi/api.go`
 ```go
 slackMgr := slack.GetManager()
 if slackMgr != nil {
@@ -259,7 +259,7 @@ slackMgr.NotifyPipelineEvent(event)
 
 ### Run Unit Tests
 ```bash
-cd /Users/ofidohubvm/gitorc/gitorcapi
+cd /Users/ofidohubvm/orcastack/orcastackapi
 go test -v ./internal/platform/slack/...
 ```
 
@@ -424,8 +424,8 @@ Both integrations follow identical patterns but with different APIs:
 - **Quick Start**: `docs/integrations/slack-quickstart.md` (6 steps, 10 minutes)
 - **Setup Guide**: `docs/integrations/slack-setup.md` (exact configuration paths)
 - **Complete Reference**: `docs/integrations/slack.md` (architecture, API, troubleshooting)
-- **Code Examples**: `gitorcapi/internal/platform/slack/integration_examples.go`
-- **Tests**: `gitorcapi/internal/platform/slack/notifier_test.go`
+- **Code Examples**: `orcastackapi/internal/platform/slack/integration_examples.go`
+- **Tests**: `orcastackapi/internal/platform/slack/notifier_test.go`
 
 ---
 

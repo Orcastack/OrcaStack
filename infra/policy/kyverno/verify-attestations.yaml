@@ -1,22 +1,22 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: gitorc-verify-attestations
+  name: orcastack-verify-attestations
 spec:
   validationFailureAction: Enforce
   background: false
   rules:
-    - name: require-signed-gitorc-images
+    - name: require-signed-orcastack-images
       match:
         any:
           - resources:
               kinds:
                 - Pod
               namespaces:
-                - gitorc-system
+                - orcastack-system
       verifyImages:
         - imageReferences:
-            - "registry.internal.example/gitorc/*"
+            - "registry.internal.example/orcastack/*"
           attestors:
             - count: 1
               entries:

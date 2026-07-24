@@ -30,8 +30,8 @@ resource "kubernetes_namespace_v1" "platform" {
   metadata {
     name = var.namespace
     labels = {
-      "app.kubernetes.io/part-of" = "gitorc"
-      "gitorc.io/governance"      = "enforced"
+      "app.kubernetes.io/part-of" = "orcastack"
+      "orcastack.io/governance"      = "enforced"
     }
   }
 }
@@ -41,7 +41,7 @@ resource "kubernetes_service_account_v1" "runner" {
     name      = var.runner_service_account
     namespace = kubernetes_namespace_v1.platform.metadata[0].name
     annotations = {
-      "gitorc.io/identity-mode" = "keystone-linked"
+      "orcastack.io/identity-mode" = "keystone-linked"
     }
   }
 }
@@ -50,7 +50,7 @@ resource "kubernetes_storage_class_v1" "ceph" {
   metadata {
     name = var.ceph_storage_class_name
     annotations = {
-      "gitorc.io/storage-tier" = "artifacts"
+      "orcastack.io/storage-tier" = "artifacts"
     }
   }
 
@@ -60,14 +60,14 @@ resource "kubernetes_storage_class_v1" "ceph" {
   allow_volume_expansion = true
 
   parameters = {
-    clusterID = "gitorc-private-cloud"
-    pool      = "gitorc-artifacts"
+    clusterID = "orcastack-private-cloud"
+    pool      = "orcastack-artifacts"
   }
 }
 
 resource "kubernetes_config_map_v1" "platform_bootstrap" {
   metadata {
-    name      = "gitorc-platform-bootstrap"
+    name      = "orcastack-platform-bootstrap"
     namespace = kubernetes_namespace_v1.platform.metadata[0].name
   }
 

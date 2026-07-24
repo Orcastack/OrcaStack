@@ -1,6 +1,6 @@
 # Slack Integration Setup Guide
 
-This guide shows **exactly where** to add your Slack App credentials in the GITORC platform for automated notifications.
+This guide shows **exactly where** to add your Slack App credentials in the ORCASTACK platform for automated notifications.
 
 ## Table of Contents
 1. [Get Your Slack Credentials](#get-your-slack-credentials)
@@ -14,7 +14,7 @@ This guide shows **exactly where** to add your Slack App credentials in the GITO
 
 ## Get Your Slack Credentials
 
-Before adding credentials to GITORC, you need 5 values from your Slack App:
+Before adding credentials to ORCASTACK, you need 5 values from your Slack App:
 
 ### Required Credentials:
 1. **Bot Token** - Starts with `xoxb-`
@@ -26,7 +26,7 @@ Before adding credentials to GITORC, you need 5 values from your Slack App:
 ### Where to Find Them:
 
 1. Go to [api.slack.com/apps](https://api.slack.com/apps)
-2. Select your GITORC app
+2. Select your ORCASTACK app
 3. Navigate to these sections:
    - **Bot Token**: `OAuth & Permissions` → `Bot User OAuth Token` (xoxb-...)
    - **Signing Secret**: `Basic Information` → `Signing Secret`
@@ -99,8 +99,8 @@ docker-compose --env-file .env.slack up
 Or add to `docker-compose.yml`:
 ```yaml
 services:
-  gitorc:
-    image: gitorc:latest
+  orcastack:
+    image: orcastack:latest
     env_file:
       - .env.slack
     environment:
@@ -121,9 +121,9 @@ Edit `docker-compose.yml` directly:
 version: '3.8'
 
 services:
-  gitorc-gateway:
-    image: gitorc/gateway:latest
-    container_name: gitorc-gateway
+  orcastack-gateway:
+    image: orcastack/gateway:latest
+    container_name: orcastack-gateway
     ports:
       - "8080:8080"
     environment:
@@ -138,10 +138,10 @@ services:
       DISCORD_WEBHOOK_URL: ""
       DISCORD_NOTIFICATIONS_ENABLED: "false"
     networks:
-      - gitorc-network
+      - orcastack-network
 
 networks:
-  gitorc-network:
+  orcastack-network:
     driver: bridge
 ```
 
@@ -153,13 +153,13 @@ Create a Kubernetes Secret for Slack credentials:
 
 ```bash
 # Create the secret
-kubectl create secret generic gitorc-slack-credentials \
+kubectl create secret generic orcastack-slack-credentials \
   --from-literal=SLACK_BOT_TOKEN=xoxb-your-bot-token-here \
   --from-literal=SLACK_SIGNING_SECRET=your-signing-secret-here \
   --from-literal=SLACK_CLIENT_ID=your-client-id-here \
   --from-literal=SLACK_CLIENT_SECRET=your-client-secret-here \
   --from-literal=SLACK_NOTIFICATIONS_ENABLED=true \
-  -n gitorc
+  -n orcastack
 ```
 
 Or create `slack-secret.yaml`:
@@ -168,8 +168,8 @@ Or create `slack-secret.yaml`:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: gitorc-slack-credentials
-  namespace: gitorc
+  name: orcastack-slack-credentials
+  namespace: orcastack
 type: Opaque
 data:
   SLACK_BOT_TOKEN: eG94Yi15b3VyLWJvdC10b2tlbi1oZXJl  # base64 encoded
@@ -190,17 +190,17 @@ Then reference in deployment:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gitorc-gateway
-  namespace: gitorc
+  name: orcastack-gateway
+  namespace: orcastack
 spec:
   template:
     spec:
       containers:
       - name: gateway
-        image: gitorc/gateway:latest
+        image: orcastack/gateway:latest
         envFrom:
         - secretRef:
-            name: gitorc-slack-credentials
+            name: orcastack-slack-credentials
         ports:
         - containerPort: 8080
 ```
@@ -211,7 +211,7 @@ spec:
 
 ### Location 1: Gateway Main Entry Point
 
-**File**: `gitorcapi/cmd/gitorc-gateway/main.go`
+**File**: `orcastackapi/cmd/orcastack-gateway/main.go`
 
 Add this to initialize the Slack manager:
 
@@ -219,7 +219,7 @@ Add this to initialize the Slack manager:
 package main
 
 import (
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	// ... other imports
 )
 
@@ -242,7 +242,7 @@ func main() {
 
 ### Location 2: Gateway API Routes
 
-**File**: `gitorcapi/internal/gatewayapi/api.go`
+**File**: `orcastackapi/internal/gatewayapi/api.go`
 
 Add to the `Register()` function to set up OAuth and event handlers:
 
@@ -250,7 +250,7 @@ Add to the `Register()` function to set up OAuth and event handlers:
 package gatewayapi
 
 import (
-	"github.com/gitorc/gitorcapi/internal/platform/slack"
+	"github.com/orcastack/orcastackapi/internal/platform/slack"
 	// ... other imports
 )
 
@@ -291,7 +291,7 @@ Once initialized, send notifications from anywhere:
 ```go
 // File: internal/services/pipeline/pipeline.go
 
-import "github.com/gitorc/gitorcapi/internal/platform/slack"
+import "github.com/orcastack/orcastackapi/internal/platform/slack"
 
 func (s *PipelineService) NotifyPipelineCompletion(pipelineID string, status string) {
 	slackMgr := slack.GetManager()
@@ -304,7 +304,7 @@ func (s *PipelineService) NotifyPipelineCompletion(pipelineID string, status str
 		"my-project",              // project name
 		pipelineID,                // pipeline ID
 		"#devops",                 // channel
-		"https://gitorc.example.com/pipelines/" + pipelineID,
+		"https://orcastack.example.com/pipelines/" + pipelineID,
 	)
 	
 	slackMgr.NotifyPipelineEvent(event)
@@ -315,7 +315,7 @@ func (s *PipelineService) NotifyPipelineCompletion(pipelineID string, status str
 ```go
 // File: internal/services/deployment/deployment.go
 
-import "github.com/gitorc/gitorcapi/internal/platform/slack"
+import "github.com/orcastack/orcastackapi/internal/platform/slack"
 
 func (s *DeploymentService) NotifyDeployment(status string) {
 	slackMgr := slack.GetManager()
@@ -329,7 +329,7 @@ func (s *DeploymentService) NotifyDeployment(status string) {
 		"api-service",             // service name
 		"v1.2.3",                  // version
 		"#deployments",            // channel
-		"https://gitorc.example.com/deployments",
+		"https://orcastack.example.com/deployments",
 	)
 	
 	slackMgr.NotifyDeploymentEvent(event)
@@ -340,7 +340,7 @@ func (s *DeploymentService) NotifyDeployment(status string) {
 ```go
 // File: internal/services/security/security.go
 
-import "github.com/gitorc/gitorcapi/internal/platform/slack"
+import "github.com/orcastack/orcastackapi/internal/platform/slack"
 
 func (s *SecurityService) NotifySecurityAlert(alertType string) {
 	slackMgr := slack.GetManager()
@@ -354,7 +354,7 @@ func (s *SecurityService) NotifySecurityAlert(alertType string) {
 		"user123",                 // user ID
 		"Unauthorized access attempt detected",  // description
 		"#security",               // channel
-		"https://gitorc.example.com/security",
+		"https://orcastack.example.com/security",
 	)
 	
 	slackMgr.NotifySecurityEvent(event)
@@ -383,10 +383,10 @@ env | grep SLACK_
 
 ```bash
 # Build and run with your credentials
-docker-compose --env-file .env.slack up gitorc-gateway
+docker-compose --env-file .env.slack up orcastack-gateway
 
 # Check logs for initialization
-docker logs gitorc-gateway | grep -i slack
+docker logs orcastack-gateway | grep -i slack
 
 # Should show:
 # [Slack] Initializing notification manager
@@ -407,7 +407,7 @@ curl http://localhost:8080/api/integrations/slack/install
 
 ```bash
 # In Slack App settings, set up Event Subscriptions
-# URL: https://your-gitorc-domain/api/integrations/slack/events
+# URL: https://your-orcastack-domain/api/integrations/slack/events
 
 # Send a test event
 curl -X POST http://localhost:8080/api/integrations/slack/events \
@@ -423,7 +423,7 @@ curl -X POST http://localhost:8080/api/integrations/slack/events \
 Use the Go test command:
 
 ```bash
-cd /Users/ofidohubvm/gitorc/gitorcapi
+cd /Users/ofidohubvm/orcastack/orcastackapi
 
 # Run Slack tests (13 should pass, 1 expected failure without real token)
 go test -v ./internal/platform/slack/...
@@ -465,7 +465,7 @@ go test -v ./internal/platform/slack/...
 
 **Solution**:
 1. In Slack App → Interactivity & Shortcuts → Request URL
-2. Set to: `https://your-gitorc-domain/api/integrations/slack/commands`
+2. Set to: `https://your-orcastack-domain/api/integrations/slack/commands`
 3. Slack will send a verification challenge - your endpoint must respond with it
 
 ### Issue: Events not being received
@@ -473,7 +473,7 @@ go test -v ./internal/platform/slack/...
 **Cause**: Event subscription endpoint not configured or signature verification failing
 
 **Solution**:
-1. Verify Event Subscriptions URL: `https://your-gitorc-domain/api/integrations/slack/events`
+1. Verify Event Subscriptions URL: `https://your-orcastack-domain/api/integrations/slack/events`
 2. Confirm signing secret is exactly correct (copy/paste from Slack, no spaces)
 3. Check server logs for signature mismatch errors
 4. Ensure endpoint is publicly accessible (not localhost for Slack)
@@ -486,7 +486,7 @@ go test -v ./internal/platform/slack/...
 1. Verify Client ID matches in code and Slack App settings
 2. Verify Client Secret is correct (never expires, but can be regenerated)
 3. Ensure Redirect URL in code matches exactly in Slack App settings:
-   - Should be: `https://your-gitorc-domain/api/integrations/slack/oauth/callback`
+   - Should be: `https://your-orcastack-domain/api/integrations/slack/oauth/callback`
 4. Authorized Redirect URLs in Slack App settings must include this exact URL
 
 ### Issue: "command not found" when running Slack notifications
@@ -536,7 +536,7 @@ if slackMgr == nil {
 | Signing Secret | 32 hex chars | `SLACK_SIGNING_SECRET` env var |
 | Client ID | Numbers and letters | `SLACK_CLIENT_ID` env var |
 | Client Secret | 32+ chars | `SLACK_CLIENT_SECRET` env var |
-| Initialize | Call `slack.Initialize()` | `cmd/gitorc-gateway/main.go` |
+| Initialize | Call `slack.Initialize()` | `cmd/orcastack-gateway/main.go` |
 | Event Handler | `/api/integrations/slack/events` | `internal/gatewayapi/api.go` |
 | OAuth Callback | `/api/integrations/slack/oauth/callback` | `internal/gatewayapi/api.go` |
 | Send Message | `slackMgr.NotifyPipelineEvent(event)` | Your service code |

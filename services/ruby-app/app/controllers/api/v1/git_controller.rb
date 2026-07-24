@@ -1,4 +1,4 @@
-module Gitorc
+module OrcaStack
   module RubyApp
     module Api
       module V1
@@ -6,7 +6,7 @@ module Gitorc
           def access_token(request)
             params = parse_json(request)
             username = params['username'] || Store.profile[:username]
-            repo = params['repo'] || 'gitorc-platform'
+            repo = params['repo'] || 'orcastack-platform'
             action = params['action'] || 'read'
             token = Store.issue_git_access_token(username: username, repo: repo, action: action, source: 'api', command: params['command'])
 

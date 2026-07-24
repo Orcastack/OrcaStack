@@ -21,7 +21,7 @@ variable "application_credential_secret" {
 
 variable "tenant_name" {
   type        = string
-  description = "Keystone project used for the GITORC platform."
+  description = "Keystone project used for the ORCASTACK platform."
 }
 
 variable "user_name" {

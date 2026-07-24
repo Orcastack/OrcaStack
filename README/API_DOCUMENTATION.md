@@ -1,4 +1,4 @@
-# gitorc - API Documentation
+# orcastack - API Documentation
 
 ## Base URL
 - Development: `http://localhost:8000/api`

@@ -1,7 +1,7 @@
 version: 1
 workflow:
   name: cloud-bootstrap
-  description: Build the private cloud under GITORC control from bare-metal and virtualization layers up to Rancher and Kubernetes registration.
+  description: Build the private cloud under ORCASTACK control from bare-metal and virtualization layers up to Rancher and Kubernetes registration.
   lanes:
     - name: proxmox-foundation
       type: ansible

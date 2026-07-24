@@ -3,7 +3,7 @@ begin
 rescue LoadError
 end
 
-module Gitorc
+module OrcaStack
   module RubyApp
     module Jobs
       class WebhookDeliveryJob

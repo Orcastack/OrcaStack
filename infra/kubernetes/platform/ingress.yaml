@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gitorc-gateway
+  name: orcastack-gateway
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 256m
@@ -9,16 +9,16 @@ metadata:
 spec:
   tls:
     - hosts:
-        - gitorc.internal.example
-      secretName: gitorc-ingress-tls
+        - orcastack.internal.example
+      secretName: orcastack-ingress-tls
   rules:
-    - host: gitorc.internal.example
+    - host: orcastack.internal.example
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: gitorc-gateway
+                name: orcastack-gateway
                 port:
                   number: 8080

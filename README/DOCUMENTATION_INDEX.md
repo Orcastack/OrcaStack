@@ -1,6 +1,6 @@
-# gitorc Documentation Index
+# orcastack Documentation Index
 
-This index points to the current, project-specific documentation for gitorc.
+This index points to the current, project-specific documentation for orcastack.
 
 ## Start here
 
@@ -23,4 +23,4 @@ This index points to the current, project-specific documentation for gitorc.
 
 ## What changed
 
-The previous version of this index described an unrelated Django-based application and was no longer valid for this repository. The wiki above is the current source of truth for gitorc.
+The previous version of this index described an unrelated Django-based application and was no longer valid for this repository. The wiki above is the current source of truth for orcastack.

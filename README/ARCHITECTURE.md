@@ -1,4 +1,4 @@
-# 🏗️ gitorc - System Architecture
+# 🏗️ orcastack - System Architecture
 ## High-Level Architecture
 ```
 ┌─────────────────────────────────────────────────────────────────┐

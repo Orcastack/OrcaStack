@@ -1,6 +1,6 @@
 # Docker Guide
 
-This guide covers the local container bootstrap for GITORC. Docker Compose is only the local entry point; sovereign production deployment lives under `infra/terraform` and `infra/kubernetes`.
+This guide covers the local container bootstrap for ORCASTACK. Docker Compose is only the local entry point; sovereign production deployment lives under `infra/terraform` and `infra/kubernetes`.
 
 ## Prerequisites
 

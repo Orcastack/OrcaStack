@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide shows how to quickly integrate Discord notifications into your GITORC services.
+This guide shows how to quickly integrate Discord notifications into your ORCASTACK services.
 
 ## 1. Setup (2 minutes)
 
@@ -10,7 +10,7 @@ This guide shows how to quickly integrate Discord notifications into your GITORC
 
 1. Open your Discord server
 2. Right-click target channel → Edit channel → Integrations → Webhooks
-3. Click "New Webhook" → Name: "GITORC Automation"
+3. Click "New Webhook" → Name: "ORCASTACK Automation"
 4. Copy the webhook URL
 
 ### Step 2: Set Environment Variable
@@ -25,7 +25,7 @@ export DISCORD_NOTIFICATIONS_ENABLED=true
 ```bash
 curl -X POST "$DISCORD_WEBHOOK_URL" \
   -H "Content-Type: application/json" \
-  -d '{"content":"GITORC Integration Test"}' \
+  -d '{"content":"ORCASTACK Integration Test"}' \
   && echo "✓ Webhook working!"
 ```
 
@@ -38,7 +38,7 @@ curl -X POST "$DISCORD_WEBHOOK_URL" \
 In `internal/gatewayapi/signup_requests.go`, add Discord notification:
 
 ```go
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 
 // In the function that handles signup approval
 func approveSignup(ctx context.Context, username, email string) error {
@@ -51,7 +51,7 @@ func approveSignup(ctx context.Context, username, email string) error {
         username,
         email,
         "New user registered",
-        "https://gitorc.example.com/users",
+        "https://orcastack.example.com/users",
     )
     
     return nil
@@ -71,7 +71,7 @@ func handleAccessRequest(ctx context.Context, username, resources string) error 
         username,
         "",
         fmt.Sprintf("Requested access to: %s", resources),
-        "https://gitorc.example.com/access-requests",
+        "https://orcastack.example.com/access-requests",
     )
     
     return nil
@@ -91,7 +91,7 @@ func handleAuthFailure(ctx context.Context, username string) {
         "Failed authentication attempt",
         username,
         "Multiple failed login attempts",
-        "https://gitorc.example.com/security",
+        "https://orcastack.example.com/security",
     )
 }
 ```
@@ -108,7 +108,7 @@ func (p *Project) OnRepositoryCreated(ctx context.Context) error {
         "created",
         p.Name,
         fmt.Sprintf("New project: %s", p.Name),
-        fmt.Sprintf("https://gitorc.example.com/projects/%s", p.ID),
+        fmt.Sprintf("https://orcastack.example.com/projects/%s", p.ID),
     )
     
     return nil
@@ -119,14 +119,14 @@ func (p *Project) OnRepositoryCreated(ctx context.Context) error {
 
 ## 3. Service Integration (Detailed)
 
-### For CI Service (gitorc-ci-service)
+### For CI Service (orcastack-ci-service)
 
 Add to main pipeline execution handler:
 
 ```go
 package main
 
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 
 type CIPipeline struct {
     ID     string
@@ -143,7 +143,7 @@ func (cp *CIPipeline) Execute(ctx context.Context) error {
         cp.ID,
         cp.Branch,
         "", // commit will be set during execution
-        fmt.Sprintf("https://gitorc.example.com/pipelines/%s", cp.ID),
+        fmt.Sprintf("https://orcastack.example.com/pipelines/%s", cp.ID),
     )
     
     // ... run pipeline ...
@@ -154,7 +154,7 @@ func (cp *CIPipeline) Execute(ctx context.Context) error {
             cp.ID,
             cp.Branch,
             cp.Status,
-            fmt.Sprintf("https://gitorc.example.com/pipelines/%s", cp.ID),
+            fmt.Sprintf("https://orcastack.example.com/pipelines/%s", cp.ID),
         )
         return err
     }
@@ -164,21 +164,21 @@ func (cp *CIPipeline) Execute(ctx context.Context) error {
         cp.ID,
         cp.Branch,
         cp.Status,
-        fmt.Sprintf("https://gitorc.example.com/pipelines/%s", cp.ID),
+        fmt.Sprintf("https://orcastack.example.com/pipelines/%s", cp.ID),
     )
     
     return nil
 }
 ```
 
-### For CD Service (gitorc-cd-service)
+### For CD Service (orcastack-cd-service)
 
 Add to deployment handler:
 
 ```go
 package main
 
-import "github.com/gitorc/gitorcapi/internal/platform/discord"
+import "github.com/orcastack/orcastackapi/internal/platform/discord"
 
 type Deployment struct {
     Service     string
@@ -195,7 +195,7 @@ func (d *Deployment) Deploy(ctx context.Context) error {
         d.Environment,
         d.Service,
         d.Version,
-        "https://gitorc.example.com/deployments",
+        "https://orcastack.example.com/deployments",
     )
     
     // ... perform deployment ...
@@ -206,7 +206,7 @@ func (d *Deployment) Deploy(ctx context.Context) error {
             d.Environment,
             d.Service,
             d.Version,
-            "https://gitorc.example.com/deployments",
+            "https://orcastack.example.com/deployments",
         )
         return err
     }
@@ -216,14 +216,14 @@ func (d *Deployment) Deploy(ctx context.Context) error {
         d.Environment,
         d.Service,
         d.Version,
-        "https://gitorc.example.com/deployments",
+        "https://orcastack.example.com/deployments",
     )
     
     return nil
 }
 ```
 
-### For Analytics Service (gitorc-analytics-service)
+### For Analytics Service (orcastack-analytics-service)
 
 Add to health check handler:
 
@@ -232,7 +232,7 @@ package main
 
 import (
     "fmt"
-    "github.com/gitorc/gitorcapi/internal/platform/discord"
+    "github.com/orcastack/orcastackapi/internal/platform/discord"
 )
 
 type HealthMonitor struct{}
@@ -248,7 +248,7 @@ func (hm *HealthMonitor) CheckSystemHealth(ctx context.Context) error {
             "CPU",
             "usage_percent",
             fmt.Sprintf("%.2f%%", cpuUsage),
-            "https://gitorc.example.com/health",
+            "https://orcastack.example.com/health",
         )
     }
     
@@ -260,7 +260,7 @@ func (hm *HealthMonitor) CheckSystemHealth(ctx context.Context) error {
             "Memory",
             "usage_percent",
             fmt.Sprintf("%.2f%%", memUsage),
-            "https://gitorc.example.com/health",
+            "https://orcastack.example.com/health",
         )
     }
     
@@ -280,7 +280,7 @@ package gatewayapi
 import (
     "context"
     "testing"
-    "github.com/gitorc/gitorcapi/internal/platform/discord"
+    "github.com/orcastack/orcastackapi/internal/platform/discord"
 )
 
 func TestDiscordNotificationOnSignup(t *testing.T) {
@@ -293,7 +293,7 @@ func TestDiscordNotificationOnSignup(t *testing.T) {
         "testuser",
         "test@example.com",
         "Test signup notification",
-        "https://gitorc.example.com/users",
+        "https://orcastack.example.com/users",
     )
     
     payload := event.ToPayload()
@@ -321,7 +321,7 @@ export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN"
 export DISCORD_NOTIFICATIONS_ENABLED=true
 
 # Run service
-go run ./cmd/gitorc-gateway/main.go &
+go run ./cmd/orcastack-gateway/main.go &
 SERVICE_PID=$!
 
 # Wait for service to start
@@ -371,7 +371,7 @@ Before deploying to production:
 
 1. Check webhook URL: `curl -X POST "$DISCORD_WEBHOOK_URL" -d '{"content":"test"}'`
 2. Check enabled flag: `echo $DISCORD_NOTIFICATIONS_ENABLED`
-3. Check service logs: `docker logs gitorc-gateway | grep -i discord`
+3. Check service logs: `docker logs orcastack-gateway | grep -i discord`
 4. Verify Discord channel permissions for webhook bot
 
 ### Wrong channel?
@@ -394,7 +394,7 @@ Before deploying to production:
 
 ```yaml
 services:
-  gitorc-gateway:
+  orcastack-gateway:
     environment:
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
       - DISCORD_NOTIFICATIONS_ENABLED=true
@@ -445,8 +445,8 @@ Environment="DISCORD_NOTIFICATIONS_ENABLED=true"
 ## Support
 
 - Full documentation: `/docs/integrations/discord.md`
-- Example code: `/gitorcapi/internal/platform/discord/integration_examples.go`
-- Unit tests: `/gitorcapi/internal/platform/discord/webhook_test.go`
+- Example code: `/orcastackapi/internal/platform/discord/integration_examples.go`
+- Unit tests: `/orcastackapi/internal/platform/discord/webhook_test.go`
 - Configuration template: `/docs/integrations/.env.discord.template`
 
 ---

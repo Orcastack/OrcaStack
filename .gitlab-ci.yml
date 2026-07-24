@@ -12,7 +12,7 @@ api-build:
   stage: validate
   image: golang:1.23
   script:
-    - cd gitorcapi
+    - cd orcastackapi
     - go mod tidy
     - go build ./...
   only:
@@ -23,7 +23,7 @@ api-test:
   stage: validate
   image: golang:1.23
   script:
-    - cd gitorcapi
+    - cd orcastackapi
     - go test ./...
   only:
     - merge_requests
@@ -33,12 +33,12 @@ web-build:
   stage: validate
   image: node:20-alpine
   script:
-    - cd gitorcweb
+    - cd orcastackweb
     - npm install
     - npm run build
   artifacts:
     paths:
-      - gitorcweb/dist/
+      - orcastackweb/dist/
     expire_in: 1 hour
   only:
     - merge_requests
@@ -73,8 +73,8 @@ cloud-manifests:
   stage: automate
   image: bitnami/kubectl:1.31
   script:
-    - kubectl kustomize infra/kubernetes/platform >/tmp/gitorc-platform.yaml
-    - test -s /tmp/gitorc-platform.yaml
+    - kubectl kustomize infra/kubernetes/platform >/tmp/orcastack-platform.yaml
+    - test -s /tmp/orcastack-platform.yaml
   only:
     - merge_requests
     - main
@@ -97,11 +97,11 @@ artifact-sign:
   stage: package
   image: golang:1.23
   script:
-    - cd gitorcapi
+    - cd orcastackapi
     - mkdir -p dist/signing dist/attestations
-    - go build -o dist/gitorc-cd-service ./cmd/gitorc-cd-service
-    - go run ./cmd/gitorc-secctl genkeys --private dist/signing/private.pem --public dist/signing/public.pem
-    - go run ./cmd/gitorc-secctl attest --repository-identity "$GITORC_REPOSITORY_IDENTITY" --component-identity orca:service:dd3490dc-e08d-43bb-abaf-2874e46ad7ec --binary-path dist/gitorc-cd-service --build-reference "${CI_COMMIT_SHA}:gitorc-cd-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/cd-service.json
+    - go build -o dist/orcastack-cd-service ./cmd/orcastack-cd-service
+    - go run ./cmd/orcastack-secctl genkeys --private dist/signing/private.pem --public dist/signing/public.pem
+    - go run ./cmd/orcastack-secctl attest --repository-identity "$ORCASTACK_REPOSITORY_IDENTITY" --component-identity orca:service:dd3490dc-e08d-43bb-abaf-2874e46ad7ec --binary-path dist/orcastack-cd-service --build-reference "${CI_COMMIT_SHA}:orcastack-cd-service" --private-key dist/signing/private.pem --public-key dist/signing/public.pem --output dist/attestations/cd-service.json
   only:
     - merge_requests
     - main
@@ -110,7 +110,7 @@ policy-gate:
   stage: govern
   image: openpolicyagent/opa:0.68.0-static
   script:
-    - opa eval --fail-defined --data infra/policy/opa/runtime-governance.rego --input infra/policy/examples/prod-approval-input.json 'data.gitorc.runtime.deny'
+    - opa eval --fail-defined --data infra/policy/opa/runtime-governance.rego --input infra/policy/examples/prod-approval-input.json 'data.orcastack.runtime.deny'
   only:
     - merge_requests
     - main

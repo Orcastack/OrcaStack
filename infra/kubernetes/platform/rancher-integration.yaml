@@ -5,12 +5,12 @@ metadata:
 type: Opaque
 stringData:
   server-url: https://rancher.internal.example
-  cluster-name: gitorc-private-cloud
+  cluster-name: orcastack-private-cloud
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: gitorc-rancher-register
+  name: orcastack-rancher-register
 spec:
   template:
     spec:
@@ -21,4 +21,4 @@ spec:
           command:
             - /bin/sh
             - -c
-            - echo "Cluster registration is executed by GITORC workflow using Rancher API credentials"
+            - echo "Cluster registration is executed by ORCASTACK workflow using Rancher API credentials"

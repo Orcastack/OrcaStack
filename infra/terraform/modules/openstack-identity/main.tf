@@ -29,13 +29,13 @@ variable "repository_auditor_role" {
 
 resource "openstack_identity_project_v3" "platform" {
   name        = var.project_name
-  description = "GITORC sovereign automation platform"
+  description = "ORCASTACK sovereign automation platform"
   enabled     = true
 }
 
 resource "openstack_identity_user_v3" "service" {
   default_project_id = openstack_identity_project_v3.platform.id
-  description        = "Service identity for GITORC platform automation"
+  description        = "Service identity for ORCASTACK platform automation"
   enabled            = true
   name               = var.service_user_name
   password           = var.service_user_password
